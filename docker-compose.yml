@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: medicine
+      POSTGRES_USER: medicine
+      POSTGRES_PASSWORD: medicine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql+psycopg://medicine:medicine@postgres:5432/medicine
+      JWT_SECRET: ${JWT_SECRET:-change-this-long-random-value}
+      AI_SERVICE_URL: ${AI_SERVICE_URL:-}
+      AI_ALLOW_MOCK: ${AI_ALLOW_MOCK:-true}
+      AI_CONFIDENCE_THRESHOLD: ${AI_CONFIDENCE_THRESHOLD:-0.70}
+      AI_MODEL_VERSION: ${AI_MODEL_VERSION:-jupiter-or-demo-v1}
+      AI_DATASET_VERSION: ${AI_DATASET_VERSION:-not-validated-demo}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+    volumes:
+      - backend_data:/app/data
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+    ports:
+      - "5173:5173"
+
+volumes:
+  postgres_data:
+  backend_data:
