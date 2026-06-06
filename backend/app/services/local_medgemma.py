@@ -34,6 +34,7 @@ Use the closest prediction from the allowed set. If the image is not a chest
 radiology image or is not diagnostic, say so in findings, keep confidence low,
 and choose the safest closest class.
 This is decision support only; do not present the output as a final diagnosis.
+Do not repeat the task instructions. Do not write "Determine the ..." sections.
 Do not include chain-of-thought, hidden reasoning, markdown, or explanations.
 """.strip()
 

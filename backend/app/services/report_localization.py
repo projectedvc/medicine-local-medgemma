@@ -7,6 +7,7 @@ from typing import Any
 from app.models.ai import AIAnalysis
 from app.models.enums import FindingClass
 from app.models.study import Study
+from app.services.translation import translate_text
 
 
 ReportLang = str
@@ -321,6 +322,9 @@ def _looks_english(text: str) -> bool:
 def _translate_generated_text(text: str, report_lang: ReportLang) -> str:
     if report_lang == "en" or not _looks_english(text):
         return text
+    online = translate_text(text, report_lang)
+    if online:
+        return online
     translated = text
     for pattern, replacement in TRANSLATION_RULES[report_lang]:
         translated = re.sub(pattern, replacement, translated, flags=re.IGNORECASE)
@@ -328,6 +332,79 @@ def _translate_generated_text(text: str, report_lang: ReportLang) -> str:
     translated = re.sub(r"\s{2,}", " ", translated)
     translated = re.sub(r"\n\s+", "\n", translated)
     return translated.strip()
+
+
+SECTION_LABELS: dict[str, str] = {
+    "findings": "findings",
+    "finding": "findings",
+    "description": "findings",
+    "observations": "findings",
+    "описание": "findings",
+    "сипаттама": "findings",
+    "impression": "impression",
+    "conclusion": "impression",
+    "diagnosis": "impression",
+    "заключение": "impression",
+    "қорытынды": "impression",
+    "recommendation": "recommendations",
+    "recommendations": "recommendations",
+    "next steps": "recommendations",
+    "рекомендации": "recommendations",
+    "ұсыныстар": "recommendations",
+}
+
+IGNORED_LABELS = {
+    "prediction",
+    "confidence",
+    "top 3",
+    "top3",
+    "class",
+    "score",
+}
+
+
+def _strip_instruction_noise(text: str) -> str:
+    text = re.sub(
+        r"(?is)\btranslate\s+the\s+.*?\b(?:to|into)\s+(?:russian|kazakh|english)\s*\.?",
+        " ",
+        text,
+    )
+    text = re.sub(
+        r"(?is)\breturn\s+only\s+valid\s+compact\s+json\b.*?(?=(?:findings|description|impression|conclusion|recommendations?)\s*:|$)",
+        " ",
+        text,
+    )
+    return re.sub(r"\s{2,}", " ", text).strip()
+
+
+def _split_labeled_sections(text: str, report_lang: ReportLang) -> dict[str, str]:
+    text = _strip_instruction_noise(text)
+    labels = tuple(list(SECTION_LABELS) + list(IGNORED_LABELS))
+    label_pattern = "|".join(re.escape(label) for label in sorted(labels, key=len, reverse=True))
+    pattern = re.compile(
+        rf"(?is)(?:^|[\n\r]|\s)\*?\*?(?:determine\s+the\s+)?({label_pattern})\*?\*?\s*:\s*\*?\*?",
+    )
+    matches = list(pattern.finditer(text))
+    if not matches:
+        return {}
+
+    sections: dict[str, str] = {}
+    for index, match in enumerate(matches):
+        raw_label = re.sub(r"\s+", " ", match.group(1).strip().casefold())
+        start = match.end()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        content = _clean_generated_text(text[start:end])
+        if not content:
+            continue
+        target = SECTION_LABELS.get(raw_label)
+        if not target:
+            continue
+        content = _translate_generated_text(content, report_lang)
+        if target in sections:
+            sections[target] = f"{sections[target]}\n{content}".strip()
+        else:
+            sections[target] = content
+    return sections
 
 
 def _clean_generated_text(value: Any) -> str | None:
@@ -345,6 +422,7 @@ def _clean_generated_text(value: Any) -> str | None:
     text = re.sub(r"(?i)\bmedgemma\b", "AI", text)
     text = re.sub(r"(?im)^\s*(?:MedAI|AI|local AI)\s+local response\s*:?\s*", "", text)
     text = re.sub(r"(?im)^\s*(?:assistant|user|system)\s*:?\s*", "", text)
+    text = _strip_instruction_noise(text)
     text = re.sub(r"\r\n?", "\n", text)
     lines: list[str] = []
     for raw_line in text.splitlines():
@@ -412,6 +490,14 @@ def _model_generated_sections(analysis: AIAnalysis, report_lang: ReportLang) -> 
         embedded = _extract_json_payload(response)
         if embedded:
             payload = {**embedded, **payload}
+
+    for key in ("findings", "impression", "recommendations", "response", "raw_generation"):
+        value = payload.get(key)
+        if not isinstance(value, str) or not value.strip():
+            continue
+        labeled_sections = _split_labeled_sections(value, report_lang)
+        if labeled_sections:
+            return labeled_sections
 
     sections: dict[str, str] = {}
     for key in ("findings", "impression", "recommendations"):

@@ -2,10 +2,17 @@ import json
 
 import pytest
 
+from app.core.config import settings
 from app.models.ai import AIAnalysis
 from app.models.enums import AIJobStatus, FindingClass
 from app.models.study import Study
+from app.services import report_localization
 from app.services.report_localization import build_localized_ai_draft
+
+
+@pytest.fixture(autouse=True)
+def use_local_translation_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(settings, "translation_provider", "local")
 
 
 @pytest.fixture()
@@ -110,3 +117,49 @@ def test_ai_draft_translates_generated_text_to_kazakh(study: Study, analysis: AI
     assert "айқын патологиялық өзгерістер көрінбейді" in text
     assert "қосымша визуализация қажет емес" in text
     assert "The image shows" not in text
+
+
+def test_ai_draft_uses_online_translation_when_available(
+    study: Study,
+    analysis: AIAnalysis,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    analysis.predicted_class = FindingClass.normal
+    analysis.confidence = 0.71
+    analysis.hidden_due_low_confidence = False
+    analysis.raw_response_json = json.dumps({"findings": "The lungs are clear."})
+
+    def fake_translate(text: str, target_lang: str) -> str | None:
+        assert target_lang == "ru"
+        assert text == "The lungs are clear."
+        return "Легкие без инфильтративных изменений."
+
+    monkeypatch.setattr(report_localization, "translate_text", fake_translate)
+
+    text = build_localized_ai_draft(study, analysis, "ru")
+
+    assert "Легкие без инфильтративных изменений." in text
+    assert "The lungs are clear" not in text
+
+
+def test_ai_draft_removes_instruction_noise(study: Study, analysis: AIAnalysis) -> None:
+    analysis.predicted_class = None
+    analysis.confidence = 0.5
+    analysis.hidden_due_low_confidence = True
+    analysis.raw_response_json = json.dumps(
+        {
+            "findings": (
+                "Determine the prediction:** Based on the image, the diagnosis is pneumonia. "
+                "Determine the confidence:** The confidence is low. "
+                "Determine the description:** The image shows increased opacity in the left lung. "
+                "Determine the conclusion:** Findings are suspicious for pneumonia. "
+                "Determine the recommendations:** Radiologist review is recommended."
+            )
+        }
+    )
+
+    text = build_localized_ai_draft(study, analysis, "ru")
+
+    assert "Determine the" not in text
+    assert "prediction" not in text.casefold()
+    assert "затемнение" in text or "opacity" not in text

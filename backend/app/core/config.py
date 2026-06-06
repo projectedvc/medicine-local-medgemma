@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     local_medgemma_load_in_4bit: bool = Field(default=False, alias="LOCAL_MEDGEMMA_LOAD_IN_4BIT")
     local_medgemma_max_new_tokens: int = Field(default=350, alias="LOCAL_MEDGEMMA_MAX_NEW_TOKENS")
     local_medgemma_max_image_side: int = Field(default=1600, alias="LOCAL_MEDGEMMA_MAX_IMAGE_SIDE")
+    translation_provider: str = Field(default="google", alias="TRANSLATION_PROVIDER")
+    translation_timeout_seconds: int = Field(default=8, alias="TRANSLATION_TIMEOUT_SECONDS")
+    translation_max_chars: int = Field(default=4500, alias="TRANSLATION_MAX_CHARS")
 
     pdf_font_path: str | None = Field(default=None, alias="PDF_FONT_PATH")
 
