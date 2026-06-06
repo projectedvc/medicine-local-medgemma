@@ -81,6 +81,7 @@ AI_SERVICE_URL=http://172.26.230.20:8000/user/student1/proxy/8899
 ```
 
 Backend отправляет файл на `POST {AI_SERVICE_URL}/predict` как `multipart/form-data` с полем `file`.
+Если Jupiter API работает как показанный notebook-сервер, укажите полный путь `AI_SERVICE_URL=https://shiny-net-slimy.ngrok-free.dev/generate`; backend отправит `multipart/form-data` с полями `prompt` и `image` и разберет JSON из поля `response`.
 
 Ожидаемый ответ jupiter:
 

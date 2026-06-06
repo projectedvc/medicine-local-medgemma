@@ -9,8 +9,16 @@ import type {
   User
 } from "./types";
 
-const VITE_API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
-const API_BASE = VITE_API_URL.replace(/\/$/, "") + "/api";
+const DEFAULT_API_URL = import.meta.env.DEV ? "http://localhost:8000" : "";
+
+function createApiBase(rawUrl: string | undefined) {
+  const cleaned = (rawUrl || DEFAULT_API_URL).trim().replace(/\/+$/, "");
+  if (!cleaned) return "/api";
+  return cleaned.endsWith("/api") ? cleaned : `${cleaned}/api`;
+}
+
+const API_BASE = createApiBase(import.meta.env.VITE_API_URL);
+const USES_NGROK = API_BASE === "/api" || /\.ngrok(-free)?\./.test(API_BASE);
 
 let token = localStorage.getItem("medicine_token") ?? "";
 
@@ -31,10 +39,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
+  if (USES_NGROK) {
+    headers.set("ngrok-skip-browser-warning", "true");
+  }
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
   if (!response.ok) {
     const payload = await response.json().catch(() => ({ detail: response.statusText }));
-    throw new Error(payload.detail ?? "Ошибка API");
+    const detail = typeof payload.detail === "string" ? payload.detail : response.statusText;
+    throw new Error(`${detail || "Ошибка API"} (${response.status})`);
   }
   return response.json() as Promise<T>;
 }
@@ -44,10 +56,14 @@ async function requestBlob(path: string): Promise<Blob> {
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
+  if (USES_NGROK) {
+    headers.set("ngrok-skip-browser-warning", "true");
+  }
   const response = await fetch(`${API_BASE}${path}`, { headers });
   if (!response.ok) {
     const payload = await response.json().catch(() => ({ detail: response.statusText }));
-    throw new Error(payload.detail ?? "Ошибка API");
+    const detail = typeof payload.detail === "string" ? payload.detail : response.statusText;
+    throw new Error(`${detail || "Ошибка API"} (${response.status})`);
   }
   return response.blob();
 }

@@ -1,10 +1,6 @@
 import os
 from pathlib import Path
 
-os.environ["DATABASE_URL"] = "sqlite:///./data/test_workflow.db"
-os.environ["AI_ALLOW_MOCK"] = "true"
-os.environ["JWT_SECRET"] = "test-secret"
-
 from fastapi.testclient import TestClient  # noqa: E402
 from PIL import Image  # noqa: E402
 
@@ -82,7 +78,7 @@ def test_upload_ai_report_export_workflow(tmp_path):
         actions = {row["action"] for row in audit_response.json()}
         assert {"login", "upload_file", "run_ai", "confirm_report", "export_report"} <= actions
 
-    db_file = Path("data/test_workflow.db")
+    db_file = Path(os.environ["DATABASE_URL"].removeprefix("sqlite:///"))
     import gc
     gc.collect()
     import time

@@ -22,7 +22,7 @@ services:
       AI_CONFIDENCE_THRESHOLD: ${AI_CONFIDENCE_THRESHOLD:-0.70}
       AI_MODEL_VERSION: ${AI_MODEL_VERSION:-jupiter-or-demo-v1}
       AI_DATASET_VERSION: ${AI_DATASET_VERSION:-not-validated-demo}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,https://aimedicine.vercel.app}
     volumes:
       - backend_data:/app/data
     ports:
@@ -33,7 +33,7 @@ services:
     depends_on:
       - backend
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
     ports:
       - "5173:5173"
 
