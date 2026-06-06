@@ -70,3 +70,43 @@ def test_ai_draft_prefers_local_ai_generated_text(study: Study, analysis: AIAnal
     assert "Live model impression." in text
     assert "Live model recommendation." in text
     assert "MedGemMA" not in text
+
+
+def test_ai_draft_translates_generated_text_to_russian(study: Study, analysis: AIAnalysis) -> None:
+    analysis.predicted_class = FindingClass.normal
+    analysis.confidence = 0.71
+    analysis.hidden_due_low_confidence = False
+    analysis.raw_response_json = json.dumps(
+        {
+            "findings": "The image shows a normal chest x-ray. No obvious abnormalities are visible.",
+            "impression": "No acute cardiopulmonary abnormality.",
+            "recommendations": "No further imaging is required.",
+        }
+    )
+
+    text = build_localized_ai_draft(study, analysis, "ru")
+
+    assert "нормальная рентгенограмма грудной клетки" in text
+    assert "явных патологических изменений не видно" in text
+    assert "дополнительная визуализация не требуется" in text
+    assert "The image shows" not in text
+
+
+def test_ai_draft_translates_generated_text_to_kazakh(study: Study, analysis: AIAnalysis) -> None:
+    analysis.predicted_class = FindingClass.normal
+    analysis.confidence = 0.71
+    analysis.hidden_due_low_confidence = False
+    analysis.raw_response_json = json.dumps(
+        {
+            "findings": "The image shows a normal chest x-ray. No obvious abnormalities are visible.",
+            "impression": "No acute cardiopulmonary abnormality.",
+            "recommendations": "No further imaging is required.",
+        }
+    )
+
+    text = build_localized_ai_draft(study, analysis, "kk")
+
+    assert "кеуде қуысының қалыпты рентгенограммасы" in text
+    assert "айқын патологиялық өзгерістер көрінбейді" in text
+    assert "қосымша визуализация қажет емес" in text
+    assert "The image shows" not in text

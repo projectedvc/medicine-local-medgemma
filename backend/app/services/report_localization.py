@@ -183,6 +183,153 @@ FINDING_TEXT = {
 }
 
 
+TRANSLATION_RULES: dict[ReportLang, tuple[tuple[str, str], ...]] = {
+    "ru": (
+        (r"\bthe image shows a normal brain\b", "на снимке определяется нормальная картина головного мозга"),
+        (r"\bthe image shows a normal chest x-?ray\b", "на снимке определяется нормальная рентгенограмма грудной клетки"),
+        (r"\bno obvious abnormalities are visible\b", "явных патологических изменений не видно"),
+        (r"\bno acute cardiopulmonary abnormality\b", "признаков острой кардиопульмональной патологии нет"),
+        (r"\bno acute disease\b", "признаков острой патологии нет"),
+        (r"\blungs are clear\b", "легочные поля без видимых инфильтративных изменений"),
+        (r"\bthe lungs are clear\b", "легочные поля без видимых инфильтративных изменений"),
+        (r"\bno focal airspace disease\b", "очагово-инфильтративных изменений не выявлено"),
+        (r"\bno focal consolidation\b", "очаговой консолидации не выявлено"),
+        (r"\bno focal infiltrate\b", "очаговой инфильтрации не выявлено"),
+        (r"\bno pleural effusion\b", "плевральный выпот не определяется"),
+        (r"\bno pneumothorax\b", "пневмоторакс не определяется"),
+        (r"\bheart size is normal\b", "размеры сердца в пределах нормы"),
+        (r"\bcardiomediastinal silhouette is within normal limits\b", "кардиомедиастинальная тень в пределах нормы"),
+        (r"\bcardiomediastinal silhouette is normal\b", "кардиомедиастинальная тень в пределах нормы"),
+        (r"\bno further imaging is required\b", "дополнительная визуализация не требуется"),
+        (r"\bno further imaging required\b", "дополнительная визуализация не требуется"),
+        (r"\bclinical correlation is recommended\b", "рекомендована клиническая корреляция"),
+        (r"\bfollow-?up imaging is recommended\b", "рекомендовано контрольное исследование в динамике"),
+        (r"\bradiologist review is recommended\b", "рекомендована проверка врачом-рентгенологом"),
+        (r"\bfindings are suspicious for\b", "выявлены признаки, подозрительные на"),
+        (r"\bfindings may represent\b", "изменения могут соответствовать"),
+        (r"\bis possible\b", "возможна"),
+        (r"\bare possible\b", "возможны"),
+        (r"\bis probable\b", "вероятна"),
+        (r"\bare probable\b", "вероятны"),
+        (r"\bconsistent with\b", "соответствует"),
+        (r"\bsuspicious for\b", "подозрительно на"),
+        (r"\bnormal brain\b", "норма головного мозга"),
+        (r"\bnormal chest x-?ray\b", "нормальная рентгенограмма грудной клетки"),
+        (r"\bnormal\b", "норма"),
+        (r"\bpneumonia\b", "пневмония"),
+        (r"\bpneumothorax\b", "пневмоторакс"),
+        (r"\bpleural effusion\b", "плевральный выпот"),
+        (r"\batelectasis\b", "ателектаз"),
+        (r"\bconsolidation\b", "консолидация"),
+        (r"\binfiltrate\b", "инфильтрация"),
+        (r"\binfiltration\b", "инфильтрация"),
+        (r"\bopacity\b", "затемнение"),
+        (r"\bfluid\b", "жидкость"),
+        (r"\blung fields\b", "легочные поля"),
+        (r"\blungs\b", "легкие"),
+        (r"\bbrain\b", "головной мозг"),
+        (r"\bchest\b", "грудная клетка"),
+        (r"\bx-?ray\b", "рентгенограмма"),
+        (r"\bimage\b", "снимок"),
+        (r"\bleft\b", "слева"),
+        (r"\bright\b", "справа"),
+        (r"\bbilateral\b", "двусторонний"),
+        (r"\blower\b", "нижний"),
+        (r"\bupper\b", "верхний"),
+        (r"\blobe\b", "доля"),
+        (r"\bbase\b", "базальный отдел"),
+        (r"\bapex\b", "верхушка"),
+        (r"\brecommendations?\b", "рекомендации"),
+        (r"\bimpression\b", "заключение"),
+        (r"\bfindings?\b", "описание"),
+    ),
+    "kk": (
+        (r"\bthe image shows a normal brain\b", "суретте бас миының қалыпты көрінісі анықталады"),
+        (r"\bthe image shows a normal chest x-?ray\b", "суретте кеуде қуысының қалыпты рентгенограммасы анықталады"),
+        (r"\bno obvious abnormalities are visible\b", "айқын патологиялық өзгерістер көрінбейді"),
+        (r"\bno acute cardiopulmonary abnormality\b", "жедел кардиопульмоналдық патология белгілері жоқ"),
+        (r"\bno acute disease\b", "жедел патология белгілері жоқ"),
+        (r"\blungs are clear\b", "өкпе алаңдарында айқын инфильтративті өзгерістер жоқ"),
+        (r"\bthe lungs are clear\b", "өкпе алаңдарында айқын инфильтративті өзгерістер жоқ"),
+        (r"\bno focal airspace disease\b", "ошақты-инфильтративті өзгерістер анықталмайды"),
+        (r"\bno focal consolidation\b", "ошақты консолидация анықталмайды"),
+        (r"\bno focal infiltrate\b", "ошақты инфильтрация анықталмайды"),
+        (r"\bno pleural effusion\b", "плевралық сұйықтық анықталмайды"),
+        (r"\bno pneumothorax\b", "пневмоторакс анықталмайды"),
+        (r"\bheart size is normal\b", "жүрек өлшемдері қалыпты шекте"),
+        (r"\bcardiomediastinal silhouette is within normal limits\b", "кардиомедиастиналдық көлеңке қалыпты шекте"),
+        (r"\bcardiomediastinal silhouette is normal\b", "кардиомедиастиналдық көлеңке қалыпты шекте"),
+        (r"\bno further imaging is required\b", "қосымша визуализация қажет емес"),
+        (r"\bno further imaging required\b", "қосымша визуализация қажет емес"),
+        (r"\bclinical correlation is recommended\b", "клиникалық деректермен салыстыру ұсынылады"),
+        (r"\bfollow-?up imaging is recommended\b", "динамикада бақылау зерттеуі ұсынылады"),
+        (r"\bradiologist review is recommended\b", "рентгенолог дәрігердің тексеруі ұсынылады"),
+        (r"\bfindings are suspicious for\b", "анықталған белгілер күмәнді"),
+        (r"\bfindings may represent\b", "өзгерістер сәйкес болуы мүмкін"),
+        (r"\bis possible\b", "мүмкін"),
+        (r"\bare possible\b", "мүмкін"),
+        (r"\bis probable\b", "ықтимал"),
+        (r"\bare probable\b", "ықтимал"),
+        (r"\bconsistent with\b", "сәйкес келеді"),
+        (r"\bsuspicious for\b", "күдікті"),
+        (r"\bnormal brain\b", "бас миы қалыпты"),
+        (r"\bnormal chest x-?ray\b", "кеуде қуысының рентгенограммасы қалыпты"),
+        (r"\bnormal\b", "норма"),
+        (r"\bpneumonia\b", "пневмония"),
+        (r"\bpneumothorax\b", "пневмоторакс"),
+        (r"\bpleural effusion\b", "плевралық сұйықтық"),
+        (r"\batelectasis\b", "ателектаз"),
+        (r"\bconsolidation\b", "консолидация"),
+        (r"\binfiltrate\b", "инфильтрация"),
+        (r"\binfiltration\b", "инфильтрация"),
+        (r"\bopacity\b", "қараю"),
+        (r"\bfluid\b", "сұйықтық"),
+        (r"\blung fields\b", "өкпе алаңдары"),
+        (r"\blungs\b", "өкпе"),
+        (r"\bbrain\b", "бас миы"),
+        (r"\bchest\b", "кеуде қуысы"),
+        (r"\bx-?ray\b", "рентгенограмма"),
+        (r"\bimage\b", "сурет"),
+        (r"\bleft\b", "сол жақ"),
+        (r"\bright\b", "оң жақ"),
+        (r"\bbilateral\b", "екі жақты"),
+        (r"\blower\b", "төменгі"),
+        (r"\bupper\b", "жоғарғы"),
+        (r"\blobe\b", "бөлік"),
+        (r"\bbase\b", "базальды бөлім"),
+        (r"\bapex\b", "ұшы"),
+        (r"\brecommendations?\b", "ұсыныстар"),
+        (r"\bimpression\b", "қорытынды"),
+        (r"\bfindings?\b", "сипаттама"),
+    ),
+}
+
+
+def _looks_english(text: str) -> bool:
+    latin_count = len(re.findall(r"[A-Za-z]", text))
+    target_count = len(re.findall(r"[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]", text))
+    if latin_count == 0:
+        return False
+    common_words = re.search(
+        r"\b(the|image|shows|normal|findings|impression|recommendations|lung|lungs|brain|chest|no|possible|required)\b",
+        text,
+        flags=re.IGNORECASE,
+    )
+    return bool(common_words) and latin_count > max(12, target_count * 2)
+
+
+def _translate_generated_text(text: str, report_lang: ReportLang) -> str:
+    if report_lang == "en" or not _looks_english(text):
+        return text
+    translated = text
+    for pattern, replacement in TRANSLATION_RULES[report_lang]:
+        translated = re.sub(pattern, replacement, translated, flags=re.IGNORECASE)
+    translated = re.sub(r"\s+([.,;:])", r"\1", translated)
+    translated = re.sub(r"\s{2,}", " ", translated)
+    translated = re.sub(r"\n\s+", "\n", translated)
+    return translated.strip()
+
+
 def _clean_generated_text(value: Any) -> str | None:
     if value is None:
         return None
@@ -256,7 +403,7 @@ def _response_section(text: str, headings: tuple[str, ...], stops: tuple[str, ..
     return None
 
 
-def _model_generated_sections(analysis: AIAnalysis) -> dict[str, str]:
+def _model_generated_sections(analysis: AIAnalysis, report_lang: ReportLang) -> dict[str, str]:
     payload = _parse_raw_payload(analysis.raw_response_json)
     response = payload.get("response")
     if isinstance(response, dict):
@@ -270,7 +417,7 @@ def _model_generated_sections(analysis: AIAnalysis) -> dict[str, str]:
     for key in ("findings", "impression", "recommendations"):
         value = _clean_generated_text(payload.get(key))
         if value:
-            sections[key] = value
+            sections[key] = _translate_generated_text(value, report_lang)
 
     if sections:
         return sections
@@ -288,11 +435,11 @@ def _model_generated_sections(analysis: AIAnalysis) -> dict[str, str]:
     for key, aliases in headings.items():
         value = _response_section(response_text, aliases, tuple(item for item in stop_headings if item not in aliases))
         if value:
-            sections[key] = value
+            sections[key] = _translate_generated_text(value, report_lang)
 
     if sections:
         return sections
-    return {"findings": response_text}
+    return {"findings": _translate_generated_text(response_text, report_lang)}
 
 
 def _confidence_line(text: dict[str, str], analysis: AIAnalysis) -> str:
@@ -326,7 +473,7 @@ def build_localized_ai_draft(study: Study, analysis: AIAnalysis | None, lang: st
         lines.extend([text["no_analysis"], text["doctor_review"]])
         return "\n".join(lines)
 
-    generated_sections = _model_generated_sections(analysis)
+    generated_sections = _model_generated_sections(analysis, report_lang)
     if generated_sections:
         if analysis.predicted_class and not analysis.hidden_due_low_confidence:
             lines.append(f"{text['ai_class']}: {finding_label(analysis.predicted_class, report_lang)}")
