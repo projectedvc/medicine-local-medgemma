@@ -186,11 +186,16 @@ def normalize_ai_response(raw: dict[str, Any]) -> AIResult:
     else:
         predicted_class, raw_label = _normalize_label(label)
 
+    probabilities = _normalize_probabilities(payload.get("top3") or payload.get("probabilities") or payload.get("scores"))
     confidence = _parse_confidence(payload.get("confidence") or payload.get("score") or payload.get("probability"))
+    if confidence == 0.0 and probabilities:
+        if predicted_class and predicted_class.value in probabilities:
+            confidence = probabilities[predicted_class.value]
+        else:
+            confidence = max(probabilities.values(), default=0.0)
     if confidence == 0.0 and response_text:
         confidence = _parse_text_confidence(response_text)
 
-    probabilities = _normalize_probabilities(payload.get("top3") or payload.get("probabilities") or payload.get("scores"))
     if not probabilities and predicted_class and confidence > 0:
         probabilities = {predicted_class.value: confidence}
 
@@ -251,6 +256,7 @@ async def run_ai_inference(
     image_path: str,
     clinical_note: str | None = None,
     study_type: str | None = None,
+    lang: str | None = None,
 ) -> AIResult:
     path = Path(image_path)
     if not path.exists():
@@ -265,6 +271,7 @@ async def run_ai_inference(
                 str(path),
                 clinical_note=clinical_note,
                 study_type=study_type,
+                lang=lang,
             )
         )
 

@@ -11,6 +11,7 @@ from app.models.enums import FindingClass
 from app.models.report import Report
 from app.models.study import Study
 from app.models.user import User
+from app.services.report_localization import build_localized_ai_draft, finding_label, normalize_report_lang
 
 
 DISCLAIMER = (
@@ -21,7 +22,7 @@ DISCLAIMER = (
 )
 
 REPORT_TITLE = "Медициналық қорытынды / Медицинское заключение"
-REPORT_SUBTITLE = "MedGemMA Radiology Assistant"
+REPORT_SUBTITLE = "MedAI Radiology Assistant"
 
 FINDING_LABELS: dict[FindingClass, str] = {
     FindingClass.normal: "Норма / Normal",
@@ -88,6 +89,7 @@ def _clean_line(line: str) -> str:
 
 def _strip_reasoning(text: str) -> str:
     text = html.unescape(text or "")
+    text = re.sub(r"(?i)\bmedgemma\b", "AI", text)
     text = re.sub(r"<unused\d+>", "\n", text, flags=re.IGNORECASE)
     text = re.sub(r"</?s>|<bos>|<eos>", "\n", text, flags=re.IGNORECASE)
     text = re.sub(r"\r\n?", "\n", text)
@@ -102,12 +104,20 @@ def _strip_reasoning(text: str) -> str:
         "i should",
         "we should",
         "analyze this image",
+        "analyze the image",
+        "consider the clinical context",
         "provide a json",
         "json output",
+        "json",
+        "schema",
+        "the task",
         "system instruction",
         "assistant answer",
         "assistant:",
         "user:",
+        "орк",
+        "ogk",
+        "this is a type for",
     )
     stop_skip_markers = (
         "findings",
@@ -183,7 +193,7 @@ def _payload_section(payload: dict[str, Any], key: str) -> str | None:
     return None
 
 
-def _generated_medgemma_sections(analysis: AIAnalysis | None) -> list[tuple[str, str]]:
+def _generated_ai_sections(analysis: AIAnalysis | None) -> list[tuple[str, str]]:
     if not analysis:
         return []
     payload = _parse_payload(analysis.raw_response_json)
@@ -215,12 +225,12 @@ def _generated_medgemma_sections(analysis: AIAnalysis | None) -> list[tuple[str,
     if recommendations:
         sections.append((SECTION_ALIASES["recommendations"], recommendations))
     if not sections and response:
-        sections.append(("MedGemMA", response))
+        sections.append(("MedAI", response))
     return sections
 
 
-def _generated_medgemma_text(analysis: AIAnalysis) -> str | None:
-    sections = _generated_medgemma_sections(analysis)
+def _generated_ai_text(analysis: AIAnalysis) -> str | None:
+    sections = _generated_ai_sections(analysis)
     if not sections:
         return None
     return "\n\n".join(f"{title}:\n{text}" for title, text in sections)
@@ -231,9 +241,9 @@ def _analysis_summary(analysis: AIAnalysis | None) -> list[str]:
         return ["AI талдау аяқталмаған немесе қолжетімсіз."]
 
     lines: list[str] = []
-    generated = _generated_medgemma_text(analysis)
+    generated = _generated_ai_text(analysis)
     if generated:
-        lines.extend(["MedGemMA жауабы:", generated, ""])
+        lines.extend(["MedAI жауабы:", generated, ""])
 
     if analysis.hidden_due_low_confidence or not analysis.predicted_class:
         lines.extend(
@@ -275,6 +285,10 @@ def build_ai_draft(study: Study, analysis: AIAnalysis | None) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def build_ai_draft(study: Study, analysis: AIAnalysis | None, lang: str | None = "ru") -> str:
+    return build_localized_ai_draft(study, analysis, lang)
 
 
 def ensure_export_dir() -> Path:
@@ -350,6 +364,26 @@ def _status_chip(analysis: AIAnalysis | None) -> tuple[str, str]:
     return f"{label} · {confidence}", "#047857"
 
 
+def _status_chip(analysis: AIAnalysis | None, lang: str | None = "ru") -> tuple[str, str]:
+    report_lang = normalize_report_lang(lang)
+    if not analysis or analysis.status.value != "completed":
+        fallback = {
+            "kk": "AI талдау жоқ",
+            "ru": "AI-анализ отсутствует",
+            "en": "AI analysis unavailable",
+        }
+        return fallback[report_lang], "#64748b"
+    if analysis.hidden_due_low_confidence or not analysis.predicted_class:
+        fallback = {
+            "kk": "Төмен сенімділік",
+            "ru": "Низкая уверенность",
+            "en": "Low confidence",
+        }
+        return fallback[report_lang], "#b45309"
+    confidence = f"{(analysis.confidence or 0) * 100:.1f}%"
+    return f"{finding_label(analysis.predicted_class, report_lang)} · {confidence}", "#047857"
+
+
 def _clean_final_text(text: str | None, study: Study) -> list[tuple[str, str]]:
     cleaned = _strip_reasoning(text or "")
     if not cleaned:
@@ -361,7 +395,8 @@ def _clean_final_text(text: str | None, study: Study) -> list[tuple[str, str]]:
         r"^Пациент коды\s*/\s*Код пациента\s*:.*$",
         r"^Зерттеу түрі\s*/\s*Тип исследования\s*:.*$",
         r"^Клиникалық жазба\s*/\s*Клиническая заметка\s*:?\s*$",
-        r"^MedGemMA жауабы\s*:?\s*$",
+        r"^MedAI жауабы\s*:?\s*$",
+        r"^MedAI local response\s*:?\s*$",
         r"^MedGemMA local response\s*:?\s*$",
         r"^AI сенімділігі белгіленген.*$",
         r"^Диагностикалық класс жасырылды.*$",
@@ -394,6 +429,12 @@ def _clean_final_text(text: str | None, study: Study) -> list[tuple[str, str]]:
 
     sections: list[tuple[str, str]] = []
     known = [
+        ("Сипаттама", "Сипаттама"),
+        ("Қорытынды", "Қорытынды"),
+        ("Ұсыныстар", "Ұсыныстар"),
+        ("Описание", "Описание"),
+        ("Заключение", "Заключение"),
+        ("Рекомендации", "Рекомендации"),
         ("Көрініс / Описание", "Көрініс / Описание"),
         ("Описание", "Көрініс / Описание"),
         ("Findings", "Көрініс / Описание"),
@@ -465,7 +506,7 @@ def _pdf_para(text: str, style):
     return Paragraph(html.escape(text).replace("\n", "<br/>"), style)
 
 
-def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
+def export_report_pdf(study: Study, report: Report, doctor: User, lang: str | None = "ru") -> Path:
     from reportlab.lib import colors
     from reportlab.lib.enums import TA_CENTER
     from reportlab.lib.pagesizes import A4
@@ -476,31 +517,32 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
     export_dir = ensure_export_dir()
     path = export_dir / f"study-{study.id}-report.pdf"
     font_name = _register_pdf_font()
+    lang = normalize_report_lang(lang)
     analysis = _analysis_for_study(study)
-    chip_text, chip_color = _status_chip(analysis)
+    chip_text, chip_color = _status_chip(analysis, lang)
 
     styles = getSampleStyleSheet()
     normal = ParagraphStyle(
         "ClinicalNormal",
         parent=styles["Normal"],
         fontName=font_name,
-        fontSize=9.5,
-        leading=14,
+        fontSize=9,
+        leading=12,
         textColor=colors.HexColor("#17232b"),
     )
     muted = ParagraphStyle(
         "ClinicalMuted",
         parent=normal,
-        fontSize=8,
-        leading=11,
+        fontSize=7.5,
+        leading=9.5,
         textColor=colors.HexColor("#667985"),
     )
     title = ParagraphStyle(
         "ClinicalTitle",
         parent=normal,
         fontName=font_name,
-        fontSize=18,
-        leading=22,
+        fontSize=15,
+        leading=18,
         alignment=TA_CENTER,
         textColor=colors.HexColor("#0b1f2a"),
         spaceAfter=2,
@@ -515,8 +557,8 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
         "ClinicalSection",
         parent=normal,
         fontName=font_name,
-        fontSize=11,
-        leading=14,
+        fontSize=10,
+        leading=12,
         textColor=colors.HexColor("#0b6476"),
         spaceBefore=8,
         spaceAfter=5,
@@ -532,10 +574,10 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
     doc = SimpleDocTemplate(
         str(path),
         pagesize=A4,
-        leftMargin=18 * mm,
-        rightMargin=18 * mm,
-        topMargin=15 * mm,
-        bottomMargin=14 * mm,
+        leftMargin=14 * mm,
+        rightMargin=14 * mm,
+        topMargin=12 * mm,
+        bottomMargin=12 * mm,
         title=f"Clinical report {study.accession_number}",
     )
 
@@ -564,7 +606,7 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
             _pdf_para(chip_text, normal),
         ],
     ]
-    table = Table(metadata, colWidths=[38 * mm, 54 * mm, 38 * mm, 54 * mm], hAlign="CENTER")
+    table = Table(metadata, colWidths=[35 * mm, 57 * mm, 35 * mm, 57 * mm], hAlign="CENTER")
     table.setStyle(
         TableStyle(
             [
@@ -574,13 +616,13 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                 ("LEFTPADDING", (0, 0), (-1, -1), 7),
                 ("RIGHTPADDING", (0, 0), (-1, -1), 7),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
                 ("TEXTCOLOR", (3, 2), (3, 2), colors.HexColor(chip_color)),
             ]
         )
     )
-    story.extend([table, Spacer(1, 8)])
+    story.extend([table, Spacer(1, 6)])
 
     if study.clinical_note:
         story.append(Paragraph("Клиникалық жазба / Клиническая заметка", section))
@@ -592,8 +634,8 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
                     ("BOX", (0, 0), (-1, -1), 0.35, colors.HexColor("#dce6eb")),
                     ("LEFTPADDING", (0, 0), (-1, -1), 8),
                     ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                    ("TOPPADDING", (0, 0), (-1, -1), 7),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+                    ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
                 ]
             )
         )
@@ -602,8 +644,8 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
     image_path = _latest_image_path(study)
     if image_path:
         story.append(Paragraph("Диагностикалық сурет / Диагностический снимок", section))
-        image = _pdf_image(image_path, 122 * mm, 88 * mm)
-        image_frame = Table([[image]], colWidths=[132 * mm], hAlign="CENTER")
+        image = _pdf_image(image_path, 92 * mm, 68 * mm)
+        image_frame = Table([[image]], colWidths=[102 * mm], hAlign="CENTER")
         image_frame.setStyle(
             TableStyle(
                 [
@@ -617,7 +659,7 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
                 ]
             )
         )
-        story.extend([image_frame, Spacer(1, 8)])
+        story.extend([image_frame, Spacer(1, 6)])
 
     conclusion_flow: list[Any] = []
     for heading, body in _clean_final_text(report.final_text, study):
@@ -626,29 +668,6 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
             conclusion_flow.append(_pdf_para(paragraph, normal))
             conclusion_flow.append(Spacer(1, 3))
     story.append(KeepTogether(conclusion_flow))
-
-    ai_sections = _generated_medgemma_sections(analysis)
-    if ai_sections:
-        story.append(Paragraph("AI талдау қысқаша / Кратко по AI", section))
-        ai_rows = []
-        for heading, body in ai_sections[:3]:
-            ai_rows.append([_pdf_para(heading, small_caps), _pdf_para(" ".join(_plain_paragraphs(body)), muted)])
-        ai_table = Table(ai_rows, colWidths=[34 * mm, 150 * mm])
-        ai_table.setStyle(
-            TableStyle(
-                [
-                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fbfc")),
-                    ("BOX", (0, 0), (-1, -1), 0.35, colors.HexColor("#dce6eb")),
-                    ("INNERGRID", (0, 0), (-1, -1), 0.2, colors.HexColor("#e7eef2")),
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("LEFTPADDING", (0, 0), (-1, -1), 7),
-                    ("RIGHTPADDING", (0, 0), (-1, -1), 7),
-                    ("TOPPADDING", (0, 0), (-1, -1), 5),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-                ]
-            )
-        )
-        story.extend([ai_table, Spacer(1, 7)])
 
     warning = Table([[_pdf_para(DISCLAIMER, muted)]], colWidths=[184 * mm])
     warning.setStyle(
@@ -663,18 +682,18 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
             ]
         )
     )
-    story.extend([warning, Spacer(1, 10)])
+    story.extend([warning, Spacer(1, 7)])
 
-    photo = _pdf_image(_doctor_photo(doctor, export_dir), 24 * mm, 30 * mm)
+    photo = _pdf_image(_doctor_photo(doctor, export_dir), 18 * mm, 22 * mm)
     stamp_path = _stamp_path()
-    stamp = _pdf_image(stamp_path, 28 * mm, 28 * mm) if stamp_path else _pdf_para("Мөр / Печать", muted)
+    stamp = _pdf_image(stamp_path, 22 * mm, 22 * mm) if stamp_path else _pdf_para("Мөр / Печать", muted)
     sign_text = _pdf_para(
         f"Дәрігер / Врач: {doctor.full_name}\n"
         f"Қолы / Подпись: ______________________________\n"
         f"Күні / Дата: {_format_dt(report.confirmed_at)}",
         normal,
     )
-    sign_table = Table([[photo, sign_text, stamp]], colWidths=[32 * mm, 116 * mm, 36 * mm], hAlign="CENTER")
+    sign_table = Table([[photo, sign_text, stamp]], colWidths=[26 * mm, 124 * mm, 34 * mm], hAlign="CENTER")
     sign_table.setStyle(
         TableStyle(
             [
@@ -686,8 +705,8 @@ def export_report_pdf(study: Study, report: Report, doctor: User) -> Path:
                 ("ALIGN", (2, 0), (2, 0), "CENTER"),
                 ("LEFTPADDING", (0, 0), (-1, -1), 8),
                 ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                ("TOPPADDING", (0, 0), (-1, -1), 7),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
             ]
         )
     )
@@ -733,7 +752,7 @@ def _docx_cell_text(cell, text: str, size: int = 9, bold: bool = False, color: s
     _docx_set_run_font(run, size=size, bold=bold, color=color)
 
 
-def export_report_docx(study: Study, report: Report, doctor: User) -> Path:
+def export_report_docx(study: Study, report: Report, doctor: User, lang: str | None = "ru") -> Path:
     from docx import Document
     from docx.enum.table import WD_ALIGN_VERTICAL
     from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -741,24 +760,25 @@ def export_report_docx(study: Study, report: Report, doctor: User) -> Path:
 
     export_dir = ensure_export_dir()
     path = export_dir / f"study-{study.id}-report.docx"
+    lang = normalize_report_lang(lang)
     analysis = _analysis_for_study(study)
-    chip_text, _ = _status_chip(analysis)
+    chip_text, _ = _status_chip(analysis, lang)
 
     doc = Document()
     section = doc.sections[0]
-    section.top_margin = Inches(0.5)
-    section.bottom_margin = Inches(0.5)
-    section.left_margin = Inches(0.62)
-    section.right_margin = Inches(0.62)
+    section.top_margin = Inches(0.42)
+    section.bottom_margin = Inches(0.42)
+    section.left_margin = Inches(0.52)
+    section.right_margin = Inches(0.52)
 
     styles = doc.styles
     styles["Normal"].font.name = "Arial"
-    styles["Normal"].font.size = Pt(10)
+    styles["Normal"].font.size = Pt(9)
 
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = title.add_run(REPORT_TITLE)
-    _docx_set_run_font(run, size=16, bold=True, color="0B1F2A")
+    _docx_set_run_font(run, size=14, bold=True, color="0B1F2A")
     subtitle = doc.add_paragraph()
     subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
     subrun = subtitle.add_run(REPORT_SUBTITLE)
@@ -778,37 +798,26 @@ def export_report_docx(study: Study, report: Report, doctor: User) -> Path:
             _docx_cell_text(cell, str(value), size=8 if index in (0, 2) else 9, bold=index in (1, 3), color="64748B" if index in (0, 2) else "17232B")
 
     if study.clinical_note:
-        _docx_paragraph(doc, "Клиникалық жазба / Клиническая заметка", size=11, bold=True, color="0B6476")
+        _docx_paragraph(doc, "Клиникалық жазба / Клиническая заметка", size=10, bold=True, color="0B6476")
         note_table = doc.add_table(rows=1, cols=1)
         note_table.style = "Table Grid"
         _docx_shade(note_table.cell(0, 0), "FBFDFE")
-        _docx_cell_text(note_table.cell(0, 0), study.clinical_note, size=10, color="17232B")
+        _docx_cell_text(note_table.cell(0, 0), study.clinical_note, size=9, color="17232B")
 
     image_path = _latest_image_path(study)
     if image_path:
-        _docx_paragraph(doc, "Диагностикалық сурет / Диагностический снимок", size=11, bold=True, color="0B6476")
+        _docx_paragraph(doc, "Диагностикалық сурет / Диагностический снимок", size=10, bold=True, color="0B6476")
         image_p = doc.add_paragraph()
         image_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        image_p.add_run().add_picture(str(image_path), width=Inches(4.85))
+        image_p.add_run().add_picture(str(image_path), width=Inches(3.55))
 
     for heading, body in _clean_final_text(report.final_text, study):
-        _docx_paragraph(doc, heading, size=11, bold=True, color="0B6476")
+        _docx_paragraph(doc, heading, size=10, bold=True, color="0B6476")
         for paragraph_text in _plain_paragraphs(body):
             paragraph = doc.add_paragraph()
-            paragraph.paragraph_format.space_after = Pt(4)
+            paragraph.paragraph_format.space_after = Pt(2)
             run = paragraph.add_run(paragraph_text)
-            _docx_set_run_font(run, size=10, color="17232B")
-
-    ai_sections = _generated_medgemma_sections(analysis)
-    if ai_sections:
-        _docx_paragraph(doc, "AI талдау қысқаша / Кратко по AI", size=11, bold=True, color="0B6476")
-        ai_table = doc.add_table(rows=len(ai_sections[:3]), cols=2)
-        ai_table.style = "Table Grid"
-        for row, (heading, body) in zip(ai_table.rows, ai_sections[:3]):
-            _docx_shade(row.cells[0], "F8FBFC")
-            _docx_shade(row.cells[1], "F8FBFC")
-            _docx_cell_text(row.cells[0], heading, size=8, bold=True, color="64748B")
-            _docx_cell_text(row.cells[1], " ".join(_plain_paragraphs(body)), size=8, color="667985")
+            _docx_set_run_font(run, size=9, color="17232B")
 
     warning = doc.add_table(rows=1, cols=1)
     warning.style = "Table Grid"
@@ -818,7 +827,7 @@ def export_report_docx(study: Study, report: Report, doctor: User) -> Path:
     sign = doc.add_table(rows=1, cols=3)
     sign.style = "Table Grid"
     cells = sign.rows[0].cells
-    widths = [1.05, 4.15, 1.25]
+    widths = [0.82, 4.55, 1.0]
     for cell, width in zip(cells, widths):
         cell.width = Inches(width)
         cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -826,7 +835,7 @@ def export_report_docx(study: Study, report: Report, doctor: User) -> Path:
 
     photo_paragraph = cells[0].paragraphs[0]
     photo_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    photo_paragraph.add_run().add_picture(str(_doctor_photo(doctor, export_dir)), width=Inches(0.82))
+    photo_paragraph.add_run().add_picture(str(_doctor_photo(doctor, export_dir)), width=Inches(0.62))
 
     _docx_cell_text(
         cells[1],
@@ -835,14 +844,14 @@ def export_report_docx(study: Study, report: Report, doctor: User) -> Path:
             "Қолы / Подпись: ______________________________\n"
             f"Күні / Дата: {_format_dt(report.confirmed_at)}"
         ),
-        size=9,
+        size=8,
         color="17232B",
     )
     stamp_path = _stamp_path()
     stamp_paragraph = cells[2].paragraphs[0]
     stamp_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     if stamp_path:
-        stamp_paragraph.add_run().add_picture(str(stamp_path), width=Inches(0.95))
+        stamp_paragraph.add_run().add_picture(str(stamp_path), width=Inches(0.72))
     else:
         _docx_cell_text(cells[2], "Мөр / Печать", size=8, color="667985")
 

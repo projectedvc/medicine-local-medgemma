@@ -2,6 +2,7 @@ import type {
   AIAnalysis,
   AnalyticsOverview,
   AuditLog,
+  CRMRecord,
   FeedbackType,
   Pathology,
   Report,
@@ -13,7 +14,7 @@ function isLocalHost() {
   return ["localhost", "127.0.0.1", "0.0.0.0", ""].includes(window.location.hostname);
 }
 
-const DEFAULT_API_URL = import.meta.env.DEV && isLocalHost() ? "http://localhost:8000" : "";
+const DEFAULT_API_URL = import.meta.env.DEV && isLocalHost() ? "http://127.0.0.1:8000" : "";
 const CONFIGURED_API_URL = import.meta.env.DEV ? import.meta.env.VITE_API_URL : undefined;
 
 function createApiBase(rawUrl: string | undefined) {
@@ -84,6 +85,8 @@ export const api = {
 
   listUsers: () => request<User[]>("/users"),
 
+  listDoctors: () => request<User[]>("/users/doctors"),
+
   listStudies: (params: Record<string, string>) => {
     const query = new URLSearchParams(params);
     return request<Study[]>(`/studies${query.toString() ? `?${query}` : ""}`);
@@ -102,17 +105,18 @@ export const api = {
 
   previewImage: (studyId: number) => requestBlob(`/studies/${studyId}/image/preview`),
 
-  runAI: (studyId: number, wait = true, auto = false) =>
+  runAI: (studyId: number, wait = true, auto = false, lang = "ru") =>
     request<AIAnalysis>(`/studies/${studyId}/ai/run`, {
       method: "POST",
-      body: JSON.stringify({ wait, auto })
+      body: JSON.stringify({ wait, auto, lang })
     }),
 
   listAI: (studyId: number) => request<AIAnalysis[]>(`/studies/${studyId}/ai`),
 
   getReport: (studyId: number) => request<Report>(`/studies/${studyId}/report`),
 
-  createDraft: (studyId: number) => request<Report>(`/studies/${studyId}/report/draft`, { method: "POST" }),
+  createDraft: (studyId: number, lang = "ru") =>
+    request<Report>(`/studies/${studyId}/report/draft?lang=${encodeURIComponent(lang)}`, { method: "POST" }),
 
   saveReport: (studyId: number, final_text: string) =>
     request<Report>(`/studies/${studyId}/report`, { method: "PUT", body: JSON.stringify({ final_text }) }),
@@ -123,7 +127,8 @@ export const api = {
       body: JSON.stringify({ accept_responsibility: true })
     }),
 
-  exportReport: (studyId: number, format: "pdf" | "docx") => requestBlob(`/studies/${studyId}/report/export/${format}`),
+  exportReport: (studyId: number, format: "pdf" | "docx", lang = "ru") =>
+    requestBlob(`/studies/${studyId}/report/export/${format}?lang=${encodeURIComponent(lang)}`),
 
   listPathologies: () => request<Pathology[]>("/pathologies"),
 
@@ -132,7 +137,47 @@ export const api = {
 
   audit: () => request<AuditLog[]>("/audit?limit=100"),
 
-  analytics: () => request<AnalyticsOverview>("/analytics/overview")
+  analytics: () => request<AnalyticsOverview>("/analytics/overview"),
+
+  listCrm: () => request<CRMRecord[]>("/crm"),
+
+  createCrm: (payload: {
+    patient_code: string;
+    contact_type: string;
+    status: string;
+    priority: string;
+    summary: string;
+    note: string;
+    next_step?: string | null;
+    due_at?: string | null;
+  }) => request<CRMRecord>("/crm", { method: "POST", body: JSON.stringify(payload) }),
+
+  updateCrm: (
+    recordId: number,
+    payload: Partial<{
+      patient_code: string;
+      contact_type: string;
+      status: string;
+      priority: string;
+      summary: string;
+      note: string;
+      next_step: string | null;
+      due_at: string | null;
+    }>
+  ) => request<CRMRecord>(`/crm/${recordId}`, { method: "PATCH", body: JSON.stringify(payload) }),
+
+  deleteCrm: (recordId: number) =>
+    fetch(`${API_BASE}/crm/${recordId}`, {
+      method: "DELETE",
+      headers: (() => {
+        const headers = new Headers();
+        if (token) headers.set("Authorization", `Bearer ${token}`);
+        if (USES_NGROK) headers.set("ngrok-skip-browser-warning", "true");
+        return headers;
+      })()
+    }).then((response) => {
+      if (!response.ok) throw new Error(`Ошибка API (${response.status})`);
+    })
 };
 
 export function currentToken() {

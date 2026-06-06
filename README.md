@@ -1,3 +1,14 @@
+Как запустить:
+1. В одном терминале:
+  1.1 cd C:\Users\USER\Desktop\projects\medicine-local-medgemma  
+  1.2 .\run_local_medgemma.bat  
+  
+ 2. Во втором новом терминале: ngrok http 3000
+
+Сайт на localhost или http://127.0.0.1:3000, а внешняя ссылка через ngrok есть в терминале (https://overreact-grew-cornball.ngrok-free.dev)
+
+
+
 # Radiology AI Assistant
 
 MVP веб-системы для поддержки врача при анализе рентгенологических изображений ОГК. Система принимает DICOM/JPEG/PNG, проверяет файл, показывает снимок, запускает AI-анализ через внешний GPU-сервер или mock-режим, формирует AI-черновик, хранит финальный текст врача отдельно и ведет журнал аудита.

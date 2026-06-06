@@ -20,6 +20,20 @@ def list_users(
     return db.query(User).order_by(User.id).all()
 
 
+@router.get("/doctors", response_model=list[UserOut])
+def list_doctors(
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> list[User]:
+    return (
+        db.query(User)
+        .filter(User.role.in_([Role.radiologist, Role.physician, Role.expert]))
+        .filter(User.is_active.is_(True))
+        .order_by(User.id)
+        .all()
+    )
+
+
 @router.post("", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def create_user(
     payload: UserCreate,

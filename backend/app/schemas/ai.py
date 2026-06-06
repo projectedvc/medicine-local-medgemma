@@ -32,3 +32,4 @@ class AIAnalysisOut(ORMModel):
 class RunAIRequest(BaseModel):
     wait: bool = True
     auto: bool = False
+    lang: str = "ru"

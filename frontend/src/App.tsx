@@ -7,14 +7,14 @@ import {
   ClipboardList,
   Download,
   Eye,
-  FileCheck2,
   FileText,
-  Globe2,
   Home,
   ImagePlus,
   Languages,
   Loader2,
+  LogIn,
   LogOut,
+  Moon,
   Play,
   Plus,
   RefreshCw,
@@ -22,9 +22,8 @@ import {
   Save,
   Search,
   Send,
-  ShieldCheck,
-  Sparkles,
   Stethoscope,
+  Sun,
   UploadCloud,
   Users,
   ZoomIn,
@@ -37,29 +36,29 @@ import type {
   AIAnalysis,
   AnalyticsOverview,
   AuditLog,
+  CRMRecord,
   FeedbackType,
   Pathology,
   Report,
-  Role,
   Study,
   StudyStatus,
   User
 } from "./types";
 
-type View = "overview" | "studies" | "reference" | "analytics" | "audit" | "users";
+type View = "overview" | "studies" | "crm" | "reference" | "analytics" | "audit" | "users";
 type Lang = "kk" | "ru" | "en";
+type Theme = "light" | "dark";
 
 const UI = {
   kk: {
     locale: "kk-KZ",
-    appName: "MedGemMA Radiology",
+    appName: "MedAI Radiology",
     appSubtitle: "Жергілікті AI-рентген талдау платформасы",
     loginTitle: "Клиникалық жұмыс орнына кіру",
-    loginLead: "DICOM, PNG және JPEG суреттерін жергілікті MedGemMA арқылы талдап, дәрігерге арналған қорытынды жобасын жасаңыз.",
+    loginLead: "DICOM, PNG және JPEG суреттерін жергілікті MedAI арқылы талдап, дәрігерге арналған қорытынды жобасын жасаңыз.",
     login: "Логин",
     password: "Құпиясөз",
     signIn: "Кіру",
-    demoAccess: "Демо аккаунттар",
     unknownError: "Белгісіз қате",
     signedIn: "Жүйеге кірдіңіз",
     logout: "Шығу",
@@ -67,6 +66,7 @@ const UI = {
     nav: {
       overview: "Шолу",
       studies: "Зерттеулер",
+      crm: "CRM",
       reference: "Анықтамалық",
       analytics: "Аналитика",
       audit: "Аудит",
@@ -75,6 +75,7 @@ const UI = {
     titles: {
       overview: "Платформа шолуы",
       studies: "Зерттеулер",
+      crm: "Пациент CRM",
       reference: "Кеуде патологиялары",
       analytics: "Аналитика",
       audit: "Аудит журналы",
@@ -113,24 +114,41 @@ const UI = {
       wrong_region: "Аймақ қате",
       other: "Басқа"
     },
-    overviewHeroTitle: "Жергілікті MedGemMA негізіндегі радиология ассистенті",
+    overviewHeroTitle: "Жергілікті MedAI негізіндегі радиология ассистенті",
     overviewHeroText:
       "Платформа зерттеуді қабылдайды, суретті тексереді, клиникалық жазбамен бірге AI талдау жасайды, қорытынды жобасын дайындайды және PDF/Word экспортын береді. Деректер локалды компьютерде қалады.",
     startStudy: "Жаңа зерттеу",
     openReference: "Анықтамалық",
-    localModel: "Локалды модель",
-    modelValue: "MedGemMA 1.5 4B",
+    localModel: "Жергілікті AI",
+    modelValue: "AI",
     privacy: "Жеке режим",
     privacyValue: "Сыртқы API жоқ",
     workflow: "Жұмыс барысы",
     workflowItems: [
       "Зерттеу ашылады және сурет жүктеледі.",
       "DICOM/JPEG/PNG файлы тексеріліп, preview жасалады.",
-      "MedGemMA сурет пен клиникалық жазбаны бірге талдайды.",
+      "MedAI сурет пен клиникалық жазбаны бірге талдайды.",
       "Дәрігер AI жобасын тексеріп, финал мәтінді растайды.",
       "Жүйе мөрі, суреті және қол қою аймағы бар PDF/Word жасалады."
     ],
     capabilities: "Мүмкіндіктер",
+    crmTitle: "Қолмен жазылатын CRM",
+    crmSubtitle: "Пациент байланысы, ескертпе және келесі әрекеттер",
+    crmSummary: "Қысқаша",
+    crmNote: "Қолмен жазба",
+    crmNextStep: "Келесі қадам",
+    crmContact: "Байланыс түрі",
+    crmPriority: "Маңыздылық",
+    crmDue: "Күні",
+    crmSave: "CRM жазбасын сақтау",
+    crmEmpty: "Қолмен жазылған CRM жазбалары жоқ",
+    crmSaved: "CRM жазбасы сақталды",
+    crmActive: "Белсенді",
+    crmFollowUp: "Бақылау",
+    crmClosed: "Жабық",
+    crmNormal: "Қалыпты",
+    crmHigh: "Жоғары",
+    crmUrgent: "Шұғыл",
     newStudy: "Жаңа зерттеу",
     patientCode: "Пациент коды",
     studyType: "Түрі",
@@ -157,12 +175,14 @@ const UI = {
     disclaimer: "AI нәтижесі алдын ала көмек. Соңғы шешімді тек дәрігер қабылдайды.",
     runAI: "AI іске қосу",
     aiDone: "AI талдау аяқталды",
+    aiFailed: "AI талдау орындалмады",
     status: "Статус",
     confidence: "Сенімділік",
     threshold: "Шек",
-    model: "Модель",
+    model: "AI",
     dataset: "Дерек",
     classUnknown: "Класс анықталмады",
+    lowConfidenceWarning: "AI сенімділігі төмен. Нәтижені дәрігер қолмен тексеруі керек.",
     createDraft: "Жоба жасау",
     draftDone: "AI жоба жасалды",
     report: "Қорытынды",
@@ -178,20 +198,48 @@ const UI = {
     feedbackComment: "Дәрігер пікірі",
     send: "Жіберу",
     feedbackSaved: "Кері байланыс сақталды",
-    aiWaiting: "MedGemMA талдап жатыр",
-    aiWaitingSub: "Сурет пен клиникалық жазба жергілікті модельге жіберілді. Бірінші жауап бірнеше секундқа созылуы мүмкін.",
-    noData: "дерек жоқ"
+    aiWaiting: "MedAI талдап жатыр",
+    aiWaitingSub: "Сурет пен клиникалық жазба жергілікті AI жүйесіне жіберілді. Бірінші жауап бірнеше секундқа созылуы мүмкін.",
+    noData: "дерек жоқ",
+    myLungs: "Өкпе талдауы",
+    lungsCondition: "Өкпе жағдайы",
+    pulmonologyWorkspace: "Пульмонология жұмыс орны",
+    aiReady: "AI дайын",
+    reportsReady: "Қорытынды",
+    crmNotes: "CRM жазбалары",
+    readingTeam: "Дәрігерлер",
+    scheduleTitle: "Оқу кестесі",
+    nextChestCheck: "Келесі CXR тексеруі",
+    noStudies: "Зерттеу жоқ",
+    leadReader: "Жетекші",
+    consultNow: "Кеңес ашу",
+    chestViews: "Кеуде көріністері",
+    frontalCxr: "Фронталды CXR",
+    lateralCxr: "Бүйір CXR / CT",
+    pdfWordExport: "PDF / Word экспорт",
+    localLora: "Локалды LoRA",
+    searchPlaceholder: "Іздеу...",
+    heatmap: "Heatmap",
+    homeBadge: "Локалды AI көмекшісі кеуде зерттеулеріне арналған",
+    homeTitle: "MedAI кеуде снимогын тез талдайды",
+    homeText: "Суретті жүктеңіз, AI қорытынды жобасын алыңыз және дәрігерлік тексеруге дайын жұмыс орнында зерттеуді жүргізіңіз.",
+    homePrimary: "Зерттеуді бастау",
+    homeSecondary: "Справочник ашу",
+    homeCardTitle: "Chest AI",
+    homeCardText: "CXR, DICOM, JPEG және PNG үшін локалды талдау.",
+    homeFeatureOne: "AI талдау",
+    homeFeatureTwo: "Қорытынды",
+    homeFeatureThree: "Локалды дерек"
   },
   ru: {
     locale: "ru-RU",
-    appName: "MedGemMA Radiology",
+    appName: "MedAI Radiology",
     appSubtitle: "Локальная AI-платформа анализа рентген-снимков",
     loginTitle: "Вход в клиническое рабочее место",
-    loginLead: "Анализируйте DICOM, PNG и JPEG через локальную MedGemMA и формируйте черновики заключений для врача.",
+    loginLead: "Анализируйте DICOM, PNG и JPEG через локальную MedAI и формируйте черновики заключений для врача.",
     login: "Логин",
     password: "Пароль",
     signIn: "Войти",
-    demoAccess: "Демо-аккаунты",
     unknownError: "Неизвестная ошибка",
     signedIn: "Вход выполнен",
     logout: "Выйти",
@@ -199,6 +247,7 @@ const UI = {
     nav: {
       overview: "Обзор",
       studies: "Исследования",
+      crm: "CRM",
       reference: "Справочник",
       analytics: "Аналитика",
       audit: "Аудит",
@@ -207,6 +256,7 @@ const UI = {
     titles: {
       overview: "Обзор платформы",
       studies: "Исследования",
+      crm: "Пациент CRM",
       reference: "Патологии ОГК",
       analytics: "Аналитика",
       audit: "Журнал аудита",
@@ -245,24 +295,41 @@ const UI = {
       wrong_region: "Неверная зона",
       other: "Другое"
     },
-    overviewHeroTitle: "Радиологический ассистент на локальной MedGemMA",
+    overviewHeroTitle: "Радиологический ассистент MedAI",
     overviewHeroText:
       "Платформа принимает исследование, проверяет снимок, анализирует изображение вместе с клинической заметкой, готовит черновик заключения и экспортирует PDF/Word. Данные остаются на локальном компьютере.",
     startStudy: "Новое исследование",
     openReference: "Справочник",
-    localModel: "Локальная модель",
-    modelValue: "MedGemMA 1.5 4B",
+    localModel: "Локальный AI",
+    modelValue: "AI",
     privacy: "Приватный режим",
     privacyValue: "Без внешнего API",
     workflow: "Рабочий процесс",
     workflowItems: [
       "Создается исследование и загружается снимок.",
       "DICOM/JPEG/PNG проверяется и получает preview.",
-      "MedGemMA анализирует снимок вместе с клинической заметкой.",
+      "MedAI анализирует снимок вместе с клинической заметкой.",
       "Врач проверяет AI-черновик и подтверждает финальный текст.",
       "Система экспортирует PDF/Word с печатью, снимком и зоной подписи."
     ],
     capabilities: "Возможности",
+    crmTitle: "Ручная CRM",
+    crmSubtitle: "Контакты пациента, заметки и следующие действия",
+    crmSummary: "Кратко",
+    crmNote: "Ручная запись",
+    crmNextStep: "Следующий шаг",
+    crmContact: "Тип контакта",
+    crmPriority: "Приоритет",
+    crmDue: "Дата",
+    crmSave: "Сохранить CRM запись",
+    crmEmpty: "Ручных CRM записей пока нет",
+    crmSaved: "CRM запись сохранена",
+    crmActive: "Активно",
+    crmFollowUp: "Контроль",
+    crmClosed: "Закрыто",
+    crmNormal: "Обычный",
+    crmHigh: "Высокий",
+    crmUrgent: "Срочно",
     newStudy: "Новое исследование",
     patientCode: "Код пациента",
     studyType: "Тип",
@@ -289,12 +356,14 @@ const UI = {
     disclaimer: "Результат AI является предварительной подсказкой. Окончательное решение принимает врач.",
     runAI: "Запустить AI",
     aiDone: "AI-анализ завершен",
+    aiFailed: "AI-анализ не выполнен",
     status: "Статус",
     confidence: "Уверенность",
     threshold: "Порог",
-    model: "Модель",
+    model: "AI",
     dataset: "Данные",
     classUnknown: "Класс не определен",
+    lowConfidenceWarning: "Уверенность AI низкая. Результат должен быть проверен врачом вручную.",
     createDraft: "Создать черновик",
     draftDone: "AI-черновик создан",
     report: "Заключение",
@@ -310,20 +379,48 @@ const UI = {
     feedbackComment: "Комментарий врача",
     send: "Отправить",
     feedbackSaved: "Обратная связь сохранена",
-    aiWaiting: "MedGemMA анализирует",
-    aiWaitingSub: "Снимок и клиническая заметка отправлены в локальную модель. Первый ответ может занять несколько секунд.",
-    noData: "нет данных"
+    aiWaiting: "MedAI анализирует",
+    aiWaitingSub: "Снимок и клиническая заметка отправлены в локальный AI. Первый ответ может занять несколько секунд.",
+    noData: "нет данных",
+    myLungs: "Мои легкие",
+    lungsCondition: "Состояние легких",
+    pulmonologyWorkspace: "Пульмонология ОГК",
+    aiReady: "Готово к AI",
+    reportsReady: "Заключения",
+    crmNotes: "CRM заметки",
+    readingTeam: "Врачи",
+    scheduleTitle: "График чтения",
+    nextChestCheck: "Следующий CXR-контроль",
+    noStudies: "Нет исследований",
+    leadReader: "Ведущий",
+    consultNow: "Открыть консультацию",
+    chestViews: "Проекции грудной клетки",
+    frontalCxr: "Фронтальный CXR",
+    lateralCxr: "Боковой CXR / CT",
+    pdfWordExport: "PDF / Word экспорт",
+    localLora: "Локальная LoRA",
+    searchPlaceholder: "Поиск...",
+    heatmap: "Теплокарта",
+    homeBadge: "Локальный AI-ассистент для исследований грудной клетки",
+    homeTitle: "MedAI помогает разбирать снимки ОГК",
+    homeText: "Загрузите снимок, получите AI-черновик заключения и ведите исследование в аккуратном рабочем пространстве врача.",
+    homePrimary: "Начать исследование",
+    homeSecondary: "Открыть справочник",
+    homeCardTitle: "Chest AI",
+    homeCardText: "Локальный анализ CXR, DICOM, JPEG и PNG.",
+    homeFeatureOne: "AI-анализ",
+    homeFeatureTwo: "Заключение",
+    homeFeatureThree: "Локальные данные"
   },
   en: {
     locale: "en-US",
-    appName: "MedGemMA Radiology",
+    appName: "MedAI Radiology",
     appSubtitle: "Local AI chest imaging workspace",
     loginTitle: "Sign in to the clinical workspace",
-    loginLead: "Analyze DICOM, PNG and JPEG images with local MedGemMA and prepare clinician-reviewed report drafts.",
+    loginLead: "Analyze DICOM, PNG and JPEG images with local MedAI and prepare clinician-reviewed report drafts.",
     login: "Login",
     password: "Password",
     signIn: "Sign in",
-    demoAccess: "Demo accounts",
     unknownError: "Unknown error",
     signedIn: "Signed in",
     logout: "Log out",
@@ -331,6 +428,7 @@ const UI = {
     nav: {
       overview: "Overview",
       studies: "Studies",
+      crm: "CRM",
       reference: "Reference",
       analytics: "Analytics",
       audit: "Audit",
@@ -339,6 +437,7 @@ const UI = {
     titles: {
       overview: "Platform overview",
       studies: "Studies",
+      crm: "Patient CRM",
       reference: "Chest pathology reference",
       analytics: "Analytics",
       audit: "Audit log",
@@ -377,24 +476,41 @@ const UI = {
       wrong_region: "Wrong region",
       other: "Other"
     },
-    overviewHeroTitle: "Local MedGemMA radiology assistant",
+    overviewHeroTitle: "Local MedAI radiology assistant",
     overviewHeroText:
       "The platform receives a study, validates the image, analyzes it together with clinical notes, prepares a report draft, and exports PDF/Word. Data stays on this computer.",
     startStudy: "New study",
     openReference: "Reference",
-    localModel: "Local model",
-    modelValue: "MedGemMA 1.5 4B",
+    localModel: "Local AI",
+    modelValue: "AI",
     privacy: "Private mode",
     privacyValue: "No external API",
     workflow: "Workflow",
     workflowItems: [
       "Create a study and upload an image.",
       "DICOM/JPEG/PNG is validated and previewed.",
-      "MedGemMA analyzes the image with the clinical note.",
+      "MedAI analyzes the image with the clinical note.",
       "The clinician reviews the AI draft and confirms the final text.",
       "The system exports PDF/Word with stamp, image and signature area."
     ],
     capabilities: "Capabilities",
+    crmTitle: "Manual CRM",
+    crmSubtitle: "Patient contacts, notes and next actions",
+    crmSummary: "Summary",
+    crmNote: "Manual note",
+    crmNextStep: "Next step",
+    crmContact: "Contact type",
+    crmPriority: "Priority",
+    crmDue: "Date",
+    crmSave: "Save CRM record",
+    crmEmpty: "No manual CRM records yet",
+    crmSaved: "CRM record saved",
+    crmActive: "Active",
+    crmFollowUp: "Follow-up",
+    crmClosed: "Closed",
+    crmNormal: "Normal",
+    crmHigh: "High",
+    crmUrgent: "Urgent",
     newStudy: "New study",
     patientCode: "Patient code",
     studyType: "Type",
@@ -421,12 +537,14 @@ const UI = {
     disclaimer: "AI output is preliminary decision support. The final decision belongs to the clinician.",
     runAI: "Run AI",
     aiDone: "AI analysis complete",
+    aiFailed: "AI analysis failed",
     status: "Status",
     confidence: "Confidence",
     threshold: "Threshold",
-    model: "Model",
+    model: "AI",
     dataset: "Data",
     classUnknown: "Class not defined",
+    lowConfidenceWarning: "AI confidence is low. The result must be checked manually by a clinician.",
     createDraft: "Create draft",
     draftDone: "AI draft created",
     report: "Report",
@@ -442,26 +560,40 @@ const UI = {
     feedbackComment: "Clinician comment",
     send: "Send",
     feedbackSaved: "Feedback saved",
-    aiWaiting: "MedGemMA is analyzing",
-    aiWaitingSub: "The image and clinical note were sent to the local model. The first response can take a few seconds.",
-    noData: "no data"
+    aiWaiting: "MedAI is analyzing",
+    aiWaitingSub: "The image and clinical note were sent to the local AI. The first response can take a few seconds.",
+    noData: "no data",
+    myLungs: "My Lungs",
+    lungsCondition: "Lungs Status",
+    pulmonologyWorkspace: "Pulmonology Workspace",
+    aiReady: "AI Ready",
+    reportsReady: "Reports",
+    crmNotes: "CRM Notes",
+    readingTeam: "Reading Team",
+    scheduleTitle: "Reading Schedule",
+    nextChestCheck: "Next CXR Check",
+    noStudies: "No studies",
+    leadReader: "Lead",
+    consultNow: "Open Consult",
+    chestViews: "Chest Views",
+    frontalCxr: "Frontal PA CXR",
+    lateralCxr: "Lateral CXR / CT",
+    pdfWordExport: "PDF / Word Export",
+    localLora: "Local LoRA",
+    searchPlaceholder: "Search...",
+    heatmap: "Heatmap",
+    homeBadge: "Local AI assistant for chest imaging",
+    homeTitle: "MedAI helps read chest studies",
+    homeText: "Upload an image, get an AI report draft, and review the study in a clean clinician workspace.",
+    homePrimary: "Start study",
+    homeSecondary: "Open reference",
+    homeCardTitle: "Chest AI",
+    homeCardText: "Local analysis for CXR, DICOM, JPEG and PNG.",
+    homeFeatureOne: "AI analysis",
+    homeFeatureTwo: "Report draft",
+    homeFeatureThree: "Local data"
   }
 } as const;
-
-const DEMO_ACCOUNTS = [
-  { role: "radiologist", login: "radiologist", password: "radio123" },
-  { role: "admin", login: "admin", password: "admin123" },
-  { role: "physician", login: "doctor", password: "doctor123" }
-] as const;
-
-const CAPABILITIES = [
-  { icon: <ImagePlus size={20} />, kk: "Сурет + мәтін", ru: "Снимок + текст", en: "Image + text" },
-  { icon: <FileCheck2 size={20} />, kk: "PDF/Word есеп", ru: "PDF/Word отчет", en: "PDF/Word report" },
-  { icon: <ShieldCheck size={20} />, kk: "Локалды дерек", ru: "Локальные данные", en: "Local data" },
-  { icon: <Sparkles size={20} />, kk: "LoRA дайын", ru: "Готово к LoRA", en: "LoRA-ready" }
-] as const;
-
-const WORKFLOW_ICONS = [UploadCloud, ImagePlus, Sparkles, FileText, Download] as const;
 
 function formatDate(value: string | null | undefined, lang: Lang) {
   if (!value) return "—";
@@ -496,6 +628,7 @@ function canUseClinicalFlow(user: User | null) {
 
 export default function App() {
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("medicine_lang") as Lang) || "kk");
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("medicine_theme") as Theme) || "light");
   const ui = UI[lang];
 
   const [user, setUser] = useState<User | null>(null);
@@ -504,7 +637,7 @@ export default function App() {
   const [password, setPassword] = useState("");
   const [view, setView] = useState<View>("overview");
   const [busy, setBusy] = useState(false);
-  const [aiBusy, setAiBusy] = useState(false);
+  const [aiRunningStudyId, setAiRunningStudyId] = useState<number | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
@@ -517,6 +650,18 @@ export default function App() {
   const [audit, setAudit] = useState<AuditLog[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsOverview | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [doctors, setDoctors] = useState<User[]>([]);
+  const [crmRecords, setCrmRecords] = useState<CRMRecord[]>([]);
+  const [crmForm, setCrmForm] = useState({
+    patient_code: "DEMO-001",
+    contact_type: "consultation",
+    status: "active",
+    priority: "normal",
+    summary: "",
+    note: "",
+    next_step: "",
+    due_at: ""
+  });
 
   const [filters, setFilters] = useState({ status: "", study_type: "", date_from: "", date_to: "" });
   const [newStudy, setNewStudy] = useState({ patient_code: "DEMO-001", study_type: "CXR", clinical_note: "" });
@@ -534,11 +679,23 @@ export default function App() {
   const [showHeatmap, setShowHeatmap] = useState(false);
 
   const latestAI = aiResults[0] ?? null;
+  const selectedStudyAiBusy = Boolean(selectedStudy && aiRunningStudyId === selectedStudy.id);
   const probabilityRows = useMemo(() => parseProbabilities(latestAI?.probabilities_json ?? null), [latestAI]);
 
   useEffect(() => {
     localStorage.setItem("medicine_lang", lang);
   }, [lang]);
+
+  useEffect(() => {
+    localStorage.setItem("medicine_theme", theme);
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(""), 3200);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
 
   useEffect(() => {
     async function restore() {
@@ -560,7 +717,7 @@ export default function App() {
   }, []);
 
   async function loadInitial(nextUser = user) {
-    await Promise.all([loadStudies(), loadPathologies()]);
+    await Promise.all([loadStudies(), loadPathologies(), loadDoctors(), loadCrm()]);
     if (nextUser && ["admin", "analyst", "expert"].includes(nextUser.role)) {
       await loadAnalytics();
     }
@@ -583,6 +740,7 @@ export default function App() {
       const response = await api.login(login, password);
       setAuthToken(response.access_token);
       setUser(response.user);
+      setView("overview");
       await loadInitial(response.user);
       flash(ui.signedIn);
     } catch (err) {
@@ -597,6 +755,8 @@ export default function App() {
     setUser(null);
     setSelectedStudy(null);
     setStudies([]);
+    setCrmRecords([]);
+    setDoctors([]);
     setPreviewUrl(null);
     setView("overview");
   }
@@ -627,6 +787,44 @@ export default function App() {
     setUsers(data);
   }
 
+  async function loadDoctors() {
+    const data = await api.listDoctors();
+    setDoctors(data);
+  }
+
+  async function loadCrm() {
+    const data = await api.listCrm();
+    setCrmRecords(data);
+  }
+
+  async function saveCrmRecord(event: FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      await api.createCrm({
+        ...crmForm,
+        next_step: crmForm.next_step || null,
+        due_at: crmForm.due_at ? new Date(crmForm.due_at).toISOString() : null
+      });
+      setCrmForm({
+        patient_code: crmForm.patient_code,
+        contact_type: "consultation",
+        status: "active",
+        priority: "normal",
+        summary: "",
+        note: "",
+        next_step: "",
+        due_at: ""
+      });
+      await loadCrm();
+      flash(ui.crmSaved);
+    } catch (err) {
+      fail(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function openStudy(studyId: number) {
     setBusy(true);
     try {
@@ -638,7 +836,7 @@ export default function App() {
       try {
         const nextReport = await api.getReport(studyId);
         setReport(nextReport);
-        setFinalText(nextReport.final_text ?? "");
+        setFinalText(nextReport.final_text || nextReport.ai_draft_text || "");
       } catch {
         setReport(null);
         setFinalText("");
@@ -677,15 +875,18 @@ export default function App() {
       await loadPreview(uploaded.id);
       let analysis: AIAnalysis | null = null;
       if (autoAI) {
-        setAiBusy(true);
+        setAiRunningStudyId(uploaded.id);
         try {
-          analysis = await api.runAI(uploaded.id, true, true);
+          analysis = await api.runAI(uploaded.id, true, true, lang);
           setAiResults([analysis]);
-          const draft = await api.createDraft(uploaded.id);
+          if (analysis.status === "failed") {
+            throw new Error(analysis.error_message || ui.aiFailed);
+          }
+          const draft = await api.createDraft(uploaded.id, lang);
           setReport(draft);
-          setFinalText(draft.final_text ?? "");
+          setFinalText(draft.ai_draft_text || draft.final_text || "");
         } finally {
-          setAiBusy(false);
+          setAiRunningStudyId(null);
         }
       }
       setSelectedStudy(await api.getStudy(uploaded.id));
@@ -701,10 +902,18 @@ export default function App() {
   async function runAI(auto = false) {
     if (!selectedStudy) return;
     setBusy(true);
-    setAiBusy(true);
+    setAiRunningStudyId(selectedStudy.id);
     try {
-      const analysis = await api.runAI(selectedStudy.id, true, auto);
-      setAiResults([analysis, ...aiResults]);
+      const analysis = await api.runAI(selectedStudy.id, true, auto, lang);
+      setAiResults([analysis]);
+      if (analysis.status === "failed") {
+        throw new Error(analysis.error_message || ui.aiFailed);
+      }
+      if (analysis.status === "completed") {
+        const nextReport = await api.createDraft(selectedStudy.id, lang);
+        setReport(nextReport);
+        setFinalText(nextReport.ai_draft_text || nextReport.final_text || "");
+      }
       const detail = await api.getStudy(selectedStudy.id);
       setSelectedStudy(detail);
       await loadStudies();
@@ -712,7 +921,7 @@ export default function App() {
     } catch (err) {
       fail(err);
     } finally {
-      setAiBusy(false);
+      setAiRunningStudyId(null);
       setBusy(false);
     }
   }
@@ -721,9 +930,9 @@ export default function App() {
     if (!selectedStudy) return;
     setBusy(true);
     try {
-      const nextReport = await api.createDraft(selectedStudy.id);
+      const nextReport = await api.createDraft(selectedStudy.id, lang);
       setReport(nextReport);
-      setFinalText(nextReport.final_text ?? "");
+      setFinalText(nextReport.ai_draft_text || nextReport.final_text || "");
       setSelectedStudy(await api.getStudy(selectedStudy.id));
       await loadStudies();
       flash(ui.draftDone);
@@ -770,7 +979,7 @@ export default function App() {
     if (!selectedStudy) return;
     setBusy(true);
     try {
-      const blob = await api.exportReport(selectedStudy.id, format);
+      const blob = await api.exportReport(selectedStudy.id, format, lang);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -825,83 +1034,70 @@ export default function App() {
   if (!user) {
     return (
       <main className="loginShell">
-        <div className="loginIntro">
-          <LanguageSwitch lang={lang} setLang={setLang} />
-          <div className="brandLockup">
-            <img src="/pec.png" alt="" />
+        <header className="loginHeader">
+          <span className="photonBrand">MedAI</span>
+          <div className="headerControls">
+            <ThemeSwitch theme={theme} setTheme={setTheme} />
+            <LanguageSwitch lang={lang} setLang={setLang} />
+          </div>
+        </header>
+
+        <section className="loginStage">
+          <div className="loginVisual" aria-hidden="true">
+            <img src="/neon_lungs_hero_transparent.png" alt="" />
             <div>
-              <span>{ui.appSubtitle}</span>
-              <h1>{ui.appName}</h1>
+              <span>Local MedAI</span>
+              <strong>Chest Radiology A.I.</strong>
             </div>
           </div>
-          <p>{ui.loginLead}</p>
-          <div className="loginHighlights">
-            {CAPABILITIES.map((item) => (
-              <span key={item.en}>
-                {item.icon}
-                {item[lang]}
-              </span>
-            ))}
-          </div>
-        </div>
 
-        <form className="loginPanel" onSubmit={handleLogin}>
-          <div>
-            <p className="eyebrow">{ui.demoAccess}</p>
-            <h2>{ui.loginTitle}</h2>
-          </div>
-          <label>
-            {ui.login}
-            <input value={login} onChange={(event) => setLogin(event.target.value)} autoComplete="username" />
-          </label>
-          <label>
-            {ui.password}
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete="current-password"
-            />
-          </label>
-          <div className="demoGrid">
-            {DEMO_ACCOUNTS.map((account) => (
-              <button
-                type="button"
-                className="demoButton"
-                key={account.login}
-                onClick={() => {
-                  setLogin(account.login);
-                  setPassword(account.password);
-                }}
-              >
-                {ui.roles[account.role as Role]}
-              </button>
-            ))}
-          </div>
-          <button className="primaryButton" disabled={busy}>
-            <ShieldCheck size={18} />
-            {ui.signIn}
-          </button>
-          {error && <div className="errorLine">{error}</div>}
-        </form>
+          <form className="loginPanel" onSubmit={handleLogin}>
+            <span>{ui.appName}</span>
+            <h1>{ui.loginTitle}</h1>
+            <p>{ui.loginLead}</p>
+            <label>
+              {ui.login}
+              <input value={login} onChange={(event) => setLogin(event.target.value)} autoComplete="username" />
+            </label>
+            <label>
+              {ui.password}
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                autoComplete="current-password"
+              />
+            </label>
+            <button className="loginSubmit" disabled={busy}>
+              <LogIn size={18} />
+              {ui.signIn}
+            </button>
+            {error && <div className="errorLine">{error}</div>}
+          </form>
+        </section>
       </main>
     );
   }
 
   return (
     <div className="appShell">
-      {aiBusy && <AiLoadingOverlay title={ui.aiWaiting} subtitle={ui.aiWaitingSub} />}
       <aside className="sidebar">
         <div className="brand">
-          <div className="brandMark">MG</div>
-          <div>
-            <strong>{ui.appName}</strong>
-            <span>{ui.roles[user.role]}</span>
-          </div>
+          <strong>MedAI</strong>
+          <span>{ui.roles[user.role]}</span>
         </div>
         <nav>
           <NavButton active={view === "overview"} icon={<Home size={18} />} label={ui.nav.overview} onClick={() => setView("overview")} />
           <NavButton active={view === "studies"} icon={<Activity size={18} />} label={ui.nav.studies} onClick={() => setView("studies")} />
+          <NavButton
+            active={view === "crm"}
+            icon={<ClipboardList size={18} />}
+            label={ui.nav.crm}
+            onClick={async () => {
+              setView("crm");
+              await loadCrm();
+            }}
+          />
           <NavButton active={view === "reference"} icon={<BookOpen size={18} />} label={ui.nav.reference} onClick={() => setView("reference")} />
           {["admin", "analyst", "expert"].includes(user.role) && (
             <NavButton
@@ -937,7 +1133,12 @@ export default function App() {
             />
           )}
         </nav>
+        <label className="globalSearch">
+          <input placeholder={ui.searchPlaceholder} />
+          <Search size={18} />
+        </label>
         <div className="sidebarFooter">
+          <ThemeSwitch theme={theme} setTheme={setTheme} />
           <LanguageSwitch lang={lang} setLang={setLang} />
           <button className="ghostButton dark" onClick={logout}>
             <LogOut size={18} />
@@ -947,165 +1148,68 @@ export default function App() {
       </aside>
 
       <main className="workspace">
-        <header className="topbar">
-          <div>
-            <h1>{ui.titles[view]}</h1>
-            <p>{user.full_name}</p>
-          </div>
-          <button className="ghostButton" onClick={() => loadInitial()} disabled={busy}>
-            <RefreshCw size={18} />
-            {ui.refresh}
-          </button>
-        </header>
+        {view !== "overview" && (
+          <header className="topbar">
+            <div>
+              <h1>{ui.titles[view]}</h1>
+              <p>{user.full_name}</p>
+            </div>
+            <button className="ghostButton" onClick={() => loadInitial()} disabled={busy}>
+              <RefreshCw size={18} />
+              {ui.refresh}
+            </button>
+          </header>
+        )}
 
         {notice && <div className="notice">{notice}</div>}
         {error && <div className="errorLine">{error}</div>}
 
         {view === "overview" && (
-          <section className="overview">
-            <div className="overviewHero">
-              <div className="heroContent">
-                <div className="heroBadge">
-                  <Sparkles size={14} />
-                  {ui.appSubtitle}
-                </div>
-                <h2>{ui.overviewHeroTitle}</h2>
-                <p>{ui.overviewHeroText}</p>
-                <div className="heroVisualStats">
-                  <div className="heroMiniStat">
-                    <Activity size={18} />
-                    <strong>{ui.modelValue}</strong>
-                    <span>{ui.localModel}</span>
-                  </div>
-                  <div className="heroMiniStat">
-                    <ShieldCheck size={18} />
-                    <strong>{ui.privacyValue}</strong>
-                    <span>{ui.privacy}</span>
-                  </div>
-                  <div className="heroMiniStat">
-                    <BarChart3 size={18} />
-                    <strong>{studies.length}</strong>
-                    <span>{ui.nav.studies}</span>
-                  </div>
-                </div>
-                <div className="buttonRow">
-                  <button className="primaryButton heroBtn" onClick={() => setView("studies")}>
-                    <Plus size={18} />
-                    {ui.startStudy}
-                  </button>
-                  <button className="ghostButton heroBtn" onClick={() => setView("reference")}>
-                    <BookOpen size={18} />
-                    {ui.openReference}
-                  </button>
-                </div>
+          <section className="photonDashboard overviewScene">
+            <div className="photonCopy dashboardCopy">
+              <h1>
+                <span>Chest</span>
+                <span>
+                  Radiology <b>A.I.</b>
+                </span>
+              </h1>
+              <div className="photonMeta">
+                <span>Local MedAI</span>
+                <i />
+                <span>2026</span>
               </div>
-
-              <div className="heroGraphicsContainer">
-                <div className="roboticHandWrapper">
-                  <img src="/robotic_hand_brain.png" alt="Medical AI Robotic Hand and Brain" className="roboticHandImg" />
-                </div>
-                
-                <div className="floatingWidget widgetDoctors">
-                  <div className="avatarGroup">
-                    <span className="avatar doc1">MG</span>
-                    <span className="avatar doc2">AI</span>
-                    <span className="avatar doc3">RX</span>
-                  </div>
-                  <div className="widgetText">
-                    <strong>{ui.modelValue}</strong>
-                    <small>{ui.localModel}</small>
-                  </div>
-                </div>
-
-                <div className="floatingWidget widgetTreatments">
-                  <div className="treatmentPreview">
-                    <FileCheck2 size={20} />
-                  </div>
-                  <div className="widgetText">
-                    <strong>PDF / Word</strong>
-                    <small>{ui.report}</small>
-                  </div>
-                </div>
-
-                <div className="floatingWidget widgetPatients">
-                  <div className="treatmentPreview">
-                    <BarChart3 size={20} />
-                  </div>
-                  <div className="widgetText">
-                    <strong>{studies.length}</strong>
-                    <small>{ui.nav.studies}</small>
-                  </div>
-                </div>
-
-                <div className="heroSocials">
-                  <div className="socialIcon"><Activity size={16} /></div>
-                  <div className="socialIcon"><Stethoscope size={16} /></div>
-                  <div className="socialIcon"><ShieldCheck size={16} /></div>
-                </div>
+              <div className="photonActionRow">
+                <button className="photonRoundButton" type="button" onClick={() => setView("studies")} aria-label={ui.homePrimary}>
+                  <Play size={18} />
+                </button>
+                <span>Start local chest AI workflow</span>
               </div>
+              <p className="photonNote">
+                MedAI is a local radiology workspace for chest imaging, AI draft reports, and clinician review.
+              </p>
             </div>
 
-            <div className="visualMetricStrip">
-              <div className="visualMetric">
-                <span><Activity size={22} /></span>
-                <div>
-                  <strong>{ui.modelValue}</strong>
-                  <small>{ui.localModel}</small>
-                </div>
-              </div>
-              <div className="visualMetric">
-                <span><ShieldCheck size={22} /></span>
-                <div>
-                  <strong>{ui.privacyValue}</strong>
-                  <small>{ui.privacy}</small>
-                </div>
-              </div>
-              <div className="visualMetric">
-                <span><FileCheck2 size={22} /></span>
-                <div>
-                  <strong>PDF / Word</strong>
-                  <small>{ui.report}</small>
-                </div>
-              </div>
+            <div className="photonVisual dashboardVisual" aria-hidden="true">
+              <img src="/neon_lungs_hero_transparent.png" alt="" />
             </div>
 
-            <div className="overviewGrid">
-              <section className="panelBand processPanel">
-                <div className="panelHeader">
-                  <h2>{ui.workflow}</h2>
-                  <FileText size={20} />
-                </div>
-                <div className="processMap">
-                  {ui.workflowItems.map((item, index) => (
-                    <div className="processNode" key={item}>
-                      <div className="processIcon">
-                        {(() => {
-                          const Icon = WORKFLOW_ICONS[index] ?? CheckCircle;
-                          return <Icon size={20} />;
-                        })()}
-                      </div>
-                      <span>{index + 1}</span>
-                      <strong>{item}</strong>
-                    </div>
-                  ))}
-                </div>
-              </section>
+            <aside className="photonSide dashboardSide">
+              <p>
+                <strong>{ui.localModel}</strong>
+              </p>
+              <span />
+              <p>
+                Chest AI for local reports, studies, and reference review.
+              </p>
+            </aside>
 
-              <section className="panelBand capabilityPanel">
-                <div className="panelHeader">
-                  <h2>{ui.capabilities}</h2>
-                  <Sparkles size={20} />
-                </div>
-                <div className="capabilityGrid">
-                  {CAPABILITIES.map((item) => (
-                    <div className="capabilityCard" key={item.en}>
-                      <div className="capabilityIcon">{item.icon}</div>
-                      <strong>{item[lang]}</strong>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </div>
+            <footer className="photonFooter overviewFooter">
+              <button type="button" onClick={() => setView("studies")}>{ui.homeFeatureThree}</button>
+              <button type="button" onClick={() => setView("studies")}>{ui.homeFeatureOne}</button>
+              <div />
+              <button type="button" onClick={() => setView("reference")}>{ui.homeSecondary}</button>
+              <button type="button" onClick={() => setView("studies")}>{ui.homePrimary}</button>
+            </footer>
           </section>
         )}
 
@@ -1186,12 +1290,23 @@ export default function App() {
 
               <div className="studyList">
                 {studies.map((study) => (
-                  <button className={`studyRow ${selectedStudy?.id === study.id ? "active" : ""}`} key={study.id} onClick={() => openStudy(study.id)}>
+                  <button
+                    className={`studyRow ${selectedStudy?.id === study.id ? "active" : ""} ${aiRunningStudyId === study.id ? "processing" : ""}`}
+                    key={study.id}
+                    onClick={() => openStudy(study.id)}
+                  >
                     <span>
                       <strong>{study.accession_number}</strong>
                       <small>{study.patient_code} · {study.study_type}</small>
                     </span>
-                    <StatusBadge status={study.status} labels={ui.statuses} />
+                    {aiRunningStudyId === study.id ? (
+                      <span className="studyProcessing">
+                        <Loader2 size={14} />
+                        AI
+                      </span>
+                    ) : (
+                      <StatusBadge status={study.status} labels={ui.statuses} />
+                    )}
                   </button>
                 ))}
                 {!studies.length && <div className="emptyState">{ui.emptyStudies}</div>}
@@ -1219,7 +1334,7 @@ export default function App() {
                       <IconButton label={ui.reset} onClick={resetViewer}>
                         <RotateCcw size={18} />
                       </IconButton>
-                      <IconButton label="Heatmap" active={showHeatmap} onClick={() => setShowHeatmap((value) => !value)}>
+                      <IconButton label={ui.heatmap} active={showHeatmap} onClick={() => setShowHeatmap((value) => !value)}>
                         <Eye size={18} />
                       </IconButton>
                       <label>
@@ -1255,6 +1370,13 @@ export default function App() {
                       ) : (
                         <div className="emptyState">{ui.previewMissing}</div>
                       )}
+                      {selectedStudyAiBusy && (
+                        <div className="imageStageLoader">
+                          <Loader2 size={24} />
+                          <strong>{ui.aiWaiting}</strong>
+                          <span>{selectedStudy.accession_number}</span>
+                        </div>
+                      )}
                     </div>
                   </section>
 
@@ -1268,9 +1390,15 @@ export default function App() {
                         <AlertTriangle size={18} />
                         <strong>{ui.disclaimer}</strong>
                       </div>
-                      <button className="primaryButton" onClick={() => runAI(false)} disabled={busy}>
-                        <Play size={18} />
-                        {ui.runAI}
+                      {selectedStudyAiBusy && (
+                        <div className="inlineAiStatus">
+                          <Loader2 size={18} />
+                          <span>{ui.aiWaiting}</span>
+                        </div>
+                      )}
+                      <button className="primaryButton" onClick={() => runAI(false)} disabled={busy || selectedStudyAiBusy}>
+                        {selectedStudyAiBusy ? <Loader2 size={18} className="spinIcon" /> : <Play size={18} />}
+                        {selectedStudyAiBusy ? ui.aiWaiting : ui.runAI}
                       </button>
                       {latestAI && (
                         <div className="aiResult">
@@ -1279,7 +1407,7 @@ export default function App() {
                             <strong>{latestAI.status}</strong>
                           </div>
                           {latestAI.hidden_due_low_confidence ? (
-                            <div className="warningBox">{latestAI.warning}</div>
+                            <div className="warningBox">{ui.lowConfidenceWarning}</div>
                           ) : (
                             <div className="prediction">
                               {latestAI.predicted_class ? ui.findings[latestAI.predicted_class] : ui.classUnknown}
@@ -1293,7 +1421,6 @@ export default function App() {
                             <span>{ui.threshold}</span>
                             <strong>{formatPercent(latestAI.threshold)}</strong>
                           </div>
-                          <small>{ui.model}: {latestAI.model_version} · {ui.dataset}: {latestAI.dataset_version}</small>
                           <div className="probabilityList">
                             {probabilityRows.map(([label, score]) => (
                               <div key={label}>
@@ -1368,8 +1495,134 @@ export default function App() {
                   </section>
                 </>
               ) : (
-                <div className="emptyState large">{ui.selectStudy}</div>
+                <div className="emptyState large visualEmpty studyVisualEmpty">
+                  <img src="/medical_lungs_xray.png" alt="" />
+                  <span>{ui.selectStudy}</span>
+                </div>
               )}
+            </div>
+          </section>
+        )}
+
+        {view === "crm" && (
+          <section className="crmDashboard">
+            <div className="crmHero">
+              <div>
+                <span>{ui.crmSubtitle}</span>
+                <h2>{ui.crmTitle}</h2>
+              </div>
+              <div className="crmVitals">
+                <div>
+                  <strong>{crmRecords.filter((record) => record.status === "active").length}</strong>
+                  <span>{ui.crmActive}</span>
+                </div>
+                <div>
+                  <strong>{crmRecords.filter((record) => record.status === "follow_up").length}</strong>
+                  <span>{ui.crmFollowUp}</span>
+                </div>
+                <div>
+                  <strong>{crmRecords.filter((record) => record.priority === "urgent").length}</strong>
+                  <span>{ui.crmUrgent}</span>
+                </div>
+              </div>
+            </div>
+
+            <form className="crmComposer" onSubmit={saveCrmRecord}>
+              <div className="panelHeader">
+                <h2>{ui.crmSave}</h2>
+                <ClipboardList size={20} />
+              </div>
+              <div className="crmFormGrid">
+                <label>
+                  {ui.patientCode}
+                  <input value={crmForm.patient_code} onChange={(event) => setCrmForm({ ...crmForm, patient_code: event.target.value })} />
+                </label>
+                <label>
+                  {ui.crmContact}
+                  <select value={crmForm.contact_type} onChange={(event) => setCrmForm({ ...crmForm, contact_type: event.target.value })}>
+                    <option value="consultation">Consultation</option>
+                    <option value="call">Call</option>
+                    <option value="follow_up">Follow-up</option>
+                    <option value="report">Report</option>
+                  </select>
+                </label>
+                <label>
+                  {ui.status}
+                  <select value={crmForm.status} onChange={(event) => setCrmForm({ ...crmForm, status: event.target.value })}>
+                    <option value="active">{ui.crmActive}</option>
+                    <option value="follow_up">{ui.crmFollowUp}</option>
+                    <option value="closed">{ui.crmClosed}</option>
+                  </select>
+                </label>
+                <label>
+                  {ui.crmPriority}
+                  <select value={crmForm.priority} onChange={(event) => setCrmForm({ ...crmForm, priority: event.target.value })}>
+                    <option value="normal">{ui.crmNormal}</option>
+                    <option value="high">{ui.crmHigh}</option>
+                    <option value="urgent">{ui.crmUrgent}</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                {ui.crmSummary}
+                <input value={crmForm.summary} onChange={(event) => setCrmForm({ ...crmForm, summary: event.target.value })} />
+              </label>
+              <label>
+                {ui.crmNote}
+                <textarea value={crmForm.note} onChange={(event) => setCrmForm({ ...crmForm, note: event.target.value })} rows={6} />
+              </label>
+              <div className="crmFormGrid two">
+                <label>
+                  {ui.crmNextStep}
+                  <input value={crmForm.next_step} onChange={(event) => setCrmForm({ ...crmForm, next_step: event.target.value })} />
+                </label>
+                <label>
+                  {ui.crmDue}
+                  <input type="datetime-local" value={crmForm.due_at} onChange={(event) => setCrmForm({ ...crmForm, due_at: event.target.value })} />
+                </label>
+              </div>
+              <button className="primaryButton" disabled={busy || !crmForm.patient_code || !crmForm.summary || !crmForm.note}>
+                <Save size={18} />
+                {ui.crmSave}
+              </button>
+            </form>
+
+            <div className="crmBoard">
+              {crmRecords.length === 0 && (
+                <div className="emptyState large visualEmpty crmVisualEmpty">
+                  <img src="/medical_lungs_xray.png" alt="" />
+                  <span>{ui.crmEmpty}</span>
+                </div>
+              )}
+              {crmRecords.map((record) => (
+                <article className={`crmCard ${record.priority}`} key={record.id}>
+                  <div className="crmCardTop">
+                    <span>{record.patient_code}</span>
+                    <b>{record.priority === "urgent" ? ui.crmUrgent : record.priority === "high" ? ui.crmHigh : ui.crmNormal}</b>
+                  </div>
+                  <h3>{record.summary}</h3>
+                  <p>{record.note}</p>
+                  <div className="crmCardMeta">
+                    <span>{record.status === "follow_up" ? ui.crmFollowUp : record.status === "closed" ? ui.crmClosed : ui.crmActive}</span>
+                    <span>{record.next_step || "—"}</span>
+                    <span>{formatDate(record.due_at || record.updated_at, lang)}</span>
+                  </div>
+                  <div className="crmCardFooter">
+                    <small>{record.created_by.full_name}</small>
+                    <button
+                      className="iconButton"
+                      title={ui.crmClosed}
+                      aria-label={ui.crmClosed}
+                      onClick={async () => {
+                        await api.updateCrm(record.id, { status: "closed" });
+                        await loadCrm();
+                      }}
+                    >
+                      <CheckCircle size={16} />
+                    </button>
+                  </div>
+                </article>
+              ))}
             </div>
           </section>
         )}
@@ -1378,6 +1631,10 @@ export default function App() {
           <section className="referenceGrid">
             {pathologies.map((item) => (
               <article className="referenceItem" key={item.id}>
+                <div className="referenceVisual">
+                  <img src="/medical_lungs_xray.png" alt="" />
+                  <span>{item.title.slice(0, 2).toUpperCase()}</span>
+                </div>
                 <h2>{item.title}</h2>
                 <h3>{ui.findings.pneumonia}</h3>
                 <p>{item.signs}</p>
@@ -1485,6 +1742,21 @@ function LanguageSwitch({ lang, setLang }: { lang: Lang; setLang: (lang: Lang) =
   );
 }
 
+function ThemeSwitch({ theme, setTheme }: { theme: Theme; setTheme: (theme: Theme) => void }) {
+  const nextTheme = theme === "light" ? "dark" : "light";
+  return (
+    <button
+      className="themeSwitch"
+      type="button"
+      title={theme === "light" ? "Темная тема" : "Светлая тема"}
+      aria-label={theme === "light" ? "Темная тема" : "Светлая тема"}
+      onClick={() => setTheme(nextTheme)}
+    >
+      {theme === "light" ? <Moon size={17} /> : <Sun size={17} />}
+    </button>
+  );
+}
+
 function NavButton({ active, icon, label, onClick }: { active: boolean; icon: ReactNode; label: string; onClick: () => void }) {
   return (
     <button className={`navButton ${active ? "active" : ""}`} onClick={onClick}>
@@ -1511,21 +1783,6 @@ function Metric({ title, value }: { title: string; value: string | number }) {
     <div className="metricCard">
       <span>{title}</span>
       <strong>{value}</strong>
-    </div>
-  );
-}
-
-function AiLoadingOverlay({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    <div className="aiOverlay">
-      <div className="aiLoaderPanel">
-        <div className="scanFrame">
-          <Loader2 size={34} />
-          <span />
-        </div>
-        <h2>{title}</h2>
-        <p>{subtitle}</p>
-      </div>
     </div>
   );
 }

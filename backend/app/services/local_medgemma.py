@@ -1,7 +1,10 @@
 import asyncio
 import json
+import logging
+import os
 import re
 import threading
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -27,8 +30,9 @@ Return only valid compact JSON with these fields:
   "recommendations": "short next-step recommendation or need for radiologist review"
 }
 
-Use the closest prediction from the allowed set. If the image is not diagnostic,
-say so in findings, keep confidence low, and choose the safest closest class.
+Use the closest prediction from the allowed set. If the image is not a chest
+radiology image or is not diagnostic, say so in findings, keep confidence low,
+and choose the safest closest class.
 This is decision support only; do not present the output as a final diagnosis.
 Do not include chain-of-thought, hidden reasoning, markdown, or explanations.
 """.strip()
@@ -48,13 +52,27 @@ _MODEL_LOCK = threading.Lock()
 _LOADED: _LoadedMedGemma | None = None
 
 
+def _configure_transformers_runtime() -> None:
+    os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
+    os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
+    warnings.filterwarnings(
+        "ignore",
+        message=r".*_check_is_size will be removed.*",
+        category=FutureWarning,
+    )
+    logging.getLogger("torch.utils.flop_counter").setLevel(logging.ERROR)
+    if settings.local_medgemma_local_files_only:
+        os.environ.setdefault("HF_HUB_OFFLINE", "1")
+        os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
+
 def _model_source() -> str:
     path = settings.local_medgemma_model_path
     if path and path.exists():
         return str(path)
     if settings.local_medgemma_local_files_only:
         raise RuntimeError(
-            "Local MedGemMA files were not found. Run scripts/download_medgemma.py first "
+            "Local AI model files were not found. Install the local model files first "
             f"or set LOCAL_MEDGEMMA_MODEL_PATH. Expected: {path}"
         )
     return settings.local_medgemma_model_id
@@ -95,13 +113,18 @@ def _load_model() -> _LoadedMedGemma:
         if _LOADED is not None:
             return _LOADED
 
+        _configure_transformers_runtime()
         import torch
         from transformers import AutoModelForImageTextToText, AutoProcessor
+        from transformers.utils import logging as transformers_logging
+
+        transformers_logging.disable_progress_bar()
+        transformers_logging.set_verbosity_error()
 
         model_source = _model_source()
         dtype = _select_dtype(torch)
         kwargs: dict[str, Any] = {
-            "torch_dtype": dtype,
+            "dtype": dtype,
             "local_files_only": settings.local_medgemma_local_files_only,
         }
         device_map = _device_map(torch)
@@ -252,16 +275,15 @@ def _fallback_payload_from_report(text: str) -> dict[str, Any]:
     if not prediction:
         return {}
 
-    confidence = 0.70 if prediction == "normal" else 0.62
     findings = _section(text, "FINDINGS", ["IMPRESSION", "CONCLUSION"])
     impression = _section(text, "IMPRESSION", ["RECOMMENDATION", "RECOMMENDATIONS"])
     return {
         "prediction": prediction,
-        "confidence": confidence,
-        "top3": {prediction: confidence},
+        "confidence": 0.0,
+        "top3": {},
         "findings": findings or text,
         "impression": impression or "",
-        "warning": "Confidence was estimated from MedGemMA free-text output because JSON confidence was not returned.",
+        "warning": "Local AI did not return numeric confidence; the generated text was preserved for clinician review.",
     }
 
 
@@ -280,28 +302,61 @@ def _ensure_estimated_confidence(payload: dict[str, Any], text: str) -> dict[str
         return payload
     prediction = str(payload.get("prediction") or "").strip()
     allowed = {"normal", "pneumonia", "pneumothorax", "pleural_effusion", "atelectasis"}
+    probabilities = payload.get("top3")
+    if isinstance(probabilities, dict):
+        parsed_probabilities = {str(key): _numeric_confidence(value) for key, value in probabilities.items()}
+        if prediction in parsed_probabilities and parsed_probabilities[prediction] > 0:
+            payload["confidence"] = parsed_probabilities[prediction]
+            payload["top3"] = parsed_probabilities
+            return payload
+        best = max(parsed_probabilities.values(), default=0.0)
+        if best > 0:
+            payload["confidence"] = best
+            payload["top3"] = parsed_probabilities
+            return payload
+
     if prediction not in allowed:
         fallback = _fallback_payload_from_report(text)
         prediction = str(fallback.get("prediction") or "").strip()
         if prediction in allowed:
             payload.setdefault("prediction", prediction)
+            payload.setdefault("findings", fallback.get("findings"))
+            payload.setdefault("impression", fallback.get("impression"))
         else:
+            payload.setdefault("confidence", 0.0)
+            payload.setdefault("top3", {})
+            payload["warning"] = "Local AI did not return a usable class or numeric confidence."
             return payload
 
-    confidence = 0.70 if prediction == "normal" else 0.62
-    probabilities = payload.get("top3")
-    if not isinstance(probabilities, dict) or not any(_numeric_confidence(value) > 0 for value in probabilities.values()):
-        payload["top3"] = {prediction: confidence}
-    payload["confidence"] = confidence
+    if not isinstance(payload.get("top3"), dict):
+        payload["top3"] = {}
+    payload["confidence"] = 0.0
     payload["warning"] = (
-        "Confidence was estimated because MedGemMA did not return a usable numeric confidence."
+        "Local AI did not return numeric confidence; the generated text was preserved for clinician review."
     )
     return payload
 
 
-def _messages(image: Image.Image, clinical_note: str | None, study_type: str | None) -> list[dict[str, Any]]:
+def _language_name(lang: str | None) -> str:
+    value = (lang or "ru").strip().lower()
+    if value.startswith("kk"):
+        return "Kazakh"
+    if value.startswith("en"):
+        return "English"
+    return "Russian"
+
+
+def _messages(
+    image: Image.Image,
+    clinical_note: str | None,
+    study_type: str | None,
+    lang: str | None = None,
+) -> list[dict[str, Any]]:
+    language = _language_name(lang)
     context = (
         f"{LOCAL_MEDGEMMA_PROMPT}\n\n"
+        f"Write the values of findings, impression, and recommendations in {language}. "
+        "Keep JSON field names in English.\n"
         f"Study type: {study_type or 'not provided'}\n"
         f"Clinical note: {clinical_note or 'not provided'}"
     )
@@ -316,10 +371,15 @@ def _messages(image: Image.Image, clinical_note: str | None, study_type: str | N
     ]
 
 
-def _generate_sync(image_path: str, clinical_note: str | None, study_type: str | None) -> dict[str, Any]:
+def _generate_sync(
+    image_path: str,
+    clinical_note: str | None,
+    study_type: str | None,
+    lang: str | None = None,
+) -> dict[str, Any]:
     loaded = _load_model()
     image = _load_image(Path(image_path))
-    messages = _messages(image, clinical_note, study_type)
+    messages = _messages(image, clinical_note, study_type, lang)
     inputs = loaded.processor.apply_chat_template(
         messages,
         add_generation_prompt=True,
@@ -334,11 +394,26 @@ def _generate_sync(image_path: str, clinical_note: str | None, study_type: str |
         inputs = inputs.to(target_device)
 
     input_len = inputs["input_ids"].shape[-1]
+    tokenizer = getattr(loaded.processor, "tokenizer", None)
+    generation_config = getattr(loaded.model, "generation_config", None)
+    eos_token_id = getattr(tokenizer, "eos_token_id", None) or getattr(generation_config, "eos_token_id", None)
+    pad_token_id = (
+        getattr(tokenizer, "pad_token_id", None)
+        or getattr(generation_config, "pad_token_id", None)
+        or eos_token_id
+    )
+    generation_kwargs: dict[str, Any] = {
+        "max_new_tokens": settings.local_medgemma_max_new_tokens,
+        "do_sample": False,
+    }
+    if pad_token_id is not None:
+        generation_kwargs["pad_token_id"] = pad_token_id
+    if eos_token_id is not None:
+        generation_kwargs["eos_token_id"] = eos_token_id
     with loaded.torch.inference_mode():
         output = loaded.model.generate(
             **inputs,
-            max_new_tokens=settings.local_medgemma_max_new_tokens,
-            do_sample=False,
+            **generation_kwargs,
         )
     decoded_raw = loaded.processor.decode(output[0][input_len:], skip_special_tokens=True).strip()
     decoded = _final_answer(decoded_raw)
@@ -348,8 +423,8 @@ def _generate_sync(image_path: str, clinical_note: str | None, study_type: str |
         {
             "response": decoded,
             "raw_generation": decoded_raw if decoded_raw != decoded else None,
-            "mode": "local_medgemma",
-            "model": settings.local_medgemma_model_id,
+            "mode": "local_ai",
+            "model": "local_ai",
             "model_source": loaded.model_source,
             "device": loaded.device_label,
             "clinical_note_used": bool(clinical_note),
@@ -362,5 +437,6 @@ async def run_local_medgemma_inference(
     image_path: str,
     clinical_note: str | None = None,
     study_type: str | None = None,
+    lang: str | None = None,
 ) -> dict[str, Any]:
-    return await asyncio.to_thread(_generate_sync, image_path, clinical_note, study_type)
+    return await asyncio.to_thread(_generate_sync, image_path, clinical_note, study_type, lang)

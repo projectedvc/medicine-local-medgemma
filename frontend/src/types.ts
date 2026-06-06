@@ -117,3 +117,19 @@ export interface AnalyticsOverview {
   ai_average_confidence: number | null;
   feedback_by_type: Record<string, number>;
 }
+
+export interface CRMRecord {
+  id: number;
+  patient_code: string;
+  contact_type: string;
+  status: string;
+  priority: string;
+  summary: string;
+  note: string;
+  next_step: string | null;
+  due_at: string | null;
+  created_by: User;
+  updated_by: User | null;
+  created_at: string;
+  updated_at: string;
+}

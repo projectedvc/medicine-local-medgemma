@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     ai_timeout_seconds: int = 120
     ai_confidence_threshold: float = Field(default=0.70, alias="AI_CONFIDENCE_THRESHOLD")
     ai_allow_mock: bool = Field(default=False, alias="AI_ALLOW_MOCK")
-    ai_model_version: str = Field(default="google/medgemma-1.5-4b-it-local", alias="AI_MODEL_VERSION")
+    ai_model_version: str = Field(default="local-ai", alias="AI_MODEL_VERSION")
     ai_dataset_version: str = Field(default="local-unvalidated", alias="AI_DATASET_VERSION")
     local_medgemma_model_id: str = Field(default="google/medgemma-1.5-4b-it", alias="LOCAL_MEDGEMMA_MODEL_ID")
     local_medgemma_model_path: Path = Field(

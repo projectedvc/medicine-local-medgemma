@@ -62,6 +62,11 @@ if not exist "%MODEL_DIR%\config.json" (
 
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%" >nul 2>nul
 
+echo Releasing old local servers if these ports are busy...
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\scripts\stop_port.ps1" -Port 8000 -Label "Backend"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\scripts\stop_port.ps1" -Port %FRONTEND_PORT% -Label "Frontend"
+
+echo.
 echo Starting backend and frontend in separate log windows...
 echo.
 echo Backend:  http://127.0.0.1:8000
@@ -71,16 +76,6 @@ echo   %LOG_DIR%\backend.log
 echo   %LOG_DIR%\frontend.log
 if "%PUBLIC_MODE%"=="1" echo   %LOG_DIR%\ngrok.log
 echo.
-
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | Select-Object -First 1" >nul 2>nul
-if not errorlevel 1 (
-  echo WARNING: Port 8000 is already in use. Backend window may show an address-in-use error.
-)
-
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Get-NetTCPConnection -LocalPort %FRONTEND_PORT% -ErrorAction SilentlyContinue | Select-Object -First 1" >nul 2>nul
-if not errorlevel 1 (
-  echo WARNING: Port %FRONTEND_PORT% is already in use. Frontend window may choose another port or fail.
-)
 
 start "MedGemMA Backend Logs" powershell.exe -NoExit -ExecutionPolicy Bypass -File "%ROOT%\scripts\run_backend_logs.ps1" -Port 8000
 

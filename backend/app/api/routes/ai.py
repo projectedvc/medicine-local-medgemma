@@ -26,7 +26,7 @@ def _latest_image(study: Study):
     return study.images[-1]
 
 
-async def process_analysis(db: Session, analysis: AIAnalysis, study: Study) -> AIAnalysis:
+async def process_analysis(db: Session, analysis: AIAnalysis, study: Study, lang: str = "ru") -> AIAnalysis:
     image = _latest_image(study)
     analysis.status = AIJobStatus.running
     study.status = StudyStatus.analyzing
@@ -36,6 +36,7 @@ async def process_analysis(db: Session, analysis: AIAnalysis, study: Study) -> A
             image.storage_path,
             clinical_note=study.clinical_note,
             study_type=study.study_type,
+            lang=lang,
         )
         hidden = result.confidence < settings.ai_confidence_threshold
         analysis.status = AIJobStatus.completed
@@ -63,14 +64,14 @@ async def process_analysis(db: Session, analysis: AIAnalysis, study: Study) -> A
     return analysis
 
 
-async def process_analysis_by_id(analysis_id: int) -> None:
+async def process_analysis_by_id(analysis_id: int, lang: str = "ru") -> None:
     db = SessionLocal()
     try:
         analysis = db.get(AIAnalysis, analysis_id)
         if not analysis:
             return
         study = get_study_or_404(db, analysis.study_id)
-        await process_analysis(db, analysis, study)
+        await process_analysis(db, analysis, study, lang)
     finally:
         db.close()
 
@@ -106,12 +107,12 @@ async def run_ai(
         user=current_user,
         entity_type="study",
         entity_id=study.id,
-        details={"analysis_id": analysis.id, "auto": payload.auto, "wait": payload.wait},
+        details={"analysis_id": analysis.id, "auto": payload.auto, "wait": payload.wait, "lang": payload.lang},
         request=request,
     )
     if payload.wait:
-        return await process_analysis(db, analysis, study)
-    background_tasks.add_task(process_analysis_by_id, analysis.id)
+        return await process_analysis(db, analysis, study, payload.lang)
+    background_tasks.add_task(process_analysis_by_id, analysis.id, payload.lang)
     return analysis
 
 
