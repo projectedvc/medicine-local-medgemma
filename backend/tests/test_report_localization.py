@@ -5,9 +5,11 @@ import pytest
 from app.core.config import settings
 from app.models.ai import AIAnalysis
 from app.models.enums import AIJobStatus, FindingClass
+from app.models.report import Report
 from app.models.study import Study
 from app.services import report_localization
 from app.services.report_localization import build_localized_ai_draft
+from app.services.reporting import _report_text_for_lang
 
 
 @pytest.fixture(autouse=True)
@@ -117,6 +119,32 @@ def test_ai_draft_translates_generated_text_to_kazakh(study: Study, analysis: AI
     assert "айқын патологиялық өзгерістер көрінбейді" in text
     assert "қосымша визуализация қажет емес" in text
     assert "The image shows" not in text
+
+
+def test_export_text_relocalizes_completed_analysis_for_kazakh(study: Study, analysis: AIAnalysis) -> None:
+    analysis.predicted_class = FindingClass.normal
+    analysis.confidence = 0.71
+    analysis.hidden_due_low_confidence = False
+    analysis.raw_response_json = json.dumps(
+        {
+            "findings": "The lungs are clear.",
+            "impression": "No acute cardiopulmonary abnormality.",
+            "recommendations": "No further imaging is required.",
+        }
+    )
+    report = Report(
+        study_id=1,
+        ai_draft_text="AI-черновик заключения\nОписание:\nЛегкие чистые.",
+        final_text="AI-черновик заключения\nОписание:\nЛегкие чистые.",
+    )
+
+    text = _report_text_for_lang(study, report, analysis, "kk")
+
+    assert "өкпе" in text.casefold()
+    assert "қосымша визуализация қажет емес" in text
+    assert "Легкие чистые" not in text
+    assert "The lungs are clear" not in text
+    assert "The " not in text
 
 
 def test_ai_draft_uses_online_translation_when_available(

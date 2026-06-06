@@ -228,7 +228,13 @@ const UI = {
     homeCardText: "CXR, DICOM, JPEG және PNG үшін локалды талдау.",
     homeFeatureOne: "AI талдау",
     homeFeatureTwo: "Қорытынды",
-    homeFeatureThree: "Локалды дерек"
+    homeFeatureThree: "Локалды дерек",
+    heroTitleOne: "Кеуде",
+    heroTitleTwo: "Радиология",
+    heroMeta: "Жергілікті MedAI",
+    heroAction: "Кеуде AI жұмысын бастау",
+    heroNote: "MedAI: кеуде суреттерін талдауға, AI қорытынды жобасын жасауға және дәрігерлік тексеруге арналған жергілікті радиология жұмыс орны.",
+    heroSideText: "Кеуде AI жергілікті қорытындылар, зерттеулер және анықтамалық шолу үшін."
   },
   ru: {
     locale: "ru-RU",
@@ -409,7 +415,13 @@ const UI = {
     homeCardText: "Локальный анализ CXR, DICOM, JPEG и PNG.",
     homeFeatureOne: "AI-анализ",
     homeFeatureTwo: "Заключение",
-    homeFeatureThree: "Локальные данные"
+    homeFeatureThree: "Локальные данные",
+    heroTitleOne: "Грудная",
+    heroTitleTwo: "Радиология",
+    heroMeta: "Локальный MedAI",
+    heroAction: "Начать локальный AI-процесс ОГК",
+    heroNote: "MedAI: локальное рабочее место для анализа снимков грудной клетки, AI-черновиков заключений и врачебной проверки.",
+    heroSideText: "AI для локальных заключений, исследований и справочника ОГК."
   },
   en: {
     locale: "en-US",
@@ -590,9 +602,147 @@ const UI = {
     homeCardText: "Local analysis for CXR, DICOM, JPEG and PNG.",
     homeFeatureOne: "AI analysis",
     homeFeatureTwo: "Report draft",
-    homeFeatureThree: "Local data"
+    homeFeatureThree: "Local data",
+    heroTitleOne: "Chest",
+    heroTitleTwo: "Radiology",
+    heroMeta: "Local MedAI",
+    heroAction: "Start local chest AI workflow",
+    heroNote: "MedAI is a local radiology workspace for chest imaging, AI draft reports, and clinician review.",
+    heroSideText: "Chest AI for local reports, studies, and reference review."
   }
 } as const;
+
+type LocalizedPathology = {
+  title: string;
+  label: string;
+  signs: string;
+  report_template: string;
+  references: string;
+};
+
+const PATHOLOGY_REFERENCE: Record<Lang, Record<string, LocalizedPathology>> = {
+  kk: {
+    normal: {
+      title: "Норма",
+      label: "Қалыпты",
+      signs: "Өкпе алаңдарында жаңа ошақты-инфильтративті өзгерістер жоқ. Түбірлер құрылымды. Плевралық синустар бос. Ортаңғы көлеңке кеңеймеген.",
+      report_template: "ОГК рентгенограммасында жаңа ошақты-инфильтративті өзгерістер анықталмайды. Плевралық синустар бос. Жүрек-қантамыр көлеңкесінде айқын ерекшелік жоқ.",
+      references: "ОГК сипаттауға арналған жергілікті хаттамалар."
+    },
+    pneumonia: {
+      title: "Пневмония",
+      label: "Қабыну инфильтрациясы",
+      signs: "Өкпенің бір бөлігінде немесе сегментінде ауа мөлшерінің төмендеуі, инфильтративті көлеңкелер, өкпе суретінің күшеюі және плевра реакциясы болуы мүмкін.",
+      report_template: "Өкпе тінінде инфильтративті өзгерістерге тән рентгенологиялық белгілер анықталады. Клиникалық-зертханалық деректермен салыстыру және дәрігер тағайындаса динамикалық бақылау ұсынылады.",
+      references: "Клиникалық ұсынымдар және мекеменің жергілікті хаттамалары."
+    },
+    pleural_effusion: {
+      title: "Плевралық сұйықтық",
+      label: "Плевра қуысындағы сұйықтық",
+      signs: "Гемиторакстың төменгі бөлімдерінде күңгірттену, қабырға-диафрагмалық синустың тегістелуі немесе жабылуы, сұйықтықтың доға тәрізді жоғарғы шекарасы.",
+      report_template: "Плевра қуысында сұйықтыққа күмәнді рентгенологиялық белгілер бар. Көлемі мен жағын дәрігер сурет бойынша нақтылауы керек.",
+      references: "Сәулелік диагностика бойынша жергілікті хаттамалар."
+    },
+    pneumothorax: {
+      title: "Пневмоторакс",
+      label: "Плевра қуысындағы ауа",
+      signs: "Висцералды плевра сызығы, одан шеткері өкпе суретінің болмауы, өкпенің спадение белгілері және кернеулі түрінде ортаңғы көлеңкенің ығысуы мүмкін.",
+      report_template: "Пневмотораксқа күмәнді белгілер анықталады. Суретті және пациенттің клиникалық жағдайын шұғыл дәрігерлік бағалау қажет.",
+      references: "Мекеменің шұғыл көмек хаттамалары."
+    },
+    atelectasis: {
+      title: "Ателектаз",
+      label: "Өкпе көлемінің төмендеуі",
+      signs: "Көлемі төмендеген тығыздалу аймағы, үлесаралық саңылаулардың ығысуы, түбірдің жоғары немесе төмен тартылуы, көрші бөлімдердің компенсаторлық гипервоздуштылығы.",
+      report_template: "Ателектаз немесе өкпе тінінің бір бөлігінің көлемі төмендеу белгілері болуы мүмкін. Дәрігерлік верификация және клиникалық деректермен салыстыру қажет.",
+      references: "ОГК бойынша жергілікті хаттамалар."
+    }
+  },
+  ru: {
+    normal: {
+      title: "Норма",
+      label: "Нормальная картина",
+      signs: "Легочные поля без свежих очагово-инфильтративных изменений. Корни структурны. Плевральные синусы свободны. Средостение не расширено.",
+      report_template: "На рентгенограмме ОГК свежих очагово-инфильтративных изменений не выявлено. Плевральные синусы свободны. Сердечно-сосудистая тень без грубых особенностей.",
+      references: "Локальные протоколы описания ОГК."
+    },
+    pneumonia: {
+      title: "Пневмония",
+      label: "Воспалительная инфильтрация",
+      signs: "Локальное или сегментарное снижение пневматизации, инфильтративные тени, усиление легочного рисунка, возможна реакция плевры.",
+      report_template: "Определяются рентгенологические признаки инфильтративных изменений в легочной ткани. Рекомендована клинико-лабораторная корреляция и контроль в динамике по назначению врача.",
+      references: "Клинические рекомендации и локальные протоколы учреждения."
+    },
+    pleural_effusion: {
+      title: "Плевральный выпот",
+      label: "Жидкость в плевральной полости",
+      signs: "Затемнение нижних отделов гемиторакса, сглаживание или облитерация реберно-диафрагмального синуса, дугообразная верхняя граница жидкости.",
+      report_template: "Рентгенологические признаки жидкости в плевральной полости. Объем и сторона требуют подтверждения врачом по изображению.",
+      references: "Локальные протоколы лучевой диагностики."
+    },
+    pneumothorax: {
+      title: "Пневмоторакс",
+      label: "Воздух в плевральной полости",
+      signs: "Висцеральная плевральная линия, отсутствие легочного рисунка периферичнее линии, возможное спадение легкого и смещение средостения при напряженном варианте.",
+      report_template: "Имеются признаки, подозрительные на пневмоторакс. Требуется срочная врачебная оценка изображения и клинического состояния пациента.",
+      references: "Экстренные протоколы учреждения."
+    },
+    atelectasis: {
+      title: "Ателектаз",
+      label: "Снижение объема легочной ткани",
+      signs: "Участок уплотнения со снижением объема, смещение междолевых щелей, подтягивание корня, компенсаторная гипервоздушность соседних отделов.",
+      report_template: "Возможны признаки ателектаза или снижения объема участка легочной ткани. Необходима врачебная верификация и сопоставление с клиническими данными.",
+      references: "Локальные протоколы ОГК."
+    }
+  },
+  en: {
+    normal: {
+      title: "Normal",
+      label: "Normal chest study",
+      signs: "No fresh focal infiltrative changes in the lung fields. Hila are structured. Pleural sinuses are clear. No mediastinal widening.",
+      report_template: "No fresh focal infiltrative changes are seen on the chest radiograph. Pleural sinuses are clear. Cardiomediastinal silhouette shows no gross abnormality.",
+      references: "Local chest radiography reporting protocols."
+    },
+    pneumonia: {
+      title: "Pneumonia",
+      label: "Inflammatory infiltration",
+      signs: "Focal or segmental loss of aeration, infiltrative opacities, increased lung markings, and possible pleural reaction.",
+      report_template: "Radiographic signs of infiltrative change in the lung tissue are present. Clinical and laboratory correlation and follow-up as directed by the clinician are recommended.",
+      references: "Clinical recommendations and local institutional protocols."
+    },
+    pleural_effusion: {
+      title: "Pleural effusion",
+      label: "Fluid in the pleural space",
+      signs: "Basal hemithorax opacity, blunting or obliteration of the costophrenic angle, and a meniscus-shaped upper fluid margin.",
+      report_template: "Radiographic signs suggest fluid in the pleural cavity. Volume and side should be confirmed by the clinician on the image.",
+      references: "Local diagnostic imaging protocols."
+    },
+    pneumothorax: {
+      title: "Pneumothorax",
+      label: "Air in the pleural space",
+      signs: "Visceral pleural line, absent peripheral lung markings, possible lung collapse, and mediastinal shift in a tension variant.",
+      report_template: "Findings are suspicious for pneumothorax. Urgent clinician assessment of the image and patient condition is required.",
+      references: "Institutional emergency protocols."
+    },
+    atelectasis: {
+      title: "Atelectasis",
+      label: "Reduced lung volume",
+      signs: "A dense area with volume loss, fissure displacement, hilar retraction, and compensatory hyperinflation of adjacent regions.",
+      report_template: "Findings may represent atelectasis or focal lung volume loss. Clinician verification and correlation with clinical data are required.",
+      references: "Local chest imaging protocols."
+    }
+  }
+};
+
+function localizedPathology(item: Pathology, lang: Lang): LocalizedPathology {
+  return PATHOLOGY_REFERENCE[lang][item.slug] ?? {
+    title: item.title,
+    label: item.slug.replace(/_/g, " ").toUpperCase(),
+    signs: item.signs,
+    report_template: item.report_template,
+    references: item.references ?? ""
+  };
+}
 
 function formatDate(value: string | null | undefined, lang: Lang) {
   if (!value) return "—";
@@ -1052,13 +1202,13 @@ export default function App() {
         <section className="photonDashboard overviewScene publicOverview">
           <div className="photonCopy dashboardCopy">
             <h1>
-              <span>Chest</span>
+              <span>{ui.heroTitleOne}</span>
               <span>
-                Radiology <b>A.I.</b>
+                {ui.heroTitleTwo} <b>A.I.</b>
               </span>
             </h1>
             <div className="photonMeta">
-              <span>Local MedAI</span>
+              <span>{ui.heroMeta}</span>
               <i />
               <span>2026</span>
             </div>
@@ -1066,11 +1216,9 @@ export default function App() {
               <button className="photonRoundButton" type="button" onClick={() => setShowLoginPanel(true)} aria-label={ui.signIn}>
                 <Play size={18} />
               </button>
-              <span>Start local chest AI workflow</span>
+              <span>{ui.heroAction}</span>
             </div>
-            <p className="photonNote">
-              MedAI is a local radiology workspace for chest imaging, AI draft reports, and clinician review.
-            </p>
+            <p className="photonNote">{ui.heroNote}</p>
           </div>
 
           <div className="photonVisual dashboardVisual" aria-hidden="true">
@@ -1082,7 +1230,7 @@ export default function App() {
               <strong>{ui.localModel}</strong>
             </p>
             <span />
-            <p>Chest AI for local reports, studies, and reference review.</p>
+            <p>{ui.heroSideText}</p>
           </aside>
 
           <footer className="photonFooter overviewFooter">
@@ -1626,20 +1774,23 @@ export default function App() {
 
         {view === "reference" && (
           <section className="referenceGrid">
-            {pathologies.map((item) => (
-              <article className="referenceItem" key={item.id}>
-                <div className="referenceVisual">
-                  <img src="/medical_lungs_xray.png" alt="" />
-                  <span>{item.title.slice(0, 2).toUpperCase()}</span>
-                </div>
-                <h2>{item.title}</h2>
-                <h3>{ui.findings.pneumonia}</h3>
-                <p>{item.signs}</p>
-                <h3>{ui.report}</h3>
-                <p>{item.report_template}</p>
-                {item.references && <small>{item.references}</small>}
-              </article>
-            ))}
+            {pathologies.map((item) => {
+              const localized = localizedPathology(item, lang);
+              return (
+                <article className="referenceItem" key={item.id}>
+                  <div className="referenceVisual">
+                    <img src="/medical_lungs_xray.png" alt="" />
+                    <span>{localized.title.slice(0, 2).toUpperCase()}</span>
+                  </div>
+                  <h2>{localized.title}</h2>
+                  <h3>{localized.label}</h3>
+                  <p>{localized.signs}</p>
+                  <h3>{ui.report}</h3>
+                  <p>{localized.report_template}</p>
+                  {localized.references && <small>{localized.references}</small>}
+                </article>
+              );
+            })}
           </section>
         )}
 

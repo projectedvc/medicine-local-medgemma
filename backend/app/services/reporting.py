@@ -481,6 +481,8 @@ def _plain_paragraphs(text: str) -> list[str]:
 
 
 def _report_text_for_lang(study: Study, report: Report, analysis: AIAnalysis | None, lang: str) -> str:
+    if analysis and analysis.status.value == "completed":
+        return build_localized_ai_draft(study, analysis, lang)
     final_text = (report.final_text or "").strip()
     ai_draft = (report.ai_draft_text or "").strip()
     if analysis and (not final_text or final_text == ai_draft):
@@ -638,7 +640,8 @@ def export_report_pdf(study: Study, report: Report, doctor: User, lang: str | No
 
     if study.clinical_note:
         story.append(Paragraph("Клиникалық жазба / Клиническая заметка", section))
-        note_box = Table([[_pdf_para(study.clinical_note, normal)]], colWidths=[184 * mm])
+        kk_note = translate_text(study.clinical_note, "kk") or study.clinical_note
+        note_box = Table([[_pdf_para(kk_note, normal)]], colWidths=[184 * mm])
         note_box.setStyle(
             TableStyle(
                 [
@@ -929,7 +932,7 @@ def export_report_docx(study: Study, report: Report, doctor: User, lang: str | N
         note_table = doc.add_table(rows=1, cols=1)
         note_table.style = "Table Grid"
         _docx_shade(note_table.cell(0, 0), "FBFDFE")
-        _docx_cell_text(note_table.cell(0, 0), study.clinical_note, size=9, color="17232B")
+        _docx_cell_text(note_table.cell(0, 0), translate_text(study.clinical_note, "kk") or study.clinical_note, size=9, color="17232B")
 
     image_path = _latest_image_path(study)
     if image_path:
