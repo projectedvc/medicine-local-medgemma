@@ -91,3 +91,16 @@ print(r.status_code, r.text)
 ```
 
 Если `/health` возвращает только `{"status":"ok"}`, значит на домене все еще висит маленький AI-service, а не backend `medicine`.
+
+## Если Jupyter пишет `IOPub data rate exceeded`
+
+Это лимит вывода notebook, а не отдельная ошибка FastAPI. Обычно он срабатывает, когда ячейка печатает слишком большой ответ модели или полный HTTP response.
+
+Для проверки не печатайте весь `r.text`, а ограничивайте вывод:
+
+```python
+print(r.status_code)
+print(r.text[:1000])
+```
+
+В AI prompt просите модель вернуть только компактный JSON, а в `model.generate(...)` держите небольшой `max_new_tokens`, например `128` или `256`. Если backend запущен с `AI_ALLOW_MOCK=true`, запрос в Jupiter AI вообще не пойдет: backend сразу вернет mock-результат.
