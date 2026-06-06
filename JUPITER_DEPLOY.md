@@ -25,11 +25,41 @@ Vercel frontend
 В notebook-коде с моделью оставьте `/generate`, но поменяйте порт с `8000` на `8001`:
 
 ```python
-def run_api():
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+from scripts.jupiter_generate_api import start_api
 
-threading.Thread(target=run_api, daemon=True).start()
-print("AI API started on port 8001")
+# Run this after `model` and `processor` are loaded.
+start_api(model, processor, port=8001)
+```
+
+Если видите `422` с текстом `Input should be a valid dictionary`, значит endpoint ожидает JSON, а запрос отправлен как `data=...` / form-urlencoded. Готовый `scripts/jupiter_generate_api.py` принимает оба формата.
+
+Проверка без картинки:
+
+```python
+import requests
+
+r = requests.post(
+    "http://127.0.0.1:8001/generate",
+    json={"prompt": "Analyze this chest X-ray. Return compact JSON."},
+)
+print(r.status_code)
+print(r.text[:1000])
+```
+
+Проверка с картинкой:
+
+```python
+import requests
+
+with open("test.jpg", "rb") as handle:
+    r = requests.post(
+        "http://127.0.0.1:8001/generate",
+        data={"prompt": "Analyze this chest X-ray. Return compact JSON."},
+        files={"image": ("test.jpg", handle, "image/jpeg")},
+    )
+
+print(r.status_code)
+print(r.text[:1000])
 ```
 
 ## 2. Medicine backend на Jupiter
