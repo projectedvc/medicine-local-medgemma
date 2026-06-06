@@ -122,9 +122,6 @@ const UI = {
     modelValue: "MedGemMA 1.5 4B",
     privacy: "Жеке режим",
     privacyValue: "Сыртқы API жоқ",
-    publicAccess: "Сыртқы сілтеме",
-    publicAccessText: "ngrok арқылы frontend порты 3000 жарияланады. Батникті --public режимімен қосыңыз.",
-    publicCommand: "run_local_medgemma.bat --public",
     workflow: "Жұмыс барысы",
     workflowItems: [
       "Зерттеу ашылады және сурет жүктеледі.",
@@ -257,9 +254,6 @@ const UI = {
     modelValue: "MedGemMA 1.5 4B",
     privacy: "Приватный режим",
     privacyValue: "Без внешнего API",
-    publicAccess: "Публичная ссылка",
-    publicAccessText: "Через ngrok публикуется frontend-порт 3000. Запускайте батник в режиме --public.",
-    publicCommand: "run_local_medgemma.bat --public",
     workflow: "Рабочий процесс",
     workflowItems: [
       "Создается исследование и загружается снимок.",
@@ -392,9 +386,6 @@ const UI = {
     modelValue: "MedGemMA 1.5 4B",
     privacy: "Private mode",
     privacyValue: "No external API",
-    publicAccess: "Public link",
-    publicAccessText: "ngrok publishes frontend port 3000. Start the launcher with --public.",
-    publicCommand: "run_local_medgemma.bat --public",
     workflow: "Workflow",
     workflowItems: [
       "Create a study and upload an image.",
@@ -971,24 +962,66 @@ export default function App() {
         {view === "overview" && (
           <section className="overview">
             <div className="overviewHero">
-              <div>
-                <p className="eyebrow">{ui.appSubtitle}</p>
+              <div className="heroContent">
+                <div className="heroBadge">{ui.appSubtitle}</div>
                 <h2>{ui.overviewHeroTitle}</h2>
                 <p>{ui.overviewHeroText}</p>
                 <div className="buttonRow">
-                  <button className="primaryButton" onClick={() => setView("studies")}>
+                  <button className="primaryButton heroBtn" onClick={() => setView("studies")}>
                     <Plus size={18} />
                     {ui.startStudy}
                   </button>
-                  <button className="ghostButton" onClick={() => setView("reference")}>
+                  <button className="ghostButton heroBtn" onClick={() => setView("reference")}>
                     <BookOpen size={18} />
                     {ui.openReference}
                   </button>
                 </div>
+                
+                <div className="floatingWidget widgetPatients">
+                  <div className="avatarGroup">
+                    <span className="avatar pat1">P1</span>
+                    <span className="avatar pat2">P2</span>
+                    <span className="avatar pat3">P3</span>
+                  </div>
+                  <div className="widgetText">
+                    <strong>Rated 5/5</strong>
+                    <small>Trusted by 1000+ Patients</small>
+                  </div>
+                </div>
               </div>
-              <div className="sealPanel">
-                <img src="/pec.png" alt="" />
-                <span>{ui.modelValue}</span>
+
+              <div className="heroGraphicsContainer">
+                <div className="roboticHandWrapper">
+                  <img src="/robotic_hand_brain.png" alt="Medical AI Robotic Hand and Brain" className="roboticHandImg" />
+                </div>
+                
+                <div className="floatingWidget widgetDoctors">
+                  <div className="avatarGroup">
+                    <span className="avatar doc1">DR</span>
+                    <span className="avatar doc2">MD</span>
+                    <span className="avatar doc3">RT</span>
+                  </div>
+                  <div className="widgetText">
+                    <strong>300+</strong>
+                    <small>Expert doctors</small>
+                  </div>
+                </div>
+
+                <div className="floatingWidget widgetTreatments">
+                  <div className="treatmentPreview">
+                    <Activity size={20} />
+                  </div>
+                  <div className="widgetText">
+                    <strong>5,000+</strong>
+                    <small>Successful Treatment</small>
+                  </div>
+                </div>
+
+                <div className="heroSocials">
+                  <div className="socialIcon"><Activity size={16} /></div>
+                  <div className="socialIcon"><Stethoscope size={16} /></div>
+                  <div className="socialIcon"><ShieldCheck size={16} /></div>
+                </div>
               </div>
             </div>
 
@@ -996,7 +1029,6 @@ export default function App() {
               <Metric title={ui.localModel} value={ui.modelValue} />
               <Metric title={ui.privacy} value={ui.privacyValue} />
               <Metric title={ui.nav.studies} value={studies.length} />
-              <Metric title={ui.publicAccess} value="ngrok :3000" />
             </div>
 
             <div className="overviewGrid">
@@ -1005,11 +1037,14 @@ export default function App() {
                   <h2>{ui.workflow}</h2>
                   <FileText size={20} />
                 </div>
-                <ol className="workflowList">
-                  {ui.workflowItems.map((item) => (
-                    <li key={item}>{item}</li>
+                <div className="workflowTimeline">
+                  {ui.workflowItems.map((item, index) => (
+                    <div className="workflowStep" key={index}>
+                      <div className="stepBadge">{index + 1}</div>
+                      <div className="stepContent">{item}</div>
+                    </div>
                   ))}
-                </ol>
+                </div>
               </section>
 
               <section className="panelBand">
@@ -1019,21 +1054,12 @@ export default function App() {
                 </div>
                 <div className="capabilityGrid">
                   {CAPABILITIES.map((item) => (
-                    <div key={item.en}>
-                      {item.icon}
+                    <div className="capabilityCard" key={item.en}>
+                      <div className="capabilityIcon">{item.icon}</div>
                       <strong>{item[lang]}</strong>
                     </div>
                   ))}
                 </div>
-              </section>
-
-              <section className="panelBand publicBand">
-                <div className="panelHeader">
-                  <h2>{ui.publicAccess}</h2>
-                  <Globe2 size={20} />
-                </div>
-                <p>{ui.publicAccessText}</p>
-                <code>{ui.publicCommand}</code>
               </section>
             </div>
           </section>
