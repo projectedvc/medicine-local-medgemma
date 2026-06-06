@@ -280,6 +280,47 @@ input[type="checkbox"] {
     var(--bg);
 }
 
+.publicShell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.publicHeader {
+  width: 100%;
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  position: relative;
+  z-index: 12;
+  padding: 18px min(7vw, 88px);
+}
+
+.loginTopButton {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(245, 248, 255, 0.92);
+  color: #07101f;
+  font-weight: 900;
+  box-shadow: 0 16px 44px rgba(0, 88, 255, 0.22);
+}
+
+.loginTopButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 52px rgba(0, 132, 255, 0.28);
+}
+
 .loginHeader {
   width: min(1520px, 100%);
   display: flex;
@@ -379,6 +420,43 @@ input[type="checkbox"] {
   background: rgba(6, 10, 22, 0.78);
   box-shadow: var(--shadow);
   backdrop-filter: blur(14px);
+}
+
+.loginModalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(1, 4, 12, 0.68);
+  backdrop-filter: blur(10px);
+}
+
+.loginModal {
+  width: min(430px, calc(100vw - 32px));
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(6, 10, 22, 0.94);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.modalHeader button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1;
 }
 
 .loginPanel h1 {
@@ -1808,6 +1886,7 @@ td {
 }
 
 :root[data-theme="light"] .loginShell,
+:root[data-theme="light"] .publicShell,
 :root[data-theme="light"] .appShell,
 :root[data-theme="light"] .overviewScene {
   background:
@@ -1816,6 +1895,7 @@ td {
 }
 
 :root[data-theme="light"] .loginPanel,
+:root[data-theme="light"] .loginModal,
 :root[data-theme="light"] .toolPanel,
 :root[data-theme="light"] .viewerPanel,
 :root[data-theme="light"] .tablePanel,
@@ -1845,11 +1925,16 @@ td {
 
 :root[data-theme="light"] .languageSwitch button.active,
 :root[data-theme="light"] .loginSubmit,
+:root[data-theme="light"] .loginTopButton,
 :root[data-theme="light"] .primaryButton,
 :root[data-theme="light"] .photonPanelButton.primary {
   background: #07111f;
   border-color: #07111f;
   color: #ffffff;
+}
+
+:root[data-theme="light"] .loginModalBackdrop {
+  background: rgba(241, 246, 252, 0.66);
 }
 
 :root[data-theme="light"] .navButton {

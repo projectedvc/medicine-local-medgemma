@@ -8,7 +8,6 @@ import {
   Download,
   Eye,
   FileText,
-  Home,
   ImagePlus,
   Languages,
   Loader2,
@@ -45,7 +44,7 @@ import type {
   User
 } from "./types";
 
-type View = "overview" | "studies" | "crm" | "reference" | "analytics" | "audit" | "users";
+type View = "studies" | "crm" | "reference" | "analytics" | "audit" | "users";
 type Lang = "kk" | "ru" | "en";
 type Theme = "light" | "dark";
 
@@ -635,7 +634,8 @@ export default function App() {
   const [booting, setBooting] = useState(true);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
-  const [view, setView] = useState<View>("overview");
+  const [view, setView] = useState<View>("studies");
+  const [showLoginPanel, setShowLoginPanel] = useState(false);
   const [busy, setBusy] = useState(false);
   const [aiRunningStudyId, setAiRunningStudyId] = useState<number | null>(null);
   const [notice, setNotice] = useState("");
@@ -706,6 +706,7 @@ export default function App() {
       try {
         const me = await api.me();
         setUser(me);
+        setView("studies");
         await loadInitial(me);
       } catch {
         setAuthToken("");
@@ -740,7 +741,8 @@ export default function App() {
       const response = await api.login(login, password);
       setAuthToken(response.access_token);
       setUser(response.user);
-      setView("overview");
+      setView("studies");
+      setShowLoginPanel(false);
       await loadInitial(response.user);
       flash(ui.signedIn);
     } catch (err) {
@@ -758,7 +760,8 @@ export default function App() {
     setCrmRecords([]);
     setDoctors([]);
     setPreviewUrl(null);
-    setView("overview");
+    setShowLoginPanel(false);
+    setView("studies");
   }
 
   async function loadStudies(nextFilters = filters) {
@@ -1033,48 +1036,94 @@ export default function App() {
 
   if (!user) {
     return (
-      <main className="loginShell">
-        <header className="loginHeader">
+      <main className="publicShell">
+        <header className="publicHeader">
           <span className="photonBrand">MedAI</span>
           <div className="headerControls">
             <ThemeSwitch theme={theme} setTheme={setTheme} />
             <LanguageSwitch lang={lang} setLang={setLang} />
-          </div>
-        </header>
-
-        <section className="loginStage">
-          <div className="loginVisual" aria-hidden="true">
-            <img src="/neon_lungs_hero_transparent.png" alt="" />
-            <div>
-              <span>Local MedAI</span>
-              <strong>Chest Radiology A.I.</strong>
-            </div>
-          </div>
-
-          <form className="loginPanel" onSubmit={handleLogin}>
-            <span>{ui.appName}</span>
-            <h1>{ui.loginTitle}</h1>
-            <p>{ui.loginLead}</p>
-            <label>
-              {ui.login}
-              <input value={login} onChange={(event) => setLogin(event.target.value)} autoComplete="username" />
-            </label>
-            <label>
-              {ui.password}
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                autoComplete="current-password"
-              />
-            </label>
-            <button className="loginSubmit" disabled={busy}>
+            <button className="loginTopButton" type="button" onClick={() => setShowLoginPanel(true)}>
               <LogIn size={18} />
               {ui.signIn}
             </button>
-            {error && <div className="errorLine">{error}</div>}
-          </form>
+          </div>
+        </header>
+
+        <section className="photonDashboard overviewScene publicOverview">
+          <div className="photonCopy dashboardCopy">
+            <h1>
+              <span>Chest</span>
+              <span>
+                Radiology <b>A.I.</b>
+              </span>
+            </h1>
+            <div className="photonMeta">
+              <span>Local MedAI</span>
+              <i />
+              <span>2026</span>
+            </div>
+            <div className="photonActionRow">
+              <button className="photonRoundButton" type="button" onClick={() => setShowLoginPanel(true)} aria-label={ui.signIn}>
+                <Play size={18} />
+              </button>
+              <span>Start local chest AI workflow</span>
+            </div>
+            <p className="photonNote">
+              MedAI is a local radiology workspace for chest imaging, AI draft reports, and clinician review.
+            </p>
+          </div>
+
+          <div className="photonVisual dashboardVisual" aria-hidden="true">
+            <img src="/neon_lungs_hero_transparent.png" alt="" />
+          </div>
+
+          <aside className="photonSide dashboardSide">
+            <p>
+              <strong>{ui.localModel}</strong>
+            </p>
+            <span />
+            <p>Chest AI for local reports, studies, and reference review.</p>
+          </aside>
+
+          <footer className="photonFooter overviewFooter">
+            <button type="button" onClick={() => setShowLoginPanel(true)}>{ui.homeFeatureThree}</button>
+            <button type="button" onClick={() => setShowLoginPanel(true)}>{ui.homeFeatureOne}</button>
+            <div />
+            <button type="button" onClick={() => setShowLoginPanel(true)}>{ui.homeSecondary}</button>
+            <button type="button" onClick={() => setShowLoginPanel(true)}>{ui.homePrimary}</button>
+          </footer>
         </section>
+
+        {showLoginPanel && (
+          <div className="loginModalBackdrop" onMouseDown={() => setShowLoginPanel(false)}>
+            <form className="loginPanel loginModal" onSubmit={handleLogin} onMouseDown={(event) => event.stopPropagation()}>
+              <div className="modalHeader">
+                <span>{ui.appName}</span>
+                <button type="button" onClick={() => setShowLoginPanel(false)} aria-label="Close">×</button>
+              </div>
+              <h1>{ui.loginTitle}</h1>
+              <p>{ui.loginLead}</p>
+              <label>
+                {ui.login}
+                <input value={login} onChange={(event) => setLogin(event.target.value)} autoComplete="username" />
+              </label>
+              <label>
+                {ui.password}
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete="current-password"
+                />
+              </label>
+              <button className="loginSubmit" disabled={busy}>
+                <LogIn size={18} />
+                {ui.signIn}
+              </button>
+              {error && <div className="errorLine">{error}</div>}
+            </form>
+          </div>
+        )}
       </main>
     );
   }
@@ -1087,7 +1136,6 @@ export default function App() {
           <span>{ui.roles[user.role]}</span>
         </div>
         <nav>
-          <NavButton active={view === "overview"} icon={<Home size={18} />} label={ui.nav.overview} onClick={() => setView("overview")} />
           <NavButton active={view === "studies"} icon={<Activity size={18} />} label={ui.nav.studies} onClick={() => setView("studies")} />
           <NavButton
             active={view === "crm"}
@@ -1148,70 +1196,19 @@ export default function App() {
       </aside>
 
       <main className="workspace">
-        {view !== "overview" && (
-          <header className="topbar">
-            <div>
-              <h1>{ui.titles[view]}</h1>
-              <p>{user.full_name}</p>
-            </div>
-            <button className="ghostButton" onClick={() => loadInitial()} disabled={busy}>
-              <RefreshCw size={18} />
-              {ui.refresh}
-            </button>
-          </header>
-        )}
+        <header className="topbar">
+          <div>
+            <h1>{ui.titles[view]}</h1>
+            <p>{user.full_name}</p>
+          </div>
+          <button className="ghostButton" onClick={() => loadInitial()} disabled={busy}>
+            <RefreshCw size={18} />
+            {ui.refresh}
+          </button>
+        </header>
 
         {notice && <div className="notice">{notice}</div>}
         {error && <div className="errorLine">{error}</div>}
-
-        {view === "overview" && (
-          <section className="photonDashboard overviewScene">
-            <div className="photonCopy dashboardCopy">
-              <h1>
-                <span>Chest</span>
-                <span>
-                  Radiology <b>A.I.</b>
-                </span>
-              </h1>
-              <div className="photonMeta">
-                <span>Local MedAI</span>
-                <i />
-                <span>2026</span>
-              </div>
-              <div className="photonActionRow">
-                <button className="photonRoundButton" type="button" onClick={() => setView("studies")} aria-label={ui.homePrimary}>
-                  <Play size={18} />
-                </button>
-                <span>Start local chest AI workflow</span>
-              </div>
-              <p className="photonNote">
-                MedAI is a local radiology workspace for chest imaging, AI draft reports, and clinician review.
-              </p>
-            </div>
-
-            <div className="photonVisual dashboardVisual" aria-hidden="true">
-              <img src="/neon_lungs_hero_transparent.png" alt="" />
-            </div>
-
-            <aside className="photonSide dashboardSide">
-              <p>
-                <strong>{ui.localModel}</strong>
-              </p>
-              <span />
-              <p>
-                Chest AI for local reports, studies, and reference review.
-              </p>
-            </aside>
-
-            <footer className="photonFooter overviewFooter">
-              <button type="button" onClick={() => setView("studies")}>{ui.homeFeatureThree}</button>
-              <button type="button" onClick={() => setView("studies")}>{ui.homeFeatureOne}</button>
-              <div />
-              <button type="button" onClick={() => setView("reference")}>{ui.homeSecondary}</button>
-              <button type="button" onClick={() => setView("studies")}>{ui.homePrimary}</button>
-            </footer>
-          </section>
-        )}
 
         {view === "studies" && (
           <section className="dashboardGrid">

@@ -12,6 +12,7 @@ from app.models.report import Report
 from app.models.study import Study
 from app.models.user import User
 from app.services.report_localization import build_localized_ai_draft, finding_label, normalize_report_lang
+from app.services.translation import translate_text
 
 
 DISCLAIMER = (
@@ -479,6 +480,17 @@ def _plain_paragraphs(text: str) -> list[str]:
     return paragraphs or [""]
 
 
+def _report_text_for_lang(study: Study, report: Report, analysis: AIAnalysis | None, lang: str) -> str:
+    final_text = (report.final_text or "").strip()
+    ai_draft = (report.ai_draft_text or "").strip()
+    if analysis and (not final_text or final_text == ai_draft):
+        return build_localized_ai_draft(study, analysis, lang)
+    if not final_text:
+        return build_localized_ai_draft(study, analysis, lang)
+    translated = translate_text(final_text, lang) if lang in {"kk", "ru"} else None
+    return translated or final_text
+
+
 def _pdf_image(path: Path, max_width: float, max_height: float):
     from reportlab.platypus import Image as PdfImage
 
@@ -512,12 +524,12 @@ def export_report_pdf(study: Study, report: Report, doctor: User, lang: str | No
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import mm
-    from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    from reportlab.platypus import KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
     export_dir = ensure_export_dir()
     path = export_dir / f"study-{study.id}-report.pdf"
     font_name = _register_pdf_font()
-    lang = normalize_report_lang(lang)
+    lang = "kk"
     analysis = _analysis_for_study(study)
     chip_text, chip_color = _status_chip(analysis, lang)
 
@@ -582,8 +594,8 @@ def export_report_pdf(study: Study, report: Report, doctor: User, lang: str | No
     )
 
     story = [
-        Paragraph(REPORT_TITLE, title),
-        Paragraph(REPORT_SUBTITLE, subtitle),
+        Paragraph("Медициналық қорытынды", title),
+        Paragraph("MedAI радиология ассистенті", subtitle),
     ]
 
     metadata = [
@@ -662,7 +674,7 @@ def export_report_pdf(study: Study, report: Report, doctor: User, lang: str | No
         story.extend([image_frame, Spacer(1, 6)])
 
     conclusion_flow: list[Any] = []
-    for heading, body in _clean_final_text(report.final_text, study):
+    for heading, body in _clean_final_text(_report_text_for_lang(study, report, analysis, "kk"), study):
         conclusion_flow.append(Paragraph(heading, section))
         for paragraph in _plain_paragraphs(body):
             conclusion_flow.append(_pdf_para(paragraph, normal))
@@ -712,6 +724,121 @@ def export_report_pdf(study: Study, report: Report, doctor: User, lang: str | No
     )
     story.append(sign_table)
 
+    ru_chip_text, ru_chip_color = _status_chip(analysis, "ru")
+    story.append(PageBreak())
+    story.extend([Paragraph("Медицинское заключение", title), Paragraph("Радиологический ассистент MedAI", subtitle)])
+    ru_metadata = [
+        [_pdf_para("Исследование", small_caps), _pdf_para(study.accession_number, normal), _pdf_para("Дата", small_caps), _pdf_para(_format_dt(report.confirmed_at), normal)],
+        [_pdf_para("Пациент", small_caps), _pdf_para(study.patient_code, normal), _pdf_para("Тип", small_caps), _pdf_para(study.study_type, normal)],
+        [_pdf_para("Врач", small_caps), _pdf_para(doctor.full_name, normal), _pdf_para("AI статус", small_caps), _pdf_para(ru_chip_text, normal)],
+    ]
+    ru_table = Table(ru_metadata, colWidths=[35 * mm, 57 * mm, 35 * mm, 57 * mm], hAlign="CENTER")
+    ru_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f7fafb")),
+                ("BOX", (0, 0), (-1, -1), 0.45, colors.HexColor("#d7e1e6")),
+                ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#e4ebef")),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 7),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("TEXTCOLOR", (3, 2), (3, 2), colors.HexColor(ru_chip_color)),
+            ]
+        )
+    )
+    story.extend([ru_table, Spacer(1, 6)])
+
+    if study.clinical_note:
+        ru_note = translate_text(study.clinical_note, "ru") or study.clinical_note
+        story.append(Paragraph("Клиническая заметка", section))
+        ru_note_box = Table([[_pdf_para(ru_note, normal)]], colWidths=[184 * mm])
+        ru_note_box.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fbfdfe")),
+                    ("BOX", (0, 0), (-1, -1), 0.35, colors.HexColor("#dce6eb")),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                    ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ]
+            )
+        )
+        story.extend([ru_note_box, Spacer(1, 6)])
+
+    image_path = _latest_image_path(study)
+    if image_path:
+        story.append(Paragraph("Диагностический снимок", section))
+        ru_image = _pdf_image(image_path, 92 * mm, 68 * mm)
+        ru_image_frame = Table([[ru_image]], colWidths=[102 * mm], hAlign="CENTER")
+        ru_image_frame.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.white),
+                    ("BOX", (0, 0), (-1, -1), 0.45, colors.HexColor("#d5e0e6")),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 5),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+                    ("TOPPADDING", (0, 0), (-1, -1), 5),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ]
+            )
+        )
+        story.extend([ru_image_frame, Spacer(1, 6)])
+
+    ru_conclusion_flow: list[Any] = []
+    for heading, body in _clean_final_text(_report_text_for_lang(study, report, analysis, "ru"), study):
+        ru_conclusion_flow.append(Paragraph(heading, section))
+        for paragraph in _plain_paragraphs(body):
+            ru_conclusion_flow.append(_pdf_para(paragraph, normal))
+            ru_conclusion_flow.append(Spacer(1, 3))
+    story.append(KeepTogether(ru_conclusion_flow))
+
+    ru_warning = Table([[_pdf_para("Результат AI является предварительной подсказкой. Окончательное решение принимает врач.", muted)]], colWidths=[184 * mm])
+    ru_warning.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fff8ed")),
+                ("BOX", (0, 0), (-1, -1), 0.35, colors.HexColor("#ead2a8")),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 6),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ]
+        )
+    )
+    story.extend([ru_warning, Spacer(1, 7)])
+
+    ru_photo = _pdf_image(_doctor_photo(doctor, export_dir), 18 * mm, 22 * mm)
+    ru_stamp_path = _stamp_path()
+    ru_stamp = _pdf_image(ru_stamp_path, 22 * mm, 22 * mm) if ru_stamp_path else _pdf_para("Печать", muted)
+    ru_sign_text = _pdf_para(
+        f"Врач: {doctor.full_name}\n"
+        f"Подпись: ______________________________\n"
+        f"Дата: {_format_dt(report.confirmed_at)}",
+        normal,
+    )
+    ru_sign_table = Table([[ru_photo, ru_sign_text, ru_stamp]], colWidths=[26 * mm, 124 * mm, 34 * mm], hAlign="CENTER")
+    ru_sign_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fbfdfe")),
+                ("BOX", (0, 0), (-1, -1), 0.45, colors.HexColor("#d5e0e6")),
+                ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#e4ebef")),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("ALIGN", (0, 0), (0, 0), "CENTER"),
+                ("ALIGN", (2, 0), (2, 0), "CENTER"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ]
+        )
+    )
+    story.append(ru_sign_table)
+
     doc.build(story)
     return path
 
@@ -760,7 +887,7 @@ def export_report_docx(study: Study, report: Report, doctor: User, lang: str | N
 
     export_dir = ensure_export_dir()
     path = export_dir / f"study-{study.id}-report.docx"
-    lang = normalize_report_lang(lang)
+    lang = "kk"
     analysis = _analysis_for_study(study)
     chip_text, _ = _status_chip(analysis, lang)
 
@@ -777,11 +904,11 @@ def export_report_docx(study: Study, report: Report, doctor: User, lang: str | N
 
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = title.add_run(REPORT_TITLE)
+    run = title.add_run("Медициналық қорытынды")
     _docx_set_run_font(run, size=14, bold=True, color="0B1F2A")
     subtitle = doc.add_paragraph()
     subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    subrun = subtitle.add_run(REPORT_SUBTITLE)
+    subrun = subtitle.add_run("MedAI радиология ассистенті")
     _docx_set_run_font(subrun, size=9, color="667985")
 
     table = doc.add_table(rows=3, cols=4)
@@ -811,7 +938,7 @@ def export_report_docx(study: Study, report: Report, doctor: User, lang: str | N
         image_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         image_p.add_run().add_picture(str(image_path), width=Inches(3.55))
 
-    for heading, body in _clean_final_text(report.final_text, study):
+    for heading, body in _clean_final_text(_report_text_for_lang(study, report, analysis, "kk"), study):
         _docx_paragraph(doc, heading, size=10, bold=True, color="0B6476")
         for paragraph_text in _plain_paragraphs(body):
             paragraph = doc.add_paragraph()
@@ -854,6 +981,82 @@ def export_report_docx(study: Study, report: Report, doctor: User, lang: str | N
         stamp_paragraph.add_run().add_picture(str(stamp_path), width=Inches(0.72))
     else:
         _docx_cell_text(cells[2], "Мөр / Печать", size=8, color="667985")
+
+    doc.add_page_break()
+    ru_chip_text, _ = _status_chip(analysis, "ru")
+
+    ru_title = doc.add_paragraph()
+    ru_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    ru_title_run = ru_title.add_run("Медицинское заключение")
+    _docx_set_run_font(ru_title_run, size=14, bold=True, color="0B1F2A")
+    ru_subtitle = doc.add_paragraph()
+    ru_subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    ru_subtitle_run = ru_subtitle.add_run("Радиологический ассистент MedAI")
+    _docx_set_run_font(ru_subtitle_run, size=9, color="667985")
+
+    ru_table = doc.add_table(rows=3, cols=4)
+    ru_table.style = "Table Grid"
+    ru_rows = [
+        ("Исследование", study.accession_number, "Дата", _format_dt(report.confirmed_at)),
+        ("Пациент", study.patient_code, "Тип", study.study_type),
+        ("Врач", doctor.full_name, "AI статус", ru_chip_text),
+    ]
+    for row, values in zip(ru_table.rows, ru_rows):
+        for index, (cell, value) in enumerate(zip(row.cells, values)):
+            cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+            _docx_shade(cell, "F7FAFB")
+            _docx_cell_text(cell, str(value), size=8 if index in (0, 2) else 9, bold=index in (1, 3), color="64748B" if index in (0, 2) else "17232B")
+
+    if study.clinical_note:
+        _docx_paragraph(doc, "Клиническая заметка", size=10, bold=True, color="0B6476")
+        ru_note_table = doc.add_table(rows=1, cols=1)
+        ru_note_table.style = "Table Grid"
+        _docx_shade(ru_note_table.cell(0, 0), "FBFDFE")
+        _docx_cell_text(ru_note_table.cell(0, 0), translate_text(study.clinical_note, "ru") or study.clinical_note, size=9, color="17232B")
+
+    image_path = _latest_image_path(study)
+    if image_path:
+        _docx_paragraph(doc, "Диагностический снимок", size=10, bold=True, color="0B6476")
+        ru_image_p = doc.add_paragraph()
+        ru_image_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        ru_image_p.add_run().add_picture(str(image_path), width=Inches(3.55))
+
+    for heading, body in _clean_final_text(_report_text_for_lang(study, report, analysis, "ru"), study):
+        _docx_paragraph(doc, heading, size=10, bold=True, color="0B6476")
+        for paragraph_text in _plain_paragraphs(body):
+            paragraph = doc.add_paragraph()
+            paragraph.paragraph_format.space_after = Pt(2)
+            run = paragraph.add_run(paragraph_text)
+            _docx_set_run_font(run, size=9, color="17232B")
+
+    ru_warning = doc.add_table(rows=1, cols=1)
+    ru_warning.style = "Table Grid"
+    _docx_shade(ru_warning.cell(0, 0), "FFF8ED")
+    _docx_cell_text(ru_warning.cell(0, 0), "Результат AI является предварительной подсказкой. Окончательное решение принимает врач.", size=8, color="667985")
+
+    ru_sign = doc.add_table(rows=1, cols=3)
+    ru_sign.style = "Table Grid"
+    ru_cells = ru_sign.rows[0].cells
+    for cell, width in zip(ru_cells, widths):
+        cell.width = Inches(width)
+        cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+        _docx_shade(cell, "FBFDFE")
+
+    ru_photo_paragraph = ru_cells[0].paragraphs[0]
+    ru_photo_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    ru_photo_paragraph.add_run().add_picture(str(_doctor_photo(doctor, export_dir)), width=Inches(0.62))
+    _docx_cell_text(
+        ru_cells[1],
+        f"Врач: {doctor.full_name}\nПодпись: ______________________________\nДата: {_format_dt(report.confirmed_at)}",
+        size=8,
+        color="17232B",
+    )
+    ru_stamp_paragraph = ru_cells[2].paragraphs[0]
+    ru_stamp_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    if stamp_path:
+        ru_stamp_paragraph.add_run().add_picture(str(stamp_path), width=Inches(0.72))
+    else:
+        _docx_cell_text(ru_cells[2], "Печать", size=8, color="667985")
 
     doc.save(path)
     return path
