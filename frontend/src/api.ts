@@ -10,6 +10,7 @@ import type {
 } from "./types";
 
 const DEFAULT_API_URL = import.meta.env.DEV ? "http://localhost:8000" : "";
+const CONFIGURED_API_URL = import.meta.env.DEV ? import.meta.env.VITE_API_URL : undefined;
 
 function createApiBase(rawUrl: string | undefined) {
   const cleaned = (rawUrl || DEFAULT_API_URL).trim().replace(/\/+$/, "");
@@ -17,7 +18,7 @@ function createApiBase(rawUrl: string | undefined) {
   return cleaned.endsWith("/api") ? cleaned : `${cleaned}/api`;
 }
 
-const API_BASE = createApiBase(import.meta.env.VITE_API_URL);
+const API_BASE = createApiBase(CONFIGURED_API_URL);
 const USES_NGROK = API_BASE === "/api" || /\.ngrok(-free)?\./.test(API_BASE);
 
 let token = localStorage.getItem("medicine_token") ?? "";
