@@ -13,3 +13,14 @@ httpx==0.28.1
 reportlab==4.2.5
 python-docx==1.1.2
 pytest==8.3.4
+torch
+torchvision
+transformers>=4.50.0
+accelerate
+huggingface_hub[hf_xet]
+safetensors
+peft
+datasets
+sentencepiece
+protobuf
+bitsandbytes

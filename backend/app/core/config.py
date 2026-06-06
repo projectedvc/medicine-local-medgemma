@@ -21,12 +21,24 @@ class Settings(BaseSettings):
         alias="ALLOWED_ORIGINS",
     )
 
+    ai_provider: str = Field(default="local_medgemma", alias="AI_PROVIDER")
     ai_service_url: str | None = Field(default=None, alias="AI_SERVICE_URL")
     ai_timeout_seconds: int = 120
     ai_confidence_threshold: float = Field(default=0.70, alias="AI_CONFIDENCE_THRESHOLD")
-    ai_allow_mock: bool = Field(default=True, alias="AI_ALLOW_MOCK")
-    ai_model_version: str = Field(default="jupiter-or-demo-v1", alias="AI_MODEL_VERSION")
-    ai_dataset_version: str = Field(default="not-validated-demo", alias="AI_DATASET_VERSION")
+    ai_allow_mock: bool = Field(default=False, alias="AI_ALLOW_MOCK")
+    ai_model_version: str = Field(default="google/medgemma-1.5-4b-it-local", alias="AI_MODEL_VERSION")
+    ai_dataset_version: str = Field(default="local-unvalidated", alias="AI_DATASET_VERSION")
+    local_medgemma_model_id: str = Field(default="google/medgemma-1.5-4b-it", alias="LOCAL_MEDGEMMA_MODEL_ID")
+    local_medgemma_model_path: Path = Field(
+        default=Path("../models/medgemma-1.5-4b-it"),
+        alias="LOCAL_MEDGEMMA_MODEL_PATH",
+    )
+    local_medgemma_local_files_only: bool = Field(default=True, alias="LOCAL_MEDGEMMA_LOCAL_FILES_ONLY")
+    local_medgemma_device: str = Field(default="auto", alias="LOCAL_MEDGEMMA_DEVICE")
+    local_medgemma_dtype: str = Field(default="auto", alias="LOCAL_MEDGEMMA_DTYPE")
+    local_medgemma_load_in_4bit: bool = Field(default=False, alias="LOCAL_MEDGEMMA_LOAD_IN_4BIT")
+    local_medgemma_max_new_tokens: int = Field(default=350, alias="LOCAL_MEDGEMMA_MAX_NEW_TOKENS")
+    local_medgemma_max_image_side: int = Field(default=1600, alias="LOCAL_MEDGEMMA_MAX_IMAGE_SIDE")
 
     pdf_font_path: str | None = Field(default=None, alias="PDF_FONT_PATH")
 

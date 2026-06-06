@@ -32,7 +32,11 @@ async def process_analysis(db: Session, analysis: AIAnalysis, study: Study) -> A
     study.status = StudyStatus.analyzing
     db.commit()
     try:
-        result = await run_ai_inference(image.storage_path)
+        result = await run_ai_inference(
+            image.storage_path,
+            clinical_note=study.clinical_note,
+            study_type=study.study_type,
+        )
         hidden = result.confidence < settings.ai_confidence_threshold
         analysis.status = AIJobStatus.completed
         analysis.raw_predicted_label = result.raw_predicted_label

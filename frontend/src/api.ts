@@ -9,7 +9,11 @@ import type {
   User
 } from "./types";
 
-const DEFAULT_API_URL = import.meta.env.DEV ? "http://localhost:8000" : "";
+function isLocalHost() {
+  return ["localhost", "127.0.0.1", "0.0.0.0", ""].includes(window.location.hostname);
+}
+
+const DEFAULT_API_URL = import.meta.env.DEV && isLocalHost() ? "http://localhost:8000" : "";
 const CONFIGURED_API_URL = import.meta.env.DEV ? import.meta.env.VITE_API_URL : undefined;
 
 function createApiBase(rawUrl: string | undefined) {

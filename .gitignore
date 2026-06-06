@@ -4,6 +4,9 @@ backend/.venv/
 backend/data/
 frontend/node_modules/
 frontend/dist/
+models/
+adapters/
 __pycache__/
 *.pyc
+*.log
 .pytest_cache/

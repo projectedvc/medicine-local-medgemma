@@ -11,6 +11,7 @@ import httpx
 
 from app.core.config import settings
 from app.models.enums import FindingClass
+from app.services.local_medgemma import run_local_medgemma_inference
 
 
 @dataclass
@@ -65,6 +66,10 @@ def _env_bool(name: str, default: bool) -> bool:
 
 def _ai_service_url() -> str | None:
     return (os.environ.get("AI_SERVICE_URL") or settings.ai_service_url or "").strip() or None
+
+
+def _ai_provider() -> str:
+    return (os.environ.get("AI_PROVIDER") or settings.ai_provider).strip().casefold()
 
 
 def _ai_allow_mock() -> bool:
@@ -146,7 +151,7 @@ def _merge_generated_payload(raw: dict[str, Any]) -> dict[str, Any]:
     if isinstance(response, str):
         extracted = _extract_json_from_text(response)
         if extracted:
-            return {**raw, **extracted}
+            return {**extracted, **raw}
     return raw
 
 
@@ -242,13 +247,26 @@ def _response_payload(response: httpx.Response) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {"response": str(payload)}
 
 
-async def run_ai_inference(image_path: str) -> AIResult:
+async def run_ai_inference(
+    image_path: str,
+    clinical_note: str | None = None,
+    study_type: str | None = None,
+) -> AIResult:
     path = Path(image_path)
     if not path.exists():
         raise RuntimeError(f"Image file does not exist: {image_path}")
 
     if _ai_allow_mock():
         return _mock_ai_result(path)
+
+    if _ai_provider() == "local_medgemma":
+        return normalize_ai_response(
+            await run_local_medgemma_inference(
+                str(path),
+                clinical_note=clinical_note,
+                study_type=study_type,
+            )
+        )
 
     base_url = _ai_service_url()
     if not base_url:
