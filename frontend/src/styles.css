@@ -3,9 +3,8 @@
 :root {
   color-scheme: light;
   
-  /* Harmonious HSL Pastel Blue Theme */
-  --bg: hsl(207, 26%, 92%); /* Soft pastel gray-blue background */
-  --surface: rgba(255, 255, 255, 0.72); /* Glass base */
+  --bg: hsl(207, 28%, 91%);
+  --surface: rgba(255, 255, 255, 0.74);
   --surface-opaque: #ffffff;
   --surface-muted: rgba(241, 245, 249, 0.55);
   
@@ -14,10 +13,9 @@
   --line: rgba(226, 232, 240, 0.8); /* Sleek lines */
   --line-strong: rgba(203, 213, 225, 0.9);
   
-  /* Mockup buttons are dark, accentuating actions */
   --accent: hsl(222, 47%, 9%); 
   --accent-hover: hsl(222, 47%, 20%);
-  --accent-medical: hsl(200, 95%, 43%); /* Neon blue brain glow */
+  --accent-medical: hsl(200, 95%, 43%);
   --accent-medical-muted: hsl(200, 95%, 95%);
   
   --blue: hsl(217, 91%, 60%);
@@ -80,7 +78,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-family: 'Outfit', var(--font-family);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   color: var(--ink);
 }
 
@@ -190,7 +188,7 @@ label {
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0;
   color: var(--muted);
 }
 
@@ -251,7 +249,7 @@ label {
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0;
   color: var(--muted);
 }
 
@@ -517,7 +515,11 @@ button:disabled {
 }
 
 /* Glassmorphism Cards System */
-.overviewHero,
+.overview {
+  display: grid;
+  gap: 22px;
+}
+
 .panelBand,
 .toolPanel,
 .viewerPanel,
@@ -533,7 +535,6 @@ button:disabled {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.overviewHero:hover,
 .panelBand:hover,
 .toolPanel:hover,
 .viewerPanel:hover,
@@ -543,135 +544,213 @@ button:disabled {
   box-shadow: var(--shadow-lg);
 }
 
-/* Redesigned Hero Section */
+/* Pinterest-inspired visual overview */
 .overviewHero {
+  min-height: 560px;
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 40px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+  gap: clamp(28px, 5vw, 72px);
   align-items: center;
-  padding: 56px;
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.45));
-  border-radius: var(--radius-lg);
-  overflow: visible;
+  overflow: hidden;
+  padding: clamp(36px, 5vw, 72px);
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 34px;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.88) 0%, rgba(244, 249, 252, 0.82) 46%, rgba(218, 232, 242, 0.96) 100%);
+  box-shadow: 0 24px 80px rgba(28, 48, 72, 0.12);
+}
+
+.overviewHero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.52) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.52) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: linear-gradient(90deg, transparent, #000 26%, #000 74%, transparent);
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+.heroContent,
+.heroGraphicsContainer {
+  position: relative;
+  z-index: 1;
 }
 
 .heroContent {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
+  max-width: 660px;
 }
 
 .heroBadge {
-  background: var(--surface-opaque);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-full);
-  padding: 6px 16px;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--muted);
   width: fit-content;
-  box-shadow: var(--shadow);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid rgba(173, 191, 206, 0.65);
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.72);
+  color: #54677a;
+  box-shadow: 0 10px 28px rgba(28, 48, 72, 0.08);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.heroBadge svg {
+  color: var(--accent-medical);
 }
 
 .overviewHero h2 {
-  font-size: clamp(34px, 4vw, 48px);
-  line-height: 1.05;
+  max-width: 680px;
+  font-size: clamp(46px, 5.5vw, 76px);
+  line-height: 0.95;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .overviewHero p {
-  font-size: 16px;
-  color: var(--muted);
-  line-height: 1.6;
-  max-width: 580px;
+  max-width: 600px;
   margin: 0;
+  color: #5f7185;
+  font-size: clamp(15px, 1.3vw, 17px);
+  line-height: 1.72;
+}
+
+.heroVisualStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 620px;
+}
+
+.heroMiniStat {
+  min-height: 82px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid rgba(209, 220, 229, 0.82);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 12px 32px rgba(28, 48, 72, 0.07);
+}
+
+.heroMiniStat svg {
+  color: var(--accent-medical);
+}
+
+.heroMiniStat strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.heroMiniStat span {
+  color: #6b7d90;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .buttonRow {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 4px;
 }
 
 .heroBtn {
-  min-height: 48px;
-  padding: 12px 28px;
+  min-height: 52px;
+  padding: 13px 28px;
   font-size: 15px;
 }
 
-/* 3D Graphics container on the Hero */
 .heroGraphicsContainer {
-  position: relative;
-  height: 380px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 460px;
+  display: grid;
+  place-items: center;
 }
 
 .roboticHandWrapper {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: min(100%, 560px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
   position: relative;
+  border-radius: 30px;
+  background: rgba(230, 241, 248, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 30px 80px rgba(30, 60, 86, 0.18);
+  overflow: hidden;
+}
+
+.roboticHandWrapper::after {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 22px;
+  pointer-events: none;
 }
 
 .roboticHandImg {
-  max-width: 95%;
-  max-height: 95%;
-  object-fit: contain;
+  width: 115%;
+  height: 115%;
+  object-fit: cover;
   animation: float 6s ease-in-out infinite;
-  filter: drop-shadow(0 20px 40px rgba(15, 23, 42, 0.08));
+  filter: saturate(1.08) contrast(1.02);
 }
 
-/* Floating widgets matching the UI mockup */
 .floatingWidget {
   position: absolute;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  border-radius: var(--radius-md);
-  padding: 12px 18px;
+  min-width: 172px;
+  max-width: 260px;
   display: flex;
   align-items: center;
   gap: 12px;
-  z-index: 5;
+  z-index: 3;
+  padding: 13px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 45px rgba(28, 48, 72, 0.13);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   animation: floatWidget 5s ease-in-out infinite alternate;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .floatingWidget:hover {
-  transform: translateY(-5px) scale(1.03);
-  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 22px 54px rgba(28, 48, 72, 0.18);
 }
 
 .widgetDoctors {
-  top: 10px;
-  right: -10px;
+  top: 48px;
+  right: 12px;
   animation-delay: 0.2s;
 }
 
 .widgetTreatments {
-  bottom: 20px;
-  right: 20px;
+  right: 54px;
+  bottom: 42px;
   animation-delay: 0.8s;
 }
 
 .widgetPatients {
-  position: static;
-  margin-top: 28px;
-  width: fit-content;
-  background: rgba(255, 255, 255, 0.75);
-  animation: none;
+  left: 16px;
+  bottom: 98px;
+  animation-delay: 0.45s;
 }
 
 .avatarGroup {
@@ -680,89 +759,136 @@ button:disabled {
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid #fff;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: -8px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
   font-size: 10px;
   font-weight: 800;
-  color: #fff;
-  margin-left: -8px;
 }
 
 .avatar:first-child {
   margin-left: 0;
 }
 
-.doc1 { background: linear-gradient(135deg, #f9a8d4, #ec4899); }
-.doc2 { background: linear-gradient(135deg, #93c5fd, #3b82f6); }
-.doc3 { background: linear-gradient(135deg, #a7f3d0, #10b981); }
-
-.pat1 { background: linear-gradient(135deg, #fbcfe8, #f472b6); }
-.pat2 { background: linear-gradient(135deg, #fed7aa, #fb923c); }
-.pat3 { background: linear-gradient(135deg, #c7d2fe, #818cf8); }
+.doc1 { background: linear-gradient(135deg, #f472b6, #ec4899); }
+.doc2 { background: linear-gradient(135deg, #38bdf8, #0284c7); }
+.doc3 { background: linear-gradient(135deg, #34d399, #059669); }
 
 .widgetText {
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
 
 .widgetText strong {
+  overflow: hidden;
+  color: var(--ink);
   font-size: 15px;
   font-weight: 800;
-  color: var(--ink);
-  line-height: 1.2;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .widgetText small {
+  color: #63778a;
   font-size: 11px;
-  color: var(--muted);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .treatmentPreview {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--accent-medical-muted);
-  color: var(--accent-medical);
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #e8f7ff;
+  color: var(--accent-medical);
 }
 
 .heroSocials {
   position: absolute;
-  right: -24px;
-  bottom: 80px;
+  right: 0;
+  top: 50%;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  z-index: 5;
+  z-index: 3;
+  transform: translateY(-50%);
 }
 
 .socialIcon {
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.82);
   color: var(--ink);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-  cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 10px 24px rgba(28, 48, 72, 0.1);
 }
 
 .socialIcon:hover {
   background: var(--ink);
   color: #fff;
-  transform: scale(1.1);
+  transform: scale(1.06);
+}
+
+.visualMetricStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.visualMetric {
+  min-height: 104px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 16px 44px rgba(28, 48, 72, 0.08);
+}
+
+.visualMetric > span {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 18px;
+  background: #e8f7ff;
+  color: var(--accent-medical);
+}
+
+.visualMetric strong {
+  display: block;
+  overflow: hidden;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visualMetric small {
+  display: block;
+  margin-top: 5px;
+  color: #63778a;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 /* Metric KPI layout */
@@ -774,8 +900,8 @@ button:disabled {
 
 .overviewGrid {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+  gap: 18px;
   align-items: start;
 }
 
@@ -800,6 +926,80 @@ button:disabled {
 
 .panelHeader svg {
   color: var(--muted);
+}
+
+.processPanel,
+.capabilityPanel {
+  min-height: 320px;
+  border-radius: 26px;
+}
+
+.processMap {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.processNode {
+  min-height: 210px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  position: relative;
+  padding: 18px;
+  border: 1px solid rgba(213, 224, 232, 0.78);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.56);
+  overflow: hidden;
+}
+
+.processNode::after {
+  content: "";
+  position: absolute;
+  top: 34px;
+  right: -10px;
+  width: 20px;
+  height: 2px;
+  background: rgba(2, 132, 199, 0.26);
+}
+
+.processNode:last-child::after {
+  display: none;
+}
+
+.processNode:hover {
+  background: rgba(255, 255, 255, 0.86);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(28, 48, 72, 0.1);
+}
+
+.processIcon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 12px 26px rgba(9, 13, 22, 0.16);
+}
+
+.processNode span {
+  width: fit-content;
+  padding: 4px 9px;
+  border-radius: var(--radius-full);
+  background: #e8f7ff;
+  color: var(--accent-medical);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.processNode strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
 }
 
 /* Timeline Stepper Workflow */
@@ -856,41 +1056,57 @@ button:disabled {
 .capabilityGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 14px;
 }
 
 .capabilityCard {
-  background: rgba(255, 255, 255, 0.45);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  padding: 16px;
+  min-height: 132px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  padding: 18px;
+  border: 1px solid rgba(213, 224, 232, 0.78);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.56);
   transition: all 0.2s ease;
 }
 
+.capabilityCard::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  width: 34px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: rgba(2, 132, 199, 0.14);
+}
+
 .capabilityCard:hover {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
   border-color: var(--accent-medical);
   transform: translateY(-2px);
-  box-shadow: var(--shadow);
+  box-shadow: 0 14px 36px rgba(28, 48, 72, 0.1);
 }
 
 .capabilityIcon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
   background: var(--accent-medical-muted);
   color: var(--accent-medical);
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 16px;
 }
 
 .capabilityCard strong {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
   color: var(--ink);
 }
 
@@ -1028,7 +1244,7 @@ button:disabled {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
 }
 
 .statusBadge.ready_for_analysis,
@@ -1271,7 +1487,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   font-size: 11px;
   color: var(--accent-medical);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
   font-weight: 700;
 }
 
@@ -1306,7 +1522,7 @@ th {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
   border-bottom: 2px solid var(--line-strong);
 }
 
@@ -1461,14 +1677,18 @@ tr:hover td {
   }
   
   .metricGrid,
+  .visualMetricStrip,
   .loginHighlights,
   .capabilityGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   
   .heroGraphicsContainer {
-    height: 340px;
-    margin-top: 24px;
+    min-height: 430px;
+  }
+
+  .processMap {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1506,8 +1726,37 @@ tr:hover td {
   }
 
   .leftColumn,
-  .metricGrid {
+  .metricGrid,
+  .visualMetricStrip,
+  .heroVisualStats {
     grid-template-columns: 1fr;
+  }
+
+  .overviewHero {
+    min-height: 0;
+  }
+
+  .heroGraphicsContainer {
+    min-height: 390px;
+  }
+
+  .widgetDoctors {
+    top: 26px;
+    right: 0;
+  }
+
+  .widgetTreatments {
+    right: 8px;
+    bottom: 22px;
+  }
+
+  .widgetPatients {
+    left: 0;
+    bottom: 76px;
+  }
+
+  .processMap {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1517,6 +1766,8 @@ tr:hover td {
   .probabilityList div,
   .demoGrid,
   .loginHighlights,
+  .visualMetricStrip,
+  .processMap,
   .capabilityGrid {
     grid-template-columns: 1fr;
   }
@@ -1536,6 +1787,49 @@ tr:hover td {
   }
   
   .overviewHero {
-    padding: 32px 24px;
+    padding: 28px 20px;
+    border-radius: 26px;
+  }
+
+  .overviewHero h2 {
+    font-size: clamp(34px, 11vw, 46px);
+  }
+
+  .heroGraphicsContainer {
+    min-height: 330px;
+  }
+
+  .roboticHandWrapper {
+    width: min(100%, 320px);
+  }
+
+  .floatingWidget {
+    min-width: 142px;
+    padding: 10px 12px;
+    border-radius: 18px;
+  }
+
+  .widgetDoctors {
+    top: 10px;
+  }
+
+  .widgetTreatments {
+    bottom: 4px;
+  }
+
+  .widgetPatients {
+    bottom: 60px;
+  }
+
+  .heroSocials {
+    display: none;
+  }
+
+  .processNode {
+    min-height: auto;
+  }
+
+  .processNode::after {
+    display: none;
   }
 }

@@ -461,6 +461,8 @@ const CAPABILITIES = [
   { icon: <Sparkles size={20} />, kk: "LoRA дайын", ru: "Готово к LoRA", en: "LoRA-ready" }
 ] as const;
 
+const WORKFLOW_ICONS = [UploadCloud, ImagePlus, Sparkles, FileText, Download] as const;
+
 function formatDate(value: string | null | undefined, lang: Lang) {
   if (!value) return "—";
   return new Intl.DateTimeFormat(UI[lang].locale, {
@@ -963,9 +965,29 @@ export default function App() {
           <section className="overview">
             <div className="overviewHero">
               <div className="heroContent">
-                <div className="heroBadge">{ui.appSubtitle}</div>
+                <div className="heroBadge">
+                  <Sparkles size={14} />
+                  {ui.appSubtitle}
+                </div>
                 <h2>{ui.overviewHeroTitle}</h2>
                 <p>{ui.overviewHeroText}</p>
+                <div className="heroVisualStats">
+                  <div className="heroMiniStat">
+                    <Activity size={18} />
+                    <strong>{ui.modelValue}</strong>
+                    <span>{ui.localModel}</span>
+                  </div>
+                  <div className="heroMiniStat">
+                    <ShieldCheck size={18} />
+                    <strong>{ui.privacyValue}</strong>
+                    <span>{ui.privacy}</span>
+                  </div>
+                  <div className="heroMiniStat">
+                    <BarChart3 size={18} />
+                    <strong>{studies.length}</strong>
+                    <span>{ui.nav.studies}</span>
+                  </div>
+                </div>
                 <div className="buttonRow">
                   <button className="primaryButton heroBtn" onClick={() => setView("studies")}>
                     <Plus size={18} />
@@ -976,18 +998,6 @@ export default function App() {
                     {ui.openReference}
                   </button>
                 </div>
-                
-                <div className="floatingWidget widgetPatients">
-                  <div className="avatarGroup">
-                    <span className="avatar pat1">P1</span>
-                    <span className="avatar pat2">P2</span>
-                    <span className="avatar pat3">P3</span>
-                  </div>
-                  <div className="widgetText">
-                    <strong>Rated 5/5</strong>
-                    <small>Trusted by 1000+ Patients</small>
-                  </div>
-                </div>
               </div>
 
               <div className="heroGraphicsContainer">
@@ -997,23 +1007,33 @@ export default function App() {
                 
                 <div className="floatingWidget widgetDoctors">
                   <div className="avatarGroup">
-                    <span className="avatar doc1">DR</span>
-                    <span className="avatar doc2">MD</span>
-                    <span className="avatar doc3">RT</span>
+                    <span className="avatar doc1">MG</span>
+                    <span className="avatar doc2">AI</span>
+                    <span className="avatar doc3">RX</span>
                   </div>
                   <div className="widgetText">
-                    <strong>300+</strong>
-                    <small>Expert doctors</small>
+                    <strong>{ui.modelValue}</strong>
+                    <small>{ui.localModel}</small>
                   </div>
                 </div>
 
                 <div className="floatingWidget widgetTreatments">
                   <div className="treatmentPreview">
-                    <Activity size={20} />
+                    <FileCheck2 size={20} />
                   </div>
                   <div className="widgetText">
-                    <strong>5,000+</strong>
-                    <small>Successful Treatment</small>
+                    <strong>PDF / Word</strong>
+                    <small>{ui.report}</small>
+                  </div>
+                </div>
+
+                <div className="floatingWidget widgetPatients">
+                  <div className="treatmentPreview">
+                    <BarChart3 size={20} />
+                  </div>
+                  <div className="widgetText">
+                    <strong>{studies.length}</strong>
+                    <small>{ui.nav.studies}</small>
                   </div>
                 </div>
 
@@ -1025,29 +1045,53 @@ export default function App() {
               </div>
             </div>
 
-            <div className="metricGrid">
-              <Metric title={ui.localModel} value={ui.modelValue} />
-              <Metric title={ui.privacy} value={ui.privacyValue} />
-              <Metric title={ui.nav.studies} value={studies.length} />
+            <div className="visualMetricStrip">
+              <div className="visualMetric">
+                <span><Activity size={22} /></span>
+                <div>
+                  <strong>{ui.modelValue}</strong>
+                  <small>{ui.localModel}</small>
+                </div>
+              </div>
+              <div className="visualMetric">
+                <span><ShieldCheck size={22} /></span>
+                <div>
+                  <strong>{ui.privacyValue}</strong>
+                  <small>{ui.privacy}</small>
+                </div>
+              </div>
+              <div className="visualMetric">
+                <span><FileCheck2 size={22} /></span>
+                <div>
+                  <strong>PDF / Word</strong>
+                  <small>{ui.report}</small>
+                </div>
+              </div>
             </div>
 
             <div className="overviewGrid">
-              <section className="panelBand">
+              <section className="panelBand processPanel">
                 <div className="panelHeader">
                   <h2>{ui.workflow}</h2>
                   <FileText size={20} />
                 </div>
-                <div className="workflowTimeline">
+                <div className="processMap">
                   {ui.workflowItems.map((item, index) => (
-                    <div className="workflowStep" key={index}>
-                      <div className="stepBadge">{index + 1}</div>
-                      <div className="stepContent">{item}</div>
+                    <div className="processNode" key={item}>
+                      <div className="processIcon">
+                        {(() => {
+                          const Icon = WORKFLOW_ICONS[index] ?? CheckCircle;
+                          return <Icon size={20} />;
+                        })()}
+                      </div>
+                      <span>{index + 1}</span>
+                      <strong>{item}</strong>
                     </div>
                   ))}
                 </div>
               </section>
 
-              <section className="panelBand">
+              <section className="panelBand capabilityPanel">
                 <div className="panelHeader">
                   <h2>{ui.capabilities}</h2>
                   <Sparkles size={20} />
