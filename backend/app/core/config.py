@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     translation_timeout_seconds: int = Field(default=8, alias="TRANSLATION_TIMEOUT_SECONDS")
     translation_max_chars: int = Field(default=4500, alias="TRANSLATION_MAX_CHARS")
 
+    groq_api_key: str | None = Field(default=None, alias="GROQ_API_KEY")
+    groq_model: str = Field(default="llama-3.3-70b-versatile", alias="GROQ_MODEL")
+    groq_timeout_seconds: int = Field(default=45, alias="GROQ_TIMEOUT_SECONDS")
+
     pdf_font_path: str | None = Field(default=None, alias="PDF_FONT_PATH")
 
     model_config = SettingsConfigDict(

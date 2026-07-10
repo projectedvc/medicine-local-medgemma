@@ -2315,3 +2315,2584 @@ td {
     height: 330px;
   }
 }
+
+/* MedAI workspace extensions: bounded journal, department CRM, reference, assistant */
+
+.studyJournalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.studyJournalHeader small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.studyList {
+  max-height: min(62vh, 720px);
+  overflow-y: auto;
+  padding: 2px 7px 8px 2px;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(98, 220, 241, 0.34) transparent;
+  scrollbar-width: thin;
+}
+
+.studyList::-webkit-scrollbar,
+.crmLane > div::-webkit-scrollbar,
+.assistantMessages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.studyList::-webkit-scrollbar-thumb,
+.crmLane > div::-webkit-scrollbar-thumb,
+.assistantMessages::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(98, 220, 241, 0.28);
+}
+
+.filterSearch {
+  padding-left: 14px;
+}
+
+.crmWorkspace {
+  display: grid;
+  gap: 18px;
+}
+
+.crmHero {
+  min-height: 150px;
+}
+
+.crmHero > div:first-child {
+  position: relative;
+  z-index: 1;
+}
+
+.crmHero > div:first-child > span,
+.crmDepartmentBoard .panelHeader small,
+.crmComposer .panelHeader small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.accessPill {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  padding: 7px 10px;
+  border: 1px solid rgba(76, 215, 181, 0.18);
+  border-radius: 999px;
+  background: rgba(38, 184, 147, 0.08);
+  color: #66dfbd;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.crmToolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: rgba(5, 17, 31, 0.56);
+  backdrop-filter: blur(12px);
+}
+
+.crmToolbar label {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.crmToolbar input {
+  width: 100%;
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.crmOperations {
+  display: grid;
+  grid-template-columns: minmax(330px, 0.34fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.crmOperations.viewerOnly {
+  grid-template-columns: 1fr;
+}
+
+.crmComposer {
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  position: sticky;
+  top: 18px;
+}
+
+.crmPicker {
+  min-width: 0;
+  margin: 4px 0;
+  padding: 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+}
+
+.crmPicker legend {
+  padding: 0 7px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.crmPicker > div {
+  max-height: 132px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  overflow-y: auto;
+}
+
+.crmPicker label {
+  width: fit-content;
+  min-height: 31px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: rgba(5, 20, 35, 0.58);
+  color: var(--muted-strong);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.crmPicker label.selected {
+  border-color: rgba(98, 220, 241, 0.38);
+  background: rgba(18, 185, 214, 0.14);
+  color: var(--primary-bright);
+}
+
+.crmPicker input {
+  width: 12px;
+  min-height: auto;
+  accent-color: var(--primary);
+}
+
+.crmDepartmentBoard {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(126, 198, 222, 0.13);
+  border-radius: 20px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.crmKanban {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(230px, 1fr));
+  gap: 10px;
+  overflow-x: auto;
+}
+
+.crmLane {
+  min-width: 230px;
+  display: grid;
+  grid-template-rows: auto minmax(120px, 1fr);
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: rgba(3, 12, 24, 0.42);
+}
+
+.crmLane > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 3px 8px;
+  color: var(--muted-strong);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.crmLane > header b {
+  min-width: 24px;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(98, 220, 241, 0.1);
+  color: var(--primary-bright);
+  text-align: center;
+}
+
+.crmLane > div {
+  max-height: 510px;
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  overflow-y: auto;
+  padding-right: 3px;
+}
+
+.crmCard {
+  width: 100%;
+  appearance: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.crmCard.selected {
+  border-color: rgba(98, 220, 241, 0.48);
+  background: linear-gradient(145deg, rgba(17, 127, 153, 0.16), rgba(4, 17, 31, 0.8));
+  box-shadow: 0 12px 32px rgba(0, 10, 24, 0.2), 0 0 0 2px rgba(98, 220, 241, 0.06);
+}
+
+.crmCard p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.avatarStack {
+  display: flex;
+  padding-left: 5px;
+}
+
+.avatarStack i {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  margin-left: -5px;
+  border: 2px solid #081426;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #155b75, #1d7c9a);
+  color: #e5fbff;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.crmDetail {
+  display: grid;
+  gap: 15px;
+  padding: 17px;
+  border: 1px solid rgba(98, 220, 241, 0.16);
+  border-radius: 17px;
+  background: rgba(3, 14, 28, 0.58);
+  animation: panelRise 0.26s ease-out both;
+}
+
+.crmDetailHeader,
+.crmDetailGrid,
+.linkedStudies,
+.crmActivityForm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.crmDetailHeader {
+  justify-content: space-between;
+}
+
+.crmDetailHeader small,
+.crmDetailGrid span,
+.linkedStudies > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.crmDetailGrid {
+  align-items: stretch;
+}
+
+.crmDetailGrid > div {
+  flex: 1;
+  display: grid;
+  gap: 6px;
+  padding: 11px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+}
+
+.crmDetailGrid strong {
+  color: var(--muted-strong);
+  font-size: 12px;
+}
+
+.linkedStudies {
+  flex-wrap: wrap;
+}
+
+.linkedStudies button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 1px solid var(--line-soft);
+  border-radius: 9px;
+  background: rgba(18, 185, 214, 0.08);
+  color: var(--primary-bright);
+  font-size: 10px;
+}
+
+.crmTimeline {
+  display: grid;
+  gap: 10px;
+}
+
+.crmTimeline > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+}
+
+.crmTimeline > div > i {
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--primary-bright);
+  box-shadow: 0 0 0 5px rgba(98, 220, 241, 0.08);
+}
+
+.crmTimeline p {
+  display: grid;
+  gap: 4px;
+  color: var(--muted-strong);
+  font-size: 12px;
+}
+
+.crmTimeline small {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.crmActivityForm input {
+  flex: 1;
+}
+
+.crmActivityForm .primaryButton {
+  min-width: 46px;
+  padding-inline: 0;
+}
+
+.referenceWorkspace {
+  display: grid;
+  gap: 20px;
+}
+
+.referenceHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.45fr) auto;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  border: 1px solid rgba(126, 198, 222, 0.13);
+  border-radius: 20px;
+  background: radial-gradient(circle at 82% 10%, rgba(18, 204, 231, 0.14), transparent 34%), var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.referenceHero h2 {
+  margin: 5px 0;
+  color: var(--ink);
+  font-size: clamp(28px, 3vw, 42px);
+}
+
+.referenceHero p,
+.referenceHero small {
+  color: var(--muted);
+}
+
+.referenceHero label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.referenceHero input {
+  width: 100%;
+}
+
+.referenceHero > strong {
+  display: grid;
+  color: var(--primary-bright);
+  font-size: 36px;
+}
+
+.referenceHero > strong span {
+  color: var(--muted);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.referenceCardCopy {
+  display: grid;
+  gap: 10px;
+}
+
+.referenceCardCopy > small {
+  color: var(--primary-bright);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.referenceItem p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.referenceItem details {
+  display: grid;
+  gap: 10px;
+  padding-top: 3px;
+}
+
+.referenceItem details[open] p {
+  display: block;
+}
+
+.referenceItem summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0 2px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--primary-bright);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
+  list-style: none;
+}
+
+.referenceSource {
+  display: block;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(18, 185, 214, 0.06);
+  line-height: 1.45;
+}
+
+.medaiAssistant {
+  position: fixed;
+  z-index: 80;
+  right: 24px;
+  bottom: 22px;
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+}
+
+.assistantTrigger {
+  min-width: 58px;
+  height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 1px solid rgba(121, 231, 247, 0.42);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #11a7c5, #176bd0);
+  color: #fff;
+  box-shadow: 0 18px 50px rgba(6, 121, 173, 0.34), 0 0 0 7px rgba(18, 204, 231, 0.05);
+  font-weight: 900;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.assistantTrigger:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 60px rgba(6, 121, 173, 0.42), 0 0 0 9px rgba(18, 204, 231, 0.06);
+}
+
+.assistantPanel {
+  width: min(410px, calc(100vw - 32px));
+  height: min(650px, calc(100vh - 110px));
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  overflow: hidden;
+  border: 1px solid rgba(105, 218, 239, 0.22);
+  border-radius: 22px;
+  background: rgba(5, 16, 30, 0.96);
+  box-shadow: 0 32px 90px rgba(0, 3, 13, 0.56);
+  backdrop-filter: blur(24px) saturate(1.2);
+  animation: assistantEnter 0.25s ease-out both;
+}
+
+.assistantPanel > header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 11px;
+  padding: 15px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.assistantMark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(18, 185, 214, 0.3), rgba(31, 103, 194, 0.24));
+  color: #8aedf8;
+}
+
+.assistantPanel header div {
+  display: grid;
+  gap: 3px;
+}
+
+.assistantPanel header small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.assistantPanel header small i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #41dc99;
+  box-shadow: 0 0 10px rgba(65, 220, 153, 0.7);
+}
+
+.assistantPanel header > button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.assistantMessages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.assistantWelcome {
+  display: grid;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: rgba(18, 185, 214, 0.06);
+  color: var(--muted-strong);
+}
+
+.assistantWelcome > svg {
+  color: var(--primary-bright);
+}
+
+.assistantWelcome > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.assistantWelcome button {
+  padding: 7px 9px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: rgba(6, 26, 43, 0.65);
+  color: var(--primary-bright);
+  font-size: 9px;
+}
+
+.assistantMessage {
+  max-width: 90%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.assistantMessage > span {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(18, 185, 214, 0.12);
+  color: var(--primary-bright);
+}
+
+.assistantMessage p {
+  padding: 10px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 5px 14px 14px 14px;
+  background: rgba(8, 27, 44, 0.68);
+  color: var(--muted-strong);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.assistantMessage.user {
+  align-self: flex-end;
+  grid-template-columns: 1fr auto;
+}
+
+.assistantMessage.user > span {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.assistantMessage.user p {
+  grid-column: 1;
+  grid-row: 1;
+  border-radius: 14px 5px 14px 14px;
+  background: rgba(27, 112, 154, 0.22);
+}
+
+.assistantTyping {
+  display: flex;
+  gap: 5px;
+  padding: 10px 14px;
+}
+
+.assistantTyping i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary-bright);
+  animation: typingDot 1s ease-in-out infinite;
+}
+
+.assistantTyping i:nth-child(2) { animation-delay: 0.12s; }
+.assistantTyping i:nth-child(3) { animation-delay: 0.24s; }
+
+.assistantError {
+  padding: 10px;
+  border: 1px solid rgba(239, 81, 104, 0.25);
+  border-radius: 10px;
+  background: rgba(239, 81, 104, 0.08);
+  color: #ff9bad;
+  font-size: 10px;
+}
+
+.assistantContext {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.assistantPanel > form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.assistantPanel textarea {
+  min-height: 48px;
+  max-height: 100px;
+  resize: none;
+}
+
+.assistantPanel form button {
+  width: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #13b8d5, #1877d5);
+  color: #fff;
+}
+
+@keyframes assistantEnter {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes typingDot {
+  0%, 100% { opacity: 0.3; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-3px); }
+}
+
+:root[data-theme="light"] .crmToolbar,
+:root[data-theme="light"] .crmDepartmentBoard,
+:root[data-theme="light"] .referenceHero,
+:root[data-theme="light"] .assistantPanel {
+  border-color: rgba(20, 88, 117, 0.1);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 22px 60px rgba(33, 78, 104, 0.12);
+}
+
+:root[data-theme="light"] .crmLane,
+:root[data-theme="light"] .crmDetail,
+:root[data-theme="light"] .crmPicker label,
+:root[data-theme="light"] .assistantMessage p,
+:root[data-theme="light"] .assistantWelcome {
+  background: rgba(243, 249, 252, 0.9);
+}
+
+@media (max-width: 1180px) {
+  .crmOperations { grid-template-columns: 1fr; }
+  .crmComposer { position: static; max-height: none; }
+  .referenceHero { grid-template-columns: 1fr minmax(260px, 0.6fr); }
+  .referenceHero > strong { display: none; }
+}
+
+@media (max-width: 760px) {
+  .crmHero { align-items: flex-start; flex-direction: column; }
+  .crmVitals { width: 100%; }
+  .crmToolbar { align-items: stretch; flex-direction: column; }
+  .crmKanban { grid-template-columns: repeat(3, 82vw); }
+  .crmDetailGrid { flex-direction: column; }
+  .referenceHero { grid-template-columns: 1fr; padding: 18px; }
+  .referenceGrid { grid-template-columns: 1fr; }
+  .medaiAssistant { right: 14px; bottom: 14px; }
+  .assistantTrigger { min-width: 54px; height: 54px; padding: 0 14px; }
+  .assistantPanel { height: min(620px, calc(100vh - 86px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistantPanel,
+  .assistantTyping i,
+  .crmDetail { animation: none; }
+}
+
+/* --------------------------------------------------------------------------
+   MedAI 2026 — chest imaging command center
+   -------------------------------------------------------------------------- */
+
+:root {
+  --bg: #030813;
+  --bg-soft: #07101f;
+  --panel: rgba(8, 19, 36, 0.82);
+  --panel-solid: #0a1628;
+  --panel-strong: #10233c;
+  --ink: #f2f8ff;
+  --muted: #8da3b9;
+  --muted-strong: #c4d4e4;
+  --line: rgba(158, 211, 255, 0.22);
+  --line-soft: rgba(143, 198, 235, 0.11);
+  --primary: #13b9d6;
+  --primary-bright: #62dcf1;
+  --electric: #2f7fff;
+  --cyan: #12cce7;
+  --shadow: 0 24px 70px rgba(0, 3, 12, 0.34);
+  --glow: 0 0 42px rgba(18, 204, 231, 0.22);
+  --radius: 18px;
+}
+
+:root[data-theme="light"] {
+  --bg: #f2f7fb;
+  --bg-soft: #f9fcff;
+  --panel: rgba(255, 255, 255, 0.84);
+  --panel-solid: #ffffff;
+  --panel-strong: #eaf4f9;
+  --ink: #071728;
+  --muted: #64778a;
+  --muted-strong: #34495d;
+  --line: rgba(27, 88, 119, 0.2);
+  --line-soft: rgba(27, 88, 119, 0.11);
+  --primary: #087f9f;
+  --primary-bright: #046b89;
+  --shadow: 0 24px 70px rgba(25, 68, 94, 0.12);
+  --glow: 0 18px 50px rgba(20, 129, 166, 0.16);
+}
+
+body {
+  background:
+    radial-gradient(circle at 16% 0%, rgba(24, 177, 211, 0.12), transparent 28%),
+    radial-gradient(circle at 88% 16%, rgba(47, 127, 255, 0.1), transparent 28%),
+    var(--bg);
+}
+
+body::before {
+  background-image:
+    linear-gradient(rgba(86, 188, 224, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(86, 188, 224, 0.045) 1px, transparent 1px),
+    radial-gradient(circle, rgba(81, 214, 238, 0.4) 0 1px, transparent 1.8px);
+  background-size: 88px 88px, 88px 88px, 132px 132px;
+  opacity: 0.34;
+}
+
+:root[data-theme="light"] body::before {
+  background-image:
+    linear-gradient(rgba(14, 99, 131, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 99, 131, 0.045) 1px, transparent 1px),
+    radial-gradient(circle, rgba(13, 145, 177, 0.26) 0 1px, transparent 1.8px);
+  opacity: 0.42;
+}
+
+input,
+select,
+textarea {
+  min-height: 46px;
+  border-radius: 12px;
+  background: rgba(3, 11, 24, 0.72);
+  padding: 11px 13px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(18, 204, 231, 0.56);
+  box-shadow: 0 0 0 4px rgba(18, 204, 231, 0.11);
+}
+
+.publicShell {
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 61% 43%, rgba(0, 133, 255, 0.16), transparent 30%),
+    radial-gradient(ellipse at 48% 76%, rgba(18, 204, 231, 0.08), transparent 34%),
+    linear-gradient(118deg, rgba(3, 8, 19, 0.99) 0%, rgba(4, 12, 27, 0.95) 46%, rgba(2, 7, 17, 0.99) 100%);
+}
+
+.publicShell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, transparent 49.92%, rgba(99, 219, 241, 0.08) 50%, transparent 50.08%),
+    linear-gradient(0deg, transparent 49.92%, rgba(99, 219, 241, 0.06) 50%, transparent 50.08%);
+  background-size: 240px 240px;
+  mask-image: radial-gradient(circle at 62% 45%, #000 0, transparent 58%);
+  pointer-events: none;
+}
+
+.publicHeader {
+  min-height: 86px;
+  padding: 17px min(5vw, 78px);
+  border-bottom: 1px solid rgba(132, 204, 235, 0.1);
+  background: rgba(3, 9, 20, 0.46);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.photonBrand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: #f5fbff;
+  text-transform: none;
+}
+
+.brandSignal,
+.brandSymbol {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(107, 220, 243, 0.34);
+  background:
+    radial-gradient(circle at 38% 30%, rgba(93, 229, 250, 0.36), transparent 46%),
+    rgba(8, 37, 59, 0.72);
+  color: #7ee9f8;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 0 30px rgba(18, 204, 231, 0.16);
+}
+
+.brandSignal {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+}
+
+.brandSignal::after,
+.brandSymbol::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  right: -2px;
+  top: -2px;
+  border: 2px solid #07101f;
+  border-radius: 50%;
+  background: #3ce596;
+  box-shadow: 0 0 12px rgba(60, 229, 150, 0.8);
+}
+
+.photonBrandCopy {
+  display: grid;
+  gap: 2px;
+}
+
+.photonBrandCopy strong {
+  color: inherit;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.photonBrandCopy small {
+  color: #7292aa;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.loginTopButton,
+.loginSubmit,
+.primaryButton,
+.photonPanelButton.primary {
+  border-color: rgba(111, 231, 249, 0.42);
+  background: linear-gradient(135deg, #13b8d5, #1877d5);
+  color: #ffffff;
+  box-shadow: 0 14px 32px rgba(9, 141, 189, 0.24);
+}
+
+.loginTopButton:hover,
+.loginSubmit:hover,
+.primaryButton:hover,
+.photonPanelButton.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 40px rgba(9, 141, 189, 0.34);
+}
+
+.overviewScene {
+  min-height: calc(100vh - 86px);
+  grid-template-columns: minmax(470px, 0.86fr) minmax(540px, 1.1fr) minmax(220px, 0.38fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 20px;
+  padding: 24px 0 20px;
+  background: transparent;
+}
+
+.overviewScene .dashboardCopy {
+  max-width: 760px;
+  gap: 22px;
+  padding-left: min(5vw, 78px);
+}
+
+.heroEyebrow {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px 7px 8px;
+  border: 1px solid rgba(114, 220, 241, 0.17);
+  border-radius: 999px;
+  background: rgba(7, 30, 47, 0.6);
+  color: #a9c7d8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+
+.heroEyebrow b {
+  color: #75dff0;
+}
+
+.liveDot,
+.systemChip i,
+.sideStatus > span {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #3ce596;
+  box-shadow: 0 0 0 4px rgba(60, 229, 150, 0.1), 0 0 14px rgba(60, 229, 150, 0.72);
+  animation: statusPulse 2.4s ease-in-out infinite;
+}
+
+.overviewScene .dashboardCopy h1 {
+  gap: 4px;
+  max-width: 780px;
+  color: #f6fbff;
+  font-size: clamp(58px, 5.1vw, 92px);
+  line-height: 0.86;
+  letter-spacing: -0.065em;
+}
+
+.overviewScene .dashboardCopy h1 b {
+  color: rgba(111, 221, 241, 0.07);
+  -webkit-text-stroke: 1px rgba(123, 226, 245, 0.55);
+  text-shadow: 0 0 34px rgba(18, 204, 231, 0.15);
+}
+
+.photonMeta {
+  color: #8fa8ba;
+  letter-spacing: 0.08em;
+}
+
+.photonMeta i {
+  background: linear-gradient(90deg, #49c9df, rgba(73, 201, 223, 0.08));
+}
+
+.photonRoundButton {
+  width: 52px;
+  height: 52px;
+  border-color: rgba(109, 224, 244, 0.45);
+  background: rgba(10, 45, 67, 0.48);
+  color: #8eeaf7;
+  box-shadow: inset 0 0 0 6px rgba(18, 204, 231, 0.04);
+  backdrop-filter: blur(12px);
+}
+
+.photonRoundButton:hover {
+  border-color: #75e1f3;
+  background: rgba(16, 110, 139, 0.42);
+  color: #ffffff;
+  box-shadow: 0 0 34px rgba(18, 204, 231, 0.3);
+}
+
+.overviewScene .dashboardCopy .photonNote {
+  max-width: 540px;
+  color: #9bb0c2;
+  font-size: 14px;
+}
+
+.heroSpecGrid {
+  width: min(560px, 100%);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.heroSpecGrid > div {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 9px;
+  padding: 12px;
+  border: 1px solid rgba(114, 211, 233, 0.12);
+  border-radius: 14px;
+  background: rgba(6, 21, 37, 0.5);
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.heroSpecGrid > div:hover {
+  transform: translateY(-2px);
+  border-color: rgba(114, 211, 233, 0.3);
+  background: rgba(9, 35, 54, 0.7);
+}
+
+.heroSpecGrid span {
+  grid-row: span 2;
+  align-self: center;
+  color: #3a6b82;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.heroSpecGrid strong {
+  overflow: hidden;
+  color: #dff9ff;
+  font-size: 11px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.heroSpecGrid small {
+  overflow: hidden;
+  color: #68879a;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.overviewScene .dashboardVisual {
+  min-height: 610px;
+}
+
+.overviewScene .dashboardVisual::before {
+  width: min(88%, 820px);
+  background:
+    radial-gradient(ellipse at center, rgba(0, 153, 255, 0.26), rgba(9, 101, 192, 0.08) 46%, transparent 72%);
+  opacity: 0.86;
+}
+
+.overviewScene .dashboardVisual img {
+  width: min(900px, 128%);
+  filter: saturate(1.18) contrast(1.12) brightness(1.05) drop-shadow(0 0 26px rgba(0, 126, 255, 0.26));
+  mask-image: radial-gradient(ellipse 66% 64% at 50% 52%, #000 55%, rgba(0, 0, 0, 0.78) 72%, transparent 88%);
+}
+
+.scanOrbit {
+  position: absolute;
+  z-index: 0;
+  border: 1px solid rgba(104, 211, 239, 0.14);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.scanOrbit::before,
+.scanOrbit::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: #72def1;
+  box-shadow: 0 0 16px rgba(114, 222, 241, 0.7);
+}
+
+.scanOrbit::before {
+  width: 6px;
+  height: 6px;
+  left: 15%;
+  top: 8%;
+}
+
+.scanOrbit::after {
+  width: 4px;
+  height: 4px;
+  right: 6%;
+  bottom: 25%;
+}
+
+.orbitOne {
+  width: min(76%, 660px);
+  aspect-ratio: 1;
+  border-style: dashed;
+  animation: diagnosticOrbit 28s linear infinite;
+}
+
+.orbitTwo {
+  width: min(58%, 500px);
+  aspect-ratio: 1;
+  opacity: 0.58;
+  animation: diagnosticOrbit 20s linear infinite reverse;
+}
+
+.lungAxis {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 9%;
+  width: min(58%, 430px);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  color: #5c93a9;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.lungAxis i {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(106, 216, 238, 0.52), transparent);
+}
+
+.visualTelemetry {
+  position: absolute;
+  z-index: 4;
+  min-width: 98px;
+  display: grid;
+  gap: 3px;
+  padding: 9px 11px;
+  border: 1px solid rgba(111, 211, 234, 0.17);
+  border-radius: 12px;
+  background: rgba(4, 20, 35, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.visualTelemetry small {
+  color: #557c90;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.visualTelemetry strong {
+  color: #c5f5fc;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.telemetryTop {
+  top: 21%;
+  right: 3%;
+}
+
+.telemetryBottom {
+  left: 2%;
+  bottom: 18%;
+}
+
+.overviewScene .dashboardSide {
+  gap: 18px;
+  margin-right: min(4vw, 64px);
+  padding: 22px;
+  border: 1px solid rgba(108, 202, 224, 0.13);
+  border-radius: 18px;
+  background: rgba(5, 20, 34, 0.5);
+  backdrop-filter: blur(15px);
+}
+
+.overviewScene .dashboardSide p {
+  color: #bdd0dc;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.overviewScene .dashboardSide > span {
+  width: 64px;
+  background: linear-gradient(90deg, #61d9ed, transparent);
+}
+
+.sideStatus {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 2px 10px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(112, 208, 229, 0.12);
+}
+
+.sideStatus > span {
+  grid-row: span 2;
+}
+
+.sideStatus b {
+  color: #d7f6fb;
+  font-size: 10px;
+}
+
+.sideStatus small {
+  color: #52778a;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.overviewFooter {
+  width: calc(100% - min(8vw, 126px));
+  gap: 16px;
+  padding: 13px 16px;
+  border: 1px solid rgba(115, 208, 229, 0.11);
+  border-radius: 16px;
+  background: rgba(4, 17, 31, 0.42);
+  backdrop-filter: blur(14px);
+}
+
+.overviewFooter button {
+  color: #819bad;
+  letter-spacing: 0.05em;
+}
+
+.overviewFooter button:hover {
+  color: #c9f6fd;
+}
+
+.loginModalBackdrop {
+  background: rgba(1, 7, 16, 0.76);
+  backdrop-filter: blur(18px);
+}
+
+.loginModal {
+  border-color: rgba(114, 211, 233, 0.2);
+  border-radius: 22px;
+  background: rgba(5, 17, 31, 0.94);
+  box-shadow: 0 32px 100px rgba(0, 4, 13, 0.52), 0 0 0 1px rgba(255, 255, 255, 0.025) inset;
+}
+
+.appShell {
+  background:
+    radial-gradient(circle at 50% -10%, rgba(18, 204, 231, 0.1), transparent 30%),
+    var(--bg);
+}
+
+.sidebar {
+  min-height: 82px;
+  grid-template-columns: minmax(178px, auto) minmax(0, 1fr) auto;
+  gap: 22px;
+  padding: 13px max(24px, calc((100vw - 1600px) / 2));
+  border-bottom-color: rgba(121, 200, 224, 0.12);
+  background: rgba(4, 13, 27, 0.78);
+  backdrop-filter: blur(20px) saturate(1.25);
+  box-shadow: 0 12px 38px rgba(0, 5, 16, 0.16);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.brand .brandSymbol {
+  width: 42px;
+  height: 42px;
+  display: inline-grid;
+  border-radius: 14px;
+  color: #7ce5f5;
+}
+
+.brand .brandCopy {
+  display: grid;
+  gap: 2px;
+  color: inherit;
+}
+
+.brand .brandCopy strong {
+  color: var(--ink);
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.brand .brandCopy small {
+  overflow: hidden;
+  max-width: 150px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sidebar nav {
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid var(--line-soft);
+  border-radius: 15px;
+  background: rgba(3, 11, 24, 0.42);
+}
+
+.navButton {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: var(--muted);
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.navButton svg {
+  color: currentColor;
+}
+
+.navButton:hover {
+  border-color: rgba(122, 207, 229, 0.12);
+  background: rgba(21, 76, 103, 0.24);
+  color: var(--ink);
+}
+
+.navButton.active {
+  border-color: rgba(102, 219, 239, 0.25);
+  background: linear-gradient(135deg, rgba(16, 160, 190, 0.25), rgba(35, 102, 197, 0.2));
+  color: #baf5fd;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025), 0 8px 24px rgba(0, 114, 157, 0.12);
+}
+
+.sidebarFooter {
+  gap: 8px;
+}
+
+.languageSwitch,
+.themeSwitch,
+.ghostButton {
+  border-color: var(--line-soft);
+  background: rgba(6, 18, 34, 0.56);
+  color: var(--ink);
+  backdrop-filter: blur(12px);
+}
+
+.languageSwitch button.active {
+  background: linear-gradient(135deg, #14b8d4, #2479d4);
+  color: #ffffff;
+}
+
+.workspace {
+  width: min(1560px, calc(100% - 48px));
+  gap: 22px;
+  padding: 34px 0 52px;
+}
+
+.workspace > section {
+  animation: panelRise 0.42s ease-out both;
+}
+
+.topbar {
+  min-height: 62px;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.topbar h1 {
+  font-size: clamp(28px, 2.2vw, 38px);
+  letter-spacing: -0.04em;
+}
+
+.topbar p {
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.systemChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 0 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: rgba(7, 23, 40, 0.48);
+  color: var(--muted-strong);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.toolPanel,
+.viewerPanel,
+.tablePanel,
+.referenceItem,
+.metricCard,
+.crmHero,
+.crmComposer,
+.crmBoard {
+  border-color: rgba(126, 198, 222, 0.13);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 36%),
+    var(--panel);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(14px) saturate(1.12);
+}
+
+.toolPanel,
+.viewerPanel,
+.tablePanel,
+.crmComposer,
+.crmBoard,
+.referenceItem,
+.metricCard {
+  padding: 20px;
+}
+
+.panelHeader {
+  padding-bottom: 14px;
+  border-bottom-color: var(--line-soft);
+}
+
+.panelHeader h2 {
+  font-size: 17px;
+  letter-spacing: -0.025em;
+}
+
+.panelHeader svg {
+  color: var(--primary-bright);
+}
+
+.dashboardGrid {
+  grid-template-columns: 350px minmax(0, 1fr);
+  gap: 20px;
+}
+
+.fileDrop {
+  min-height: 146px;
+  border-color: rgba(87, 203, 226, 0.34);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(2, 10, 23, 0.22), rgba(2, 10, 23, 0.88)),
+    url("/neon_lungs_hero_transparent.png") center 52% / 122% auto no-repeat;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.fileDrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0 44%, rgba(90, 224, 246, 0.2) 50%, transparent 56%);
+  transform: translateY(-100%);
+  transition: transform 0.65s ease;
+  pointer-events: none;
+}
+
+.fileDrop:hover {
+  transform: translateY(-2px);
+  border-color: rgba(92, 225, 246, 0.72);
+  box-shadow: 0 16px 36px rgba(1, 19, 37, 0.24), inset 0 0 34px rgba(18, 204, 231, 0.08);
+}
+
+.fileDrop:hover::after {
+  transform: translateY(100%);
+}
+
+.studyRow {
+  min-height: 72px;
+  border-color: var(--line-soft);
+  border-radius: 15px;
+  background: rgba(6, 20, 36, 0.52);
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.studyRow:hover,
+.studyRow.active {
+  transform: translateX(3px);
+  border-color: rgba(72, 206, 232, 0.38);
+  background: linear-gradient(90deg, rgba(14, 124, 153, 0.2), rgba(8, 30, 50, 0.72));
+  box-shadow: 0 12px 28px rgba(0, 8, 20, 0.18);
+}
+
+.statusBadge,
+.studyProcessing {
+  border: 1px solid rgba(135, 210, 231, 0.13);
+  background: rgba(89, 159, 184, 0.12);
+}
+
+.viewerPanel {
+  padding: 18px;
+}
+
+.viewerToolbar {
+  border-color: var(--line-soft);
+  border-radius: 15px;
+  background: rgba(3, 13, 27, 0.64);
+}
+
+.iconButton {
+  border-radius: 11px;
+  background: rgba(9, 30, 50, 0.76);
+}
+
+.iconButton:hover,
+.iconButton.active {
+  border-color: rgba(91, 220, 242, 0.4);
+  background: rgba(13, 116, 146, 0.26);
+  color: #8be9f7;
+  box-shadow: 0 0 22px rgba(18, 204, 231, 0.12);
+}
+
+.imageStage {
+  height: 590px;
+  border-color: rgba(127, 207, 232, 0.18);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(16, 56, 82, 0.36), transparent 46%),
+    linear-gradient(rgba(52, 118, 147, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(52, 118, 147, 0.045) 1px, transparent 1px),
+    #02070d;
+  background-size: auto, 52px 52px, 52px 52px, auto;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.6), 0 16px 42px rgba(0, 6, 16, 0.2);
+}
+
+.imageStage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent 49.8%, rgba(94, 219, 241, 0.07) 50%, transparent 50.2%);
+  pointer-events: none;
+}
+
+.clinicalGrid {
+  gap: 20px;
+}
+
+.aiResult {
+  border-radius: 15px;
+  background: rgba(3, 15, 29, 0.62);
+}
+
+.prediction {
+  border-color: rgba(92, 216, 239, 0.2);
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(12, 151, 181, 0.16), rgba(31, 95, 180, 0.1));
+  color: #d8f9ff;
+}
+
+.disclaimer,
+.warningBox {
+  border-radius: 14px;
+}
+
+.emptyState {
+  border-color: rgba(107, 191, 215, 0.2);
+  border-radius: 18px;
+  background: rgba(7, 23, 40, 0.42);
+}
+
+.visualEmpty img {
+  opacity: 0.26;
+  filter: saturate(1.2) drop-shadow(0 0 34px rgba(18, 204, 231, 0.14));
+  animation: lungsBreath 6.8s ease-in-out infinite;
+}
+
+.crmHero {
+  min-height: 166px;
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(circle at 88% 20%, rgba(18, 204, 231, 0.16), transparent 28%),
+    linear-gradient(120deg, rgba(8, 89, 115, 0.18), transparent 50%),
+    var(--panel);
+}
+
+.crmHero::after {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  right: -100px;
+  top: -170px;
+  border: 1px solid rgba(103, 217, 239, 0.16);
+  border-radius: 50%;
+  box-shadow: 0 0 0 28px rgba(103, 217, 239, 0.025), 0 0 0 60px rgba(103, 217, 239, 0.018);
+  pointer-events: none;
+}
+
+.crmHero h2 {
+  font-size: clamp(30px, 3vw, 46px);
+  letter-spacing: -0.045em;
+}
+
+.crmVitals div {
+  border-radius: 14px;
+  background: rgba(4, 19, 35, 0.5);
+}
+
+.crmVitals strong,
+.metricCard strong {
+  color: var(--primary-bright);
+  text-shadow: 0 0 24px rgba(18, 204, 231, 0.15);
+}
+
+.crmCard {
+  border-radius: 15px;
+  background: rgba(4, 17, 31, 0.66);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.crmCard:hover {
+  transform: translateY(-3px);
+  border-color: rgba(95, 207, 232, 0.26);
+  box-shadow: 0 18px 36px rgba(0, 7, 17, 0.18);
+}
+
+.referenceGrid {
+  grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+  gap: 20px;
+}
+
+.referenceItem {
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
+}
+
+.referenceItem::after {
+  content: "";
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  right: -70px;
+  bottom: -70px;
+  border-radius: 50%;
+  background: rgba(18, 204, 231, 0.08);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.referenceItem:hover {
+  transform: translateY(-6px);
+  border-color: rgba(82, 211, 236, 0.36);
+  box-shadow: 0 28px 70px rgba(0, 9, 20, 0.25);
+}
+
+.referenceVisual {
+  min-height: 205px;
+  border: 1px solid rgba(116, 201, 224, 0.12);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 52%, rgba(25, 127, 166, 0.2), transparent 56%),
+    #020912;
+}
+
+.referenceVisual img {
+  opacity: 0.54;
+  filter: saturate(1.35) contrast(1.08);
+  transition: transform 0.45s ease, opacity 0.3s ease, filter 0.3s ease;
+}
+
+.referenceItem:hover .referenceVisual img {
+  transform: scale(1.035);
+  opacity: 0.68;
+  filter: saturate(1.55) contrast(1.12);
+}
+
+.referenceVisual span {
+  border-color: rgba(106, 219, 240, 0.24);
+  border-radius: 10px;
+  background: rgba(3, 20, 35, 0.82);
+  color: #7ce8f7;
+}
+
+.referenceItem h2 {
+  font-size: 22px;
+  letter-spacing: -0.035em;
+}
+
+.tablePanel table tr {
+  transition: background 0.18s ease;
+}
+
+.tablePanel table tbody tr:hover {
+  background: rgba(18, 204, 231, 0.045);
+}
+
+:root[data-theme="light"] .publicShell,
+:root[data-theme="light"] .overviewScene {
+  background:
+    radial-gradient(ellipse at 61% 44%, rgba(47, 136, 255, 0.12), transparent 30%),
+    radial-gradient(ellipse at 36% 8%, rgba(18, 183, 211, 0.1), transparent 28%),
+    linear-gradient(118deg, #fbfdff 0%, #f2f7fb 48%, #fbfdff 100%);
+}
+
+:root[data-theme="light"] .publicHeader {
+  border-bottom-color: rgba(25, 83, 111, 0.08);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+:root[data-theme="light"] .photonBrand,
+:root[data-theme="light"] .photonBrandCopy strong {
+  color: #071728;
+}
+
+:root[data-theme="light"] .brandSignal,
+:root[data-theme="light"] .brandSymbol {
+  border-color: rgba(12, 135, 165, 0.2);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(213, 240, 247, 0.82));
+  color: #087f9f;
+  box-shadow: 0 12px 28px rgba(24, 111, 142, 0.12);
+}
+
+:root[data-theme="light"] .brandSignal::after,
+:root[data-theme="light"] .brandSymbol::after {
+  border-color: #f7fbfd;
+}
+
+:root[data-theme="light"] .heroEyebrow,
+:root[data-theme="light"] .heroSpecGrid > div,
+:root[data-theme="light"] .visualTelemetry,
+:root[data-theme="light"] .overviewScene .dashboardSide,
+:root[data-theme="light"] .overviewFooter {
+  border-color: rgba(14, 111, 143, 0.12);
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: 0 18px 50px rgba(33, 91, 119, 0.07);
+}
+
+:root[data-theme="light"] .heroEyebrow {
+  color: #557084;
+}
+
+:root[data-theme="light"] .heroEyebrow b,
+:root[data-theme="light"] .heroSpecGrid strong,
+:root[data-theme="light"] .visualTelemetry strong,
+:root[data-theme="light"] .sideStatus b {
+  color: #075f79;
+}
+
+:root[data-theme="light"] .overviewScene .dashboardCopy h1,
+:root[data-theme="light"] .overviewScene .dashboardSide p {
+  color: #071728;
+}
+
+:root[data-theme="light"] .overviewScene .dashboardCopy h1 b {
+  color: rgba(9, 102, 133, 0.025);
+  -webkit-text-stroke-color: rgba(8, 100, 130, 0.42);
+  text-shadow: none;
+}
+
+:root[data-theme="light"] .overviewScene .dashboardCopy .photonNote,
+:root[data-theme="light"] .photonMeta,
+:root[data-theme="light"] .photonActionRow > span,
+:root[data-theme="light"] .overviewFooter button {
+  color: #5d7385;
+}
+
+:root[data-theme="light"] .photonRoundButton {
+  border-color: rgba(8, 113, 144, 0.28);
+  background: rgba(255, 255, 255, 0.68);
+  color: #087a9a;
+  box-shadow: 0 12px 32px rgba(31, 111, 141, 0.1), inset 0 0 0 6px rgba(8, 127, 159, 0.035);
+}
+
+:root[data-theme="light"] .overviewScene .dashboardVisual img {
+  opacity: 0.98;
+  mix-blend-mode: multiply;
+  filter: saturate(1.25) contrast(1.08) brightness(1.04) drop-shadow(0 18px 44px rgba(18, 111, 180, 0.17));
+}
+
+:root[data-theme="light"] .scanOrbit {
+  border-color: rgba(11, 128, 159, 0.13);
+}
+
+:root[data-theme="light"] .lungAxis,
+:root[data-theme="light"] .heroSpecGrid span,
+:root[data-theme="light"] .heroSpecGrid small,
+:root[data-theme="light"] .visualTelemetry small,
+:root[data-theme="light"] .sideStatus small {
+  color: #7590a1;
+}
+
+:root[data-theme="light"] .sidebar {
+  border-bottom-color: rgba(21, 87, 115, 0.1);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 12px 38px rgba(30, 72, 97, 0.08);
+}
+
+:root[data-theme="light"] .sidebar nav,
+:root[data-theme="light"] .systemChip,
+:root[data-theme="light"] .languageSwitch,
+:root[data-theme="light"] .themeSwitch,
+:root[data-theme="light"] .ghostButton {
+  border-color: rgba(17, 83, 111, 0.1);
+  background: rgba(243, 249, 252, 0.78);
+  color: #17344a;
+}
+
+:root[data-theme="light"] .navButton {
+  color: #60778a;
+}
+
+:root[data-theme="light"] .navButton:hover {
+  border-color: rgba(9, 115, 145, 0.1);
+  background: rgba(9, 126, 158, 0.06);
+  color: #08263b;
+}
+
+:root[data-theme="light"] .navButton.active {
+  border-color: rgba(9, 135, 166, 0.18);
+  background: linear-gradient(135deg, rgba(8, 151, 181, 0.12), rgba(39, 112, 205, 0.08));
+  color: #076f8d;
+}
+
+:root[data-theme="light"] .toolPanel,
+:root[data-theme="light"] .viewerPanel,
+:root[data-theme="light"] .tablePanel,
+:root[data-theme="light"] .referenceItem,
+:root[data-theme="light"] .metricCard,
+:root[data-theme="light"] .crmHero,
+:root[data-theme="light"] .crmComposer,
+:root[data-theme="light"] .crmBoard {
+  border-color: rgba(20, 88, 117, 0.1);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.48) 48%, transparent),
+    rgba(255, 255, 255, 0.72);
+  box-shadow: 0 22px 60px rgba(33, 78, 104, 0.1), inset 0 1px 0 #ffffff;
+}
+
+:root[data-theme="light"] input,
+:root[data-theme="light"] select,
+:root[data-theme="light"] textarea {
+  border-color: rgba(20, 83, 110, 0.13);
+  background: rgba(248, 252, 254, 0.92);
+}
+
+:root[data-theme="light"] .studyRow,
+:root[data-theme="light"] .viewerToolbar,
+:root[data-theme="light"] .aiResult,
+:root[data-theme="light"] .crmVitals div,
+:root[data-theme="light"] .crmCard,
+:root[data-theme="light"] .emptyState,
+:root[data-theme="light"] .iconButton {
+  border-color: rgba(18, 84, 112, 0.1);
+  background: rgba(246, 251, 253, 0.86);
+}
+
+:root[data-theme="light"] .studyRow:hover,
+:root[data-theme="light"] .studyRow.active {
+  border-color: rgba(8, 126, 158, 0.26);
+  background: linear-gradient(90deg, rgba(8, 151, 181, 0.1), rgba(255, 255, 255, 0.94));
+}
+
+:root[data-theme="light"] .prediction {
+  border-color: rgba(8, 127, 158, 0.16);
+  background: linear-gradient(135deg, rgba(8, 151, 181, 0.08), rgba(39, 112, 205, 0.05));
+  color: #073148;
+}
+
+:root[data-theme="light"] .referenceVisual {
+  border-color: rgba(11, 102, 132, 0.1);
+  background:
+    radial-gradient(circle at 50% 52%, rgba(28, 138, 174, 0.13), transparent 56%),
+    #eef6fa;
+}
+
+:root[data-theme="light"] .referenceVisual span {
+  background: rgba(255, 255, 255, 0.86);
+  color: #087997;
+}
+
+@keyframes diagnosticOrbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    opacity: 0.74;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes panelRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanOrbit,
+  .liveDot,
+  .systemChip i,
+  .sideStatus > span,
+  .workspace > section,
+  .visualEmpty img {
+    animation: none;
+  }
+}
+
+@media (max-width: 1250px) {
+  .sidebar {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px 18px;
+  }
+
+  .sidebar nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: flex-start;
+  }
+
+  .sidebarFooter {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .overviewScene {
+    grid-template-columns: minmax(390px, 0.82fr) minmax(480px, 1.12fr);
+  }
+
+  .overviewScene .dashboardSide {
+    display: none;
+  }
+
+  .overviewScene .dashboardVisual img {
+    width: min(780px, 126%);
+  }
+
+  .clinicalGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .clinicalGrid .reportPanel {
+    grid-row: span 2;
+  }
+}
+
+@media (max-width: 900px) {
+  .publicHeader {
+    padding-inline: 22px;
+  }
+
+  .overviewScene {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    padding-top: 58px;
+  }
+
+  .overviewScene .dashboardCopy {
+    max-width: 760px;
+    padding: 0 24px;
+  }
+
+  .overviewScene .dashboardVisual {
+    min-height: 480px;
+  }
+
+  .overviewFooter {
+    grid-column: 1;
+    width: calc(100% - 40px);
+  }
+
+  .dashboardGrid,
+  .crmDashboard,
+  .clinicalGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .clinicalGrid .reportPanel {
+    grid-row: auto;
+  }
+
+  .imageStage {
+    height: 500px;
+  }
+}
+
+@media (max-width: 720px) {
+  .publicHeader {
+    min-height: 74px;
+    padding: 12px 16px;
+  }
+
+  .photonBrandCopy small,
+  .systemChip,
+  .overviewFooter,
+  .visualTelemetry,
+  .lungAxis {
+    display: none;
+  }
+
+  .headerControls {
+    gap: 6px;
+  }
+
+  .loginTopButton {
+    min-width: 42px;
+    padding: 0 11px;
+  }
+
+  .overviewScene {
+    min-height: calc(100vh - 74px);
+    padding-top: 40px;
+  }
+
+  .overviewScene .dashboardCopy h1 {
+    font-size: clamp(44px, 14vw, 64px);
+    line-height: 0.9;
+  }
+
+  .heroSpecGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroSpecGrid > div:nth-child(n + 2) {
+    display: none;
+  }
+
+  .overviewScene .dashboardVisual {
+    min-height: 350px;
+  }
+
+  .overviewScene .dashboardVisual img {
+    width: min(600px, 142%);
+  }
+
+  .sidebar {
+    position: relative;
+    grid-template-columns: 1fr;
+    padding: 12px 16px;
+  }
+
+  .brand,
+  .sidebarFooter {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .sidebarFooter {
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .sidebar nav {
+    width: 100%;
+    grid-column: 1;
+    grid-row: auto;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .workspace {
+    width: calc(100% - 28px);
+    padding-top: 22px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .topbarActions,
+  .topbarActions .ghostButton {
+    width: 100%;
+  }
+
+  .toolPanel,
+  .viewerPanel,
+  .tablePanel,
+  .crmComposer,
+  .crmBoard,
+  .referenceItem,
+  .metricCard {
+    padding: 16px;
+  }
+
+  .imageStage {
+    height: 340px;
+  }
+}
+
+/* Final layout guards */
+.dashboardGrid > .leftColumn {
+  max-height: calc(100vh - 132px);
+  overflow-y: auto;
+  position: sticky;
+  top: 18px;
+  padding-right: 6px;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(98, 220, 241, 0.3) transparent;
+  scrollbar-width: thin;
+}
+
+.assistantPanel {
+  width: min(390px, calc(100vw - 32px));
+  height: min(540px, calc(100vh - 110px));
+}
+
+:root[data-theme="light"] .assistantWelcome button {
+  border-color: rgba(8, 127, 159, 0.14);
+  background: rgba(8, 151, 181, 0.08);
+  color: #087997;
+}
+
+@media (max-width: 900px) {
+  .dashboardGrid > .leftColumn {
+    max-height: none;
+    overflow: visible;
+    position: static;
+  }
+}
+
+/* Simplified clinical workspace */
+.filterGridPrimary {
+  gap: 9px;
+  margin-bottom: 8px;
+}
+
+.advancedFilters {
+  margin: 2px 0 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: rgba(4, 18, 34, 0.34);
+}
+
+.advancedFilters summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  color: var(--muted-strong);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+  list-style: none;
+}
+
+.advancedFilters summary::-webkit-details-marker,
+.feedbackPanel summary::-webkit-details-marker,
+.crmPicker summary::-webkit-details-marker {
+  display: none;
+}
+
+.advancedFilters > div {
+  display: grid;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+
+.clinicianOutputGrid {
+  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-areas:
+    "analysis report"
+    "feedback report";
+  gap: 16px;
+}
+
+.analysisPanel { grid-area: analysis; }
+.reportPanel { grid-area: report; }
+.feedbackPanel { grid-area: feedback; }
+
+.clinicalNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid rgba(245, 158, 11, 0.18);
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.08);
+  color: #e8bd68;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.clinicalNotice svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.clinicalAiSummary {
+  display: grid;
+  gap: 9px;
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid rgba(61, 213, 178, 0.17);
+  border-radius: 14px;
+  background: rgba(35, 183, 148, 0.07);
+}
+
+.clinicalAiSummary.needsReview {
+  border-color: rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.07);
+}
+
+.clinicalAiSummary small,
+.clinicalAiSummary > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.clinicalAiSummary strong {
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.confidenceTrack {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(133, 177, 199, 0.14);
+}
+
+.confidenceTrack i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1cb7d5, #4ad6ad);
+}
+
+.needsReview .confidenceTrack i {
+  background: #e8a93e;
+}
+
+.clinicalReportPreview {
+  display: grid;
+  gap: 10px;
+}
+
+.clinicalReportPreview > section {
+  display: grid;
+  grid-template-columns: minmax(105px, 0.22fr) minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: rgba(3, 15, 29, 0.38);
+}
+
+.clinicalReportPreview span {
+  color: var(--primary-bright);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.clinicalReportPreview p {
+  color: var(--muted-strong);
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.reportEditor {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.reportEditor textarea {
+  min-height: 360px;
+  color: var(--ink);
+  font: 500 13px/1.65 inherit;
+  resize: vertical;
+}
+
+.reportEmptyState {
+  min-height: 210px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.feedbackPanel {
+  padding-block: 14px;
+}
+
+.feedbackPanel details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted-strong);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 900;
+  list-style: none;
+}
+
+.feedbackPanel summary > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feedbackPanel details[open] summary {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.feedbackPanel details > div {
+  display: grid;
+  gap: 9px;
+  padding-top: 12px;
+}
+
+.crmPicker {
+  padding: 0;
+}
+
+.crmPicker summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 12px;
+  color: var(--muted-strong);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+  list-style: none;
+}
+
+.crmPicker summary span {
+  min-width: 22px;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: rgba(18, 185, 214, 0.1);
+  color: var(--primary-bright);
+  text-align: center;
+}
+
+.crmPicker[open] summary {
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.crmPicker > div {
+  padding: 10px;
+}
+
+/* High contrast light theme */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ink: #102235;
+  --muted: #5c7185;
+  --muted-strong: #263f55;
+  --line: rgba(28, 83, 110, 0.2);
+  --line-soft: rgba(28, 83, 110, 0.13);
+}
+
+:root[data-theme="light"] body {
+  background: #eef5f8;
+}
+
+:root[data-theme="light"] input,
+:root[data-theme="light"] select,
+:root[data-theme="light"] textarea {
+  border-color: #cbdde6;
+  background: #f8fbfc;
+  color: #142b3f;
+  box-shadow: none;
+}
+
+:root[data-theme="light"] input::placeholder,
+:root[data-theme="light"] textarea::placeholder {
+  color: #72879a;
+  opacity: 1;
+}
+
+:root[data-theme="light"] .toolPanel,
+:root[data-theme="light"] .viewerPanel,
+:root[data-theme="light"] .tablePanel,
+:root[data-theme="light"] .crmDepartmentBoard,
+:root[data-theme="light"] .crmComposer,
+:root[data-theme="light"] .referenceItem,
+:root[data-theme="light"] .referenceHero {
+  border-color: #d5e3ea;
+  background: #ffffff;
+  box-shadow: 0 14px 38px rgba(41, 79, 101, 0.09);
+}
+
+:root[data-theme="light"] .advancedFilters,
+:root[data-theme="light"] .clinicalReportPreview > section,
+:root[data-theme="light"] .clinicalAiSummary,
+:root[data-theme="light"] .crmLane,
+:root[data-theme="light"] .crmDetail,
+:root[data-theme="light"] .crmPicker label {
+  border-color: #d4e2e9;
+  background: #f4f9fb;
+}
+
+:root[data-theme="light"] .clinicalNotice,
+:root[data-theme="light"] .clinicalAiSummary.needsReview {
+  border-color: #efd39d;
+  background: #fff8e8;
+  color: #87580b;
+}
+
+:root[data-theme="light"] .clinicalReportPreview span,
+:root[data-theme="light"] .panelHeader svg,
+:root[data-theme="light"] .crmPicker summary span {
+  color: #087c99;
+}
+
+:root[data-theme="light"] .clinicalReportPreview p,
+:root[data-theme="light"] .clinicalAiSummary strong,
+:root[data-theme="light"] .panelHeader h2,
+:root[data-theme="light"] .crmCard h3,
+:root[data-theme="light"] .crmDetail h3,
+:root[data-theme="light"] .crmLane > header,
+:root[data-theme="light"] .feedbackPanel summary,
+:root[data-theme="light"] .crmPicker summary {
+  color: #142b3f;
+}
+
+:root[data-theme="light"] .crmCard {
+  border-color: #ccdde6;
+  background: #ffffff;
+  box-shadow: 0 7px 20px rgba(35, 76, 99, 0.07);
+}
+
+:root[data-theme="light"] .crmCard p,
+:root[data-theme="light"] .crmCard small,
+:root[data-theme="light"] .crmTimeline p,
+:root[data-theme="light"] .crmDetailGrid strong {
+  color: #405a70;
+}
+
+:root[data-theme="light"] .crmCardTop span,
+:root[data-theme="light"] .crmCardTop b,
+:root[data-theme="light"] .crmCardMeta span {
+  background: #e8f3f7;
+  color: #28465b;
+}
+
+:root[data-theme="light"] .statusBadge,
+:root[data-theme="light"] .studyProcessing {
+  border-color: #cbdde6;
+  background: #e8f1f5;
+  color: #304d61;
+}
+
+:root[data-theme="light"] .statusBadge.confirmed,
+:root[data-theme="light"] .statusBadge.exported {
+  border-color: #b8dec8;
+  background: #e1f4e9;
+  color: #17643b;
+}
+
+:root[data-theme="light"] .statusBadge.failed {
+  border-color: #efc3ca;
+  background: #fde9ec;
+  color: #a52a3d;
+}
+
+:root[data-theme="light"] .ghostButton,
+:root[data-theme="light"] .iconButton {
+  border-color: #c9dce5;
+  background: #f7fafc;
+  color: #17364c;
+}
+
+:root[data-theme="light"] .assistantPanel,
+:root[data-theme="light"] .assistantMessage p,
+:root[data-theme="light"] .assistantWelcome {
+  color: #19384e;
+}
+
+@media (max-width: 1050px) {
+  .clinicianOutputGrid {
+    grid-template-columns: 1fr;
+    grid-template-areas: "analysis" "report" "feedback";
+  }
+
+  .clinicalReportPreview > section {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+}
