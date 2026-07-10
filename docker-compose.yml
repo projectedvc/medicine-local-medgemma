@@ -17,11 +17,15 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://medicine:medicine@postgres:5432/medicine
       JWT_SECRET: ${JWT_SECRET:-change-this-long-random-value}
+      AI_PROVIDER: ${AI_PROVIDER:-external}
       AI_SERVICE_URL: ${AI_SERVICE_URL:-}
-      AI_ALLOW_MOCK: ${AI_ALLOW_MOCK:-true}
+      AI_SERVICE_API_KEY: ${AI_SERVICE_API_KEY:-}
+      AI_SERVICE_CF_ACCESS_CLIENT_ID: ${AI_SERVICE_CF_ACCESS_CLIENT_ID:-}
+      AI_SERVICE_CF_ACCESS_CLIENT_SECRET: ${AI_SERVICE_CF_ACCESS_CLIENT_SECRET:-}
+      AI_ALLOW_MOCK: ${AI_ALLOW_MOCK:-false}
       AI_CONFIDENCE_THRESHOLD: ${AI_CONFIDENCE_THRESHOLD:-0.70}
-      AI_MODEL_VERSION: ${AI_MODEL_VERSION:-jupiter-or-demo-v1}
-      AI_DATASET_VERSION: ${AI_DATASET_VERSION:-not-validated-demo}
+      AI_MODEL_VERSION: ${AI_MODEL_VERSION:-google/medgemma-4b-it}
+      AI_DATASET_VERSION: ${AI_DATASET_VERSION:-local-unvalidated}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,https://aimedicine.vercel.app}
     volumes:
       - backend_data:/app/data

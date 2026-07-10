@@ -15,7 +15,7 @@ function isLocalHost() {
 }
 
 const DEFAULT_API_URL = import.meta.env.DEV && isLocalHost() ? "http://127.0.0.1:8000" : "";
-const CONFIGURED_API_URL = import.meta.env.DEV ? import.meta.env.VITE_API_URL : undefined;
+const CONFIGURED_API_URL = import.meta.env.VITE_API_URL;
 
 function createApiBase(rawUrl: string | undefined) {
   const cleaned = (rawUrl || DEFAULT_API_URL).trim().replace(/\/+$/, "");

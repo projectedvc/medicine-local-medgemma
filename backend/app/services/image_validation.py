@@ -49,8 +49,11 @@ def _normalize_dicom_pixels(dataset: pydicom.dataset.FileDataset) -> Image.Image
     return Image.fromarray(pixels.astype(np.uint8)).convert("L")
 
 
-def _validate_raster(data: bytes) -> tuple[int, int]:
+def _validate_raster(data: bytes, suffix: str) -> tuple[int, int]:
+    expected_format = "PNG" if suffix == ".png" else "JPEG"
     with Image.open(BytesIO(data)) as image:
+        if image.format != expected_format:
+            raise ValueError(f"File content is {image.format or 'unknown'}, not {expected_format}.")
         image.verify()
     with Image.open(BytesIO(data)) as image:
         width, height = image.size
@@ -92,7 +95,7 @@ async def store_and_validate_upload(study_id: int, upload: UploadFile) -> Stored
     metadata_json: str | None = None
 
     if suffix in {".jpg", ".jpeg", ".png"}:
-        width, height = _validate_raster(data)
+        width, height = _validate_raster(data, suffix)
         file_format = suffix.lstrip(".").upper()
         preview_path = storage_path
     else:

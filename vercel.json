@@ -4,10 +4,6 @@
   "outputDirectory": "frontend/dist",
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://shiny-net-slimy.ngrok-free.dev/api/:path*"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

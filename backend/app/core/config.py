@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     upload_dir: Path = Path("./data/uploads")
     export_dir: Path = Path("./data/exports")
-    max_upload_mb: int = 50
+    max_upload_mb: int = 20
     allowed_origins: str = Field(
         default="http://localhost:5173,http://127.0.0.1:5173",
         alias="ALLOWED_ORIGINS",
@@ -23,6 +23,15 @@ class Settings(BaseSettings):
 
     ai_provider: str = Field(default="local_medgemma", alias="AI_PROVIDER")
     ai_service_url: str | None = Field(default=None, alias="AI_SERVICE_URL")
+    ai_service_api_key: SecretStr | None = Field(default=None, alias="AI_SERVICE_API_KEY")
+    ai_service_cf_access_client_id: str | None = Field(
+        default=None,
+        alias="AI_SERVICE_CF_ACCESS_CLIENT_ID",
+    )
+    ai_service_cf_access_client_secret: SecretStr | None = Field(
+        default=None,
+        alias="AI_SERVICE_CF_ACCESS_CLIENT_SECRET",
+    )
     ai_timeout_seconds: int = 120
     ai_confidence_threshold: float = Field(default=0.70, alias="AI_CONFIDENCE_THRESHOLD")
     ai_allow_mock: bool = Field(default=False, alias="AI_ALLOW_MOCK")

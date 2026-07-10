@@ -1,5 +1,10 @@
 # Jupiter + Vercel deployment
 
+> **Deprecated:** do not use the notebook-thread, embedded-token, or hard-coded
+> ngrok workflow below. Use [`docs/JUPYTER_GPU_SERVER.md`](docs/JUPYTER_GPU_SERVER.md)
+> for the supported GPU service, secret handling, backend connection, and
+> deployment architecture.
+
 Сейчас Vercel-фронт вызывает не AI напрямую, а API приложения:
 
 - `POST /api/auth/login`

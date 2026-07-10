@@ -1,0 +1,17 @@
+# Install a CUDA-compatible PyTorch build from the official PyTorch selector first.
+accelerate>=1.2,<2
+fastapi==0.139.0
+numpy>=2.2,<3
+pillow>=12.1.1,<13
+pydicom>=3,<4
+transformers>=5.4,<6
+uvicorn>=0.34,<1
+huggingface_hub[hf_xet]>=0.34,<2
+sentencepiece>=0.2,<1
+protobuf>=5,<7
+
+# Optional decoders for compressed DICOM transfer syntaxes:
+# pylibjpeg>=2
+# pylibjpeg-libjpeg>=2
+# pylibjpeg-openjpeg>=2
+# pyjpegls>=1.5

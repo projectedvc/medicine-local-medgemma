@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import json
 import os
@@ -51,9 +52,10 @@ LABEL_MAP: dict[str, FindingClass] = {
 }
 
 GENERATE_PROMPT = (
-    "Analyze this chest radiology image. Return only compact JSON: "
-    '{"prediction":"normal|pneumonia|pneumothorax|pleural_effusion|atelectasis",'
-    '"confidence":0.0,"top3":{"class":0.0}}. No extra text.'
+    "Analyze this chest radiology image. Return only compact JSON with "
+    '"prediction" (normal|pneumonia|pneumothorax|pleural_effusion|atelectasis), '
+    '"findings", and "warning". Do not provide confidence, scores, or probabilities; '
+    "they are not clinically calibrated. Radiologist review is required."
 )
 
 
@@ -74,6 +76,42 @@ def _ai_provider() -> str:
 
 def _ai_allow_mock() -> bool:
     return _env_bool("AI_ALLOW_MOCK", settings.ai_allow_mock)
+
+
+def _secret_value(value: Any) -> str:
+    if value is None:
+        return ""
+    getter = getattr(value, "get_secret_value", None)
+    return str(getter() if callable(getter) else value).strip()
+
+
+def _env_or_setting(name: str, value: Any) -> str:
+    environment_value = os.environ.get(name)
+    if environment_value is not None:
+        return environment_value.strip()
+    return _secret_value(value)
+
+
+def _ai_service_headers() -> dict[str, str]:
+    headers = {"ngrok-skip-browser-warning": "true"}
+    api_key = _env_or_setting("AI_SERVICE_API_KEY", settings.ai_service_api_key)
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+
+    client_id = _env_or_setting(
+        "AI_SERVICE_CF_ACCESS_CLIENT_ID",
+        settings.ai_service_cf_access_client_id,
+    )
+    client_secret = _env_or_setting(
+        "AI_SERVICE_CF_ACCESS_CLIENT_SECRET",
+        settings.ai_service_cf_access_client_secret,
+    )
+    if bool(client_id) != bool(client_secret):
+        raise RuntimeError("Both Cloudflare Access service-token values must be configured.")
+    if client_id:
+        headers["CF-Access-Client-Id"] = client_id
+        headers["CF-Access-Client-Secret"] = client_secret
+    return headers
 
 
 def _guess_mime_type(path: Path) -> str:
@@ -186,15 +224,24 @@ def normalize_ai_response(raw: dict[str, Any]) -> AIResult:
     else:
         predicted_class, raw_label = _normalize_label(label)
 
-    probabilities = _normalize_probabilities(payload.get("top3") or payload.get("probabilities") or payload.get("scores"))
-    confidence = _parse_confidence(payload.get("confidence") or payload.get("score") or payload.get("probability"))
-    if confidence == 0.0 and probabilities:
-        if predicted_class and predicted_class.value in probabilities:
-            confidence = probabilities[predicted_class.value]
-        else:
-            confidence = max(probabilities.values(), default=0.0)
-    if confidence == 0.0 and response_text:
-        confidence = _parse_text_confidence(response_text)
+    confidence_is_unvalidated = str(payload.get("confidence_status") or "").casefold() == "unvalidated"
+    if confidence_is_unvalidated:
+        probabilities = {}
+        confidence = 0.0
+    else:
+        probabilities = _normalize_probabilities(
+            payload.get("top3") or payload.get("probabilities") or payload.get("scores")
+        )
+        confidence = _parse_confidence(
+            payload.get("confidence") or payload.get("score") or payload.get("probability")
+        )
+        if confidence == 0.0 and probabilities:
+            if predicted_class and predicted_class.value in probabilities:
+                confidence = probabilities[predicted_class.value]
+            else:
+                confidence = max(probabilities.values(), default=0.0)
+        if confidence == 0.0 and response_text:
+            confidence = _parse_text_confidence(response_text)
 
     if not probabilities and predicted_class and confidence > 0:
         probabilities = {predicted_class.value: confidence}
@@ -234,13 +281,28 @@ def _mock_ai_result(file_path: Path) -> AIResult:
     )
 
 
-async def _post_generate(client: httpx.AsyncClient, url: str, path: Path) -> httpx.Response:
+async def _post_generate(
+    client: httpx.AsyncClient,
+    url: str,
+    path: Path,
+    clinical_note: str | None,
+    study_type: str | None,
+    lang: str | None,
+) -> httpx.Response:
     with path.open("rb") as handle:
+        image_base64 = base64.b64encode(handle.read()).decode("ascii")
         return await client.post(
             url,
-            data={"prompt": GENERATE_PROMPT},
-            files={"image": (path.name, handle, _guess_mime_type(path))},
-            headers={"ngrok-skip-browser-warning": "true"},
+            json={
+                "prompt": GENERATE_PROMPT,
+                "image_base64": image_base64,
+                "filename": path.name,
+                "media_type": _guess_mime_type(path),
+                "clinical_note": clinical_note,
+                "study_type": study_type,
+                "lang": lang,
+            },
+            headers=_ai_service_headers(),
         )
 
 
@@ -282,7 +344,14 @@ async def run_ai_inference(
     url, _ = _candidate_endpoints(base_url)[0]
     try:
         async with httpx.AsyncClient(timeout=settings.ai_timeout_seconds) as client:
-            response = await _post_generate(client, url, path)
+            response = await _post_generate(
+                client,
+                url,
+                path,
+                clinical_note=clinical_note,
+                study_type=study_type,
+                lang=lang,
+            )
         response.raise_for_status()
     except Exception as exc:
         raise RuntimeError(f"AI service request failed: {exc}") from exc
