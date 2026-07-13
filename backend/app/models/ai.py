@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import json
 
 from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -31,3 +32,19 @@ class AIAnalysis(Base):
 
     study = relationship("Study", back_populates="analyses")
     requested_by = relationship("User")
+
+    @property
+    def ai_text(self) -> str | None:
+        """Текстовый вывод AI-модели из raw_response_json."""
+        try:
+            data = json.loads(self.raw_response_json or "{}")
+        except Exception:
+            return None
+
+        return (
+            data.get("ai_text")
+            or data.get("impression")
+            or data.get("raw_response")
+            or data.get("response")
+            or data.get("text")
+        )

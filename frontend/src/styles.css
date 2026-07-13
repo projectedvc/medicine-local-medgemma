@@ -2315,3 +2315,12 @@ td {
     height: 330px;
   }
 }
+
+/* MedAI model selector */
+.modelSelector { display: grid; gap: 8px; margin: 14px 0; }
+.modelSelector label { color: var(--muted-strong); font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+.modelSelector select { width: 100%; min-height: 46px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-solid); color: var(--ink); padding: 0 14px; font: inherit; font-weight: 700; outline: none; transition: border-color 160ms ease, box-shadow 160ms ease; }
+.modelSelector select:hover, .modelSelector select:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cyan) 18%, transparent); }
+.modelSelector select:disabled { cursor: wait; opacity: 0.65; }
+.modelVersionLine { align-items: flex-start; gap: 14px; }
+.modelVersionLine strong { max-width: 66%; text-align: right; line-height: 1.35; }

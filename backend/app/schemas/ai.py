@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -15,6 +16,7 @@ class AIAnalysisOut(ORMModel):
     status: AIJobStatus
     predicted_class: FindingClass | None
     raw_predicted_label: str | None
+    ai_text: str | None = None
     confidence: float | None
     threshold: float
     hidden_due_low_confidence: bool
@@ -33,3 +35,4 @@ class RunAIRequest(BaseModel):
     wait: bool = True
     auto: bool = False
     lang: str = "ru"
+    model_variant: Literal["base", "pneumonia_v1"] = "pneumonia_v1"

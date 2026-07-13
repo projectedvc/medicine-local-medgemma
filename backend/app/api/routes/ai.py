@@ -19,6 +19,11 @@ from app.services.audit import write_audit
 
 router = APIRouter(prefix="/studies/{study_id}/ai", tags=["ai"])
 
+MODEL_VERSION_BY_VARIANT = {
+    "base": "medai-base",
+    "pneumonia_v1": "medai-pneumonia-v1",
+}
+
 
 def _latest_image(study: Study):
     if not study.images:
@@ -26,7 +31,13 @@ def _latest_image(study: Study):
     return study.images[-1]
 
 
-async def process_analysis(db: Session, analysis: AIAnalysis, study: Study, lang: str = "ru") -> AIAnalysis:
+async def process_analysis(
+    db: Session,
+    analysis: AIAnalysis,
+    study: Study,
+    lang: str = "ru",
+    model_variant: str = "pneumonia_v1",
+) -> AIAnalysis:
     image = _latest_image(study)
     analysis.status = AIJobStatus.running
     study.status = StudyStatus.analyzing
@@ -37,6 +48,7 @@ async def process_analysis(db: Session, analysis: AIAnalysis, study: Study, lang
             clinical_note=study.clinical_note,
             study_type=study.study_type,
             lang=lang,
+            model_variant=model_variant,
         )
         hidden = result.confidence < settings.ai_confidence_threshold
         analysis.status = AIJobStatus.completed
@@ -64,14 +76,18 @@ async def process_analysis(db: Session, analysis: AIAnalysis, study: Study, lang
     return analysis
 
 
-async def process_analysis_by_id(analysis_id: int, lang: str = "ru") -> None:
+async def process_analysis_by_id(
+    analysis_id: int,
+    lang: str = "ru",
+    model_variant: str = "pneumonia_v1",
+) -> None:
     db = SessionLocal()
     try:
         analysis = db.get(AIAnalysis, analysis_id)
         if not analysis:
             return
         study = get_study_or_404(db, analysis.study_id)
-        await process_analysis(db, analysis, study, lang)
+        await process_analysis(db, analysis, study, lang, model_variant)
     finally:
         db.close()
 
@@ -95,7 +111,7 @@ async def run_ai(
         requested_by_id=current_user.id,
         status=AIJobStatus.queued,
         threshold=settings.ai_confidence_threshold,
-        model_version=settings.ai_model_version,
+        model_version=MODEL_VERSION_BY_VARIANT[payload.model_variant],
         dataset_version=settings.ai_dataset_version,
     )
     db.add(analysis)
@@ -107,12 +123,18 @@ async def run_ai(
         user=current_user,
         entity_type="study",
         entity_id=study.id,
-        details={"analysis_id": analysis.id, "auto": payload.auto, "wait": payload.wait, "lang": payload.lang},
+        details={
+            "analysis_id": analysis.id,
+            "auto": payload.auto,
+            "wait": payload.wait,
+            "lang": payload.lang,
+            "model_variant": payload.model_variant,
+        },
         request=request,
     )
     if payload.wait:
-        return await process_analysis(db, analysis, study, payload.lang)
-    background_tasks.add_task(process_analysis_by_id, analysis.id, payload.lang)
+        return await process_analysis(db, analysis, study, payload.lang, payload.model_variant)
+    background_tasks.add_task(process_analysis_by_id, analysis.id, payload.lang, payload.model_variant)
     return analysis
 
 

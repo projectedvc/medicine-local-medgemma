@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import json
 import os
@@ -51,9 +52,11 @@ LABEL_MAP: dict[str, FindingClass] = {
 }
 
 GENERATE_PROMPT = (
-    "Analyze this chest radiology image. Return only compact JSON: "
-    '{"prediction":"normal|pneumonia|pneumothorax|pleural_effusion|atelectasis",'
-    '"confidence":0.0,"top3":{"class":0.0}}. No extra text.'
+    "Analyze this chest X-ray and return only one compact JSON object: "
+    '{"finding":"normal|pneumonia|pneumothorax|pleural_effusion|atelectasis|not_diagnostic",'
+    '"confidence":0.0,"bbox":null,"impression":"one short clinical conclusion",'
+    '"evidence":["up to three visible radiographic signs"]}. '
+    "Do not include the prompt, model names, methodology, disclaimers, or text outside JSON."
 )
 
 
@@ -145,13 +148,17 @@ def _extract_json_from_text(text: str) -> dict[str, Any] | None:
 
 
 def _merge_generated_payload(raw: dict[str, Any]) -> dict[str, Any]:
-    response = raw.get("response")
-    if isinstance(response, dict):
-        return {**raw, **response}
-    if isinstance(response, str):
-        extracted = _extract_json_from_text(response)
-        if extracted:
-            return {**extracted, **raw}
+    """Merge JSON generated inside either supported service wrapper."""
+    for wrapper_key in ("response", "text"):
+        response = raw.get(wrapper_key)
+        if isinstance(response, dict):
+            wrapper_free = {key: value for key, value in raw.items() if key not in {"response", "text"}}
+            return {**wrapper_free, **response}
+        if isinstance(response, str):
+            extracted = _extract_json_from_text(response)
+            if extracted:
+                wrapper_free = {key: value for key, value in raw.items() if key not in {"response", "text"}}
+                return {**wrapper_free, **extracted}
     return raw
 
 
@@ -178,9 +185,21 @@ def _parse_text_confidence(text: str) -> float:
 
 def normalize_ai_response(raw: dict[str, Any]) -> AIResult:
     payload = _merge_generated_payload(raw)
-    response_text = raw.get("response") if isinstance(raw.get("response"), str) else None
+    response_text = next(
+        (
+            raw.get(key)
+            for key in ("response", "text")
+            if isinstance(raw.get(key), str)
+        ),
+        None,
+    )
 
-    label = payload.get("prediction") or payload.get("class") or payload.get("label")
+    label = (
+        payload.get("finding")
+        or payload.get("prediction")
+        or payload.get("class")
+        or payload.get("label")
+    )
     if label is None and response_text:
         predicted_class, raw_label = _find_label_in_text(response_text)
     else:
@@ -234,14 +253,24 @@ def _mock_ai_result(file_path: Path) -> AIResult:
     )
 
 
-async def _post_generate(client: httpx.AsyncClient, url: str, path: Path) -> httpx.Response:
+async def _post_generate(
+    client: httpx.AsyncClient,
+    url: str,
+    path: Path,
+    model_variant: str,
+) -> httpx.Response:
     with path.open("rb") as handle:
-        return await client.post(
-            url,
-            data={"prompt": GENERATE_PROMPT},
-            files={"image": (path.name, handle, _guess_mime_type(path))},
-            headers={"ngrok-skip-browser-warning": "true"},
-        )
+        image_base64 = base64.b64encode(handle.read()).decode("utf-8")
+
+    return await client.post(
+        url,
+        json={
+            "image_base64": image_base64,
+            "prompt": GENERATE_PROMPT,
+            "model_variant": model_variant,
+        },
+        headers={"ngrok-skip-browser-warning": "true"},
+    )
 
 
 def _response_payload(response: httpx.Response) -> dict[str, Any]:
@@ -257,6 +286,7 @@ async def run_ai_inference(
     clinical_note: str | None = None,
     study_type: str | None = None,
     lang: str | None = None,
+    model_variant: str = "pneumonia_v1",
 ) -> AIResult:
     path = Path(image_path)
     if not path.exists():
@@ -282,7 +312,7 @@ async def run_ai_inference(
     url, _ = _candidate_endpoints(base_url)[0]
     try:
         async with httpx.AsyncClient(timeout=settings.ai_timeout_seconds) as client:
-            response = await _post_generate(client, url, path)
+            response = await _post_generate(client, url, path, model_variant)
         response.raise_for_status()
     except Exception as exc:
         raise RuntimeError(f"AI service request failed: {exc}") from exc

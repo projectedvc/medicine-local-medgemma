@@ -179,6 +179,10 @@ const UI = {
     confidence: "Сенімділік",
     threshold: "Шек",
     model: "AI",
+    modelSelector: "MedAI нұсқасы",
+    modelBase: "Негізгі MedAI",
+    modelTuned: "Оқытылған MedAI — пневмония / норма",
+    modelCurrent: "Таңдалған нұсқа",
     dataset: "Дерек",
     classUnknown: "Класс анықталмады",
     lowConfidenceWarning: "AI сенімділігі төмен. Нәтижені дәрігер қолмен тексеруі керек.",
@@ -229,8 +233,8 @@ const UI = {
     homeFeatureOne: "AI талдау",
     homeFeatureTwo: "Қорытынды",
     homeFeatureThree: "Локалды дерек",
-    heroTitleOne: "Кеуде",
-    heroTitleTwo: "Радиология",
+    heroTitleOne: "Medicine",
+    heroTitleTwo: "",
     heroMeta: "Жергілікті MedAI",
     heroAction: "Кеуде AI жұмысын бастау",
     heroNote: "MedAI: кеуде суреттерін талдауға, AI қорытынды жобасын жасауға және дәрігерлік тексеруге арналған жергілікті радиология жұмыс орны.",
@@ -366,6 +370,10 @@ const UI = {
     confidence: "Уверенность",
     threshold: "Порог",
     model: "AI",
+    modelSelector: "Версия MedAI",
+    modelBase: "Базовая MedAI",
+    modelTuned: "Дообученная MedAI — пневмония / норма",
+    modelCurrent: "Выбранная версия",
     dataset: "Данные",
     classUnknown: "Класс не определен",
     lowConfidenceWarning: "Уверенность AI низкая. Результат должен быть проверен врачом вручную.",
@@ -553,6 +561,10 @@ const UI = {
     confidence: "Confidence",
     threshold: "Threshold",
     model: "AI",
+    modelSelector: "MedAI version",
+    modelBase: "Base MedAI",
+    modelTuned: "Fine-tuned MedAI — pneumonia / normal",
+    modelCurrent: "Selected version",
     dataset: "Data",
     classUnknown: "Class not defined",
     lowConfidenceWarning: "AI confidence is low. The result must be checked manually by a clinician.",
@@ -787,6 +799,7 @@ export default function App() {
   const [view, setView] = useState<View>("studies");
   const [showLoginPanel, setShowLoginPanel] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [modelVariant, setModelVariant] = useState<"base" | "pneumonia_v1">("pneumonia_v1");
   const [aiRunningStudyId, setAiRunningStudyId] = useState<number | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -1030,7 +1043,7 @@ export default function App() {
       if (autoAI) {
         setAiRunningStudyId(uploaded.id);
         try {
-          analysis = await api.runAI(uploaded.id, true, true, lang);
+          analysis = await api.runAI(uploaded.id, true, true, lang, modelVariant);
           setAiResults([analysis]);
           if (analysis.status === "failed") {
             throw new Error(analysis.error_message || ui.aiFailed);
@@ -1057,7 +1070,7 @@ export default function App() {
     setBusy(true);
     setAiRunningStudyId(selectedStudy.id);
     try {
-      const analysis = await api.runAI(selectedStudy.id, true, auto, lang);
+      const analysis = await api.runAI(selectedStudy.id, true, auto, lang, modelVariant);
       setAiResults([analysis]);
       if (analysis.status === "failed") {
         throw new Error(analysis.error_message || ui.aiFailed);
@@ -1535,6 +1548,18 @@ export default function App() {
                         <AlertTriangle size={18} />
                         <strong>{ui.disclaimer}</strong>
                       </div>
+                      <div className="modelSelector">
+                        <label htmlFor="medai-model-variant">{ui.modelSelector}</label>
+                        <select
+                          id="medai-model-variant"
+                          value={modelVariant}
+                          onChange={(event) => setModelVariant(event.target.value as "base" | "pneumonia_v1")}
+                          disabled={busy || selectedStudyAiBusy}
+                        >
+                          <option value="pneumonia_v1">{ui.modelTuned}</option>
+                          <option value="base">{ui.modelBase}</option>
+                        </select>
+                      </div>
                       {selectedStudyAiBusy && (
                         <div className="inlineAiStatus">
                           <Loader2 size={18} />
@@ -1551,6 +1576,10 @@ export default function App() {
                             <span>{ui.status}</span>
                             <strong>{latestAI.status}</strong>
                           </div>
+            <div className="metricLine modelVersionLine">
+              <span>{ui.modelCurrent}</span>
+              <strong>{latestAI.model_version === "medai-pneumonia-v1" ? ui.modelTuned : ui.modelBase}</strong>
+            </div>
                           {latestAI.hidden_due_low_confidence ? (
                             <div className="warningBox">{ui.lowConfidenceWarning}</div>
                           ) : (
