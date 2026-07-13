@@ -22,6 +22,9 @@ services:
       AI_CONFIDENCE_THRESHOLD: ${AI_CONFIDENCE_THRESHOLD:-0.70}
       AI_MODEL_VERSION: ${AI_MODEL_VERSION:-jupiter-or-demo-v1}
       AI_DATASET_VERSION: ${AI_DATASET_VERSION:-not-validated-demo}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      GROQ_TIMEOUT_SECONDS: ${GROQ_TIMEOUT_SECONDS:-45}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,https://aimedicine.vercel.app}
     volumes:
       - backend_data:/app/data

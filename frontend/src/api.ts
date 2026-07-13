@@ -1,6 +1,7 @@
 import type {
   AIAnalysis,
   AnalyticsOverview,
+  AssistantMessage,
   AuditLog,
   CRMRecord,
   FeedbackType,
@@ -113,7 +114,7 @@ export const api = {
 
   listAI: (studyId: number) => request<AIAnalysis[]>(`/studies/${studyId}/ai`),
 
-  getReport: (studyId: number) => request<Report>(`/studies/${studyId}/report`),
+  getReport: (studyId: number, lang = "ru") => request<Report>(`/studies/${studyId}/report?lang=${encodeURIComponent(lang)}`),
 
   createDraft: (studyId: number, lang = "ru") =>
     request<Report>(`/studies/${studyId}/report/draft?lang=${encodeURIComponent(lang)}`, { method: "POST" }),
@@ -139,7 +140,10 @@ export const api = {
 
   analytics: () => request<AnalyticsOverview>("/analytics/overview"),
 
-  listCrm: () => request<CRMRecord[]>("/crm"),
+  listCrm: (params: Record<string, string> = {}) => {
+    const query = new URLSearchParams(params);
+    return request<CRMRecord[]>(`/crm${query.toString() ? `?${query}` : ""}`);
+  },
 
   createCrm: (payload: {
     patient_code: string;
@@ -150,6 +154,8 @@ export const api = {
     note: string;
     next_step?: string | null;
     due_at?: string | null;
+    participant_ids?: number[];
+    linked_study_ids?: number[];
   }) => request<CRMRecord>("/crm", { method: "POST", body: JSON.stringify(payload) }),
 
   updateCrm: (
@@ -163,8 +169,22 @@ export const api = {
       note: string;
       next_step: string | null;
       due_at: string | null;
+      participant_ids: number[];
+      linked_study_ids: number[];
     }>
   ) => request<CRMRecord>(`/crm/${recordId}`, { method: "PATCH", body: JSON.stringify(payload) }),
+
+  addCrmActivity: (recordId: number, content: string, activity_type = "note") =>
+    request(`/crm/${recordId}/activities`, {
+      method: "POST",
+      body: JSON.stringify({ content, activity_type })
+    }),
+
+  chatAssistant: (messages: AssistantMessage[], lang: "kk" | "ru" | "en", study_id?: number) =>
+    request<{ message: string }>("/assistant/chat", {
+      method: "POST",
+      body: JSON.stringify({ messages, lang, study_id })
+    }),
 
   deleteCrm: (recordId: number) =>
     fetch(`${API_BASE}/crm/${recordId}`, {

@@ -57,13 +57,25 @@ def _sync_report_language_for_export(db: Session, study, report: Report, lang: s
 @router.get("", response_model=ReportOut)
 def get_report(
     study_id: int,
+    lang: str = "ru",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> Report:
     study = get_study_or_404(db, study_id)
     ensure_study_access(current_user, study)
     report = db.query(Report).filter(Report.study_id == study.id).one_or_none()
-    return report or _get_or_create_report(db, study.id)
+    report = report or _get_or_create_report(db, study.id)
+    if _final_text_is_ai_draft(report):
+        previous_draft = report.ai_draft_text
+        analysis = _latest_completed_analysis(db, study.id)
+        refreshed_draft = build_ai_draft(study, analysis, lang)
+        if refreshed_draft != previous_draft:
+            report.ai_draft_text = refreshed_draft
+            report.ai_draft_created_at = datetime.now(timezone.utc)
+            report.final_text = refreshed_draft
+            db.commit()
+            db.refresh(report)
+    return report
 
 
 @router.post("/draft", response_model=ReportOut)

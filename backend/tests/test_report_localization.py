@@ -44,18 +44,20 @@ def analysis() -> AIAnalysis:
 
 
 @pytest.mark.parametrize(
-    ("lang", "title", "finding"),
+    ("lang", "heading", "finding"),
     [
-        ("kk", "AI қорытынды жобасы", "Пневмония"),
-        ("ru", "AI-черновик заключения", "Пневмония"),
-        ("en", "AI report draft", "Pneumonia"),
+        ("kk", "Сипаттама:", "Пневмония"),
+        ("ru", "Описание:", "пневмония"),
+        ("en", "Findings:", "Pneumonia"),
     ],
 )
-def test_ai_draft_is_localized(lang: str, title: str, finding: str, study: Study, analysis: AIAnalysis) -> None:
+def test_ai_draft_is_localized(lang: str, heading: str, finding: str, study: Study, analysis: AIAnalysis) -> None:
     text = build_localized_ai_draft(study, analysis, lang)
 
-    assert title in text
+    assert heading in text
     assert finding in text
+    assert "Уверенность AI" not in text
+    assert "RX-TEST" not in text
 
 
 def test_ai_draft_prefers_local_ai_generated_text(study: Study, analysis: AIAnalysis) -> None:
@@ -191,3 +193,37 @@ def test_ai_draft_removes_instruction_noise(study: Study, analysis: AIAnalysis) 
     assert "Determine the" not in text
     assert "prediction" not in text.casefold()
     assert "затемнение" in text or "opacity" not in text
+
+
+def test_ai_draft_keeps_only_clinical_sections_from_reasoning_dump(study: Study, analysis: AIAnalysis) -> None:
+    analysis.predicted_class = None
+    analysis.confidence = 0.03
+    analysis.hidden_due_low_confidence = True
+    analysis.raw_response_json = json.dumps(
+        {
+            "findings": (
+                "<unused94>thought\nThe user wants JSON output.\n"
+                "5. Determine the findings: The findings should be a short description of the image. "
+                '"The chest X-ray shows clear lung fields, normal heart size, and no obvious signs of '
+                'consolidation, pleural effusion, or pneumothorax."\n'
+                "6. Determine the impression: The impression should be a short diagnostic impression. "
+                '"The chest X-ray is unremarkable."\n'
+                "7. Determine the recommendations: The recommendation should be a short next-step recommendation. "
+                '"No further imaging is required."\n'
+                "8. Format the output: Create the JSON structure."
+            )
+        }
+    )
+
+    text = build_localized_ai_draft(study, analysis, "ru")
+
+    assert text.startswith("Описание:\n")
+    assert "Заключение:" in text
+    assert "Рекомендации:" in text
+    assert "Легочные поля без очагово-инфильтративных изменений" in text
+    assert "Рентгенограмма органов грудной клетки без острых патологических изменений" in text
+    assert "JSON" not in text
+    assert "Determine" not in text
+    assert "долж" not in text.casefold()
+    assert "Уверенность" not in text
+    assert "RX-TEST" not in text

@@ -186,6 +186,11 @@ FINDING_TEXT = {
 
 TRANSLATION_RULES: dict[ReportLang, tuple[tuple[str, str], ...]] = {
     "ru": (
+        (
+            r"\bthe chest x-?ray shows clear lung fields,? normal heart size,? and no obvious signs of consolidation,? pleural effusion,? or pneumothorax\b",
+            "Легочные поля без очагово-инфильтративных изменений. Размеры сердца в пределах нормы. Признаков консолидации, плеврального выпота и пневмоторакса не выявлено",
+        ),
+        (r"\bthe chest x-?ray is unremarkable\b", "Рентгенограмма органов грудной клетки без острых патологических изменений"),
         (r"\bthe image shows a normal brain\b", "на снимке определяется нормальная картина головного мозга"),
         (r"\bthe image shows a normal chest x-?ray\b", "на снимке определяется нормальная рентгенограмма грудной клетки"),
         (r"\bno obvious abnormalities are visible\b", "явных патологических изменений не видно"),
@@ -245,6 +250,11 @@ TRANSLATION_RULES: dict[ReportLang, tuple[tuple[str, str], ...]] = {
         (r"\bfindings?\b", "описание"),
     ),
     "kk": (
+        (
+            r"\bthe chest x-?ray shows clear lung fields,? normal heart size,? and no obvious signs of consolidation,? pleural effusion,? or pneumothorax\b",
+            "Өкпе алаңдарында ошақты-инфильтративті өзгерістер жоқ. Жүрек өлшемдері қалыпты шекте. Консолидация, плевралық сұйықтық және пневмоторакс белгілері анықталмайды",
+        ),
+        (r"\bthe chest x-?ray is unremarkable\b", "Кеуде қуысының рентгенограммасында жедел патологиялық өзгерістер жоқ"),
         (r"\bthe image shows a normal brain\b", "суретте бас миының қалыпты көрінісі анықталады"),
         (r"\bthe image shows a normal chest x-?ray\b", "суретте кеуде қуысының қалыпты рентгенограммасы анықталады"),
         (r"\bno obvious abnormalities are visible\b", "айқын патологиялық өзгерістер көрінбейді"),
@@ -374,7 +384,52 @@ def _strip_instruction_noise(text: str) -> str:
         " ",
         text,
     )
+    text = re.sub(
+        r"(?is)\b(?:format\s+the\s+output|create\s+the\s+json\s+structure|ensure\s+the\s+.*?\s+are\s+in\s+(?:russian|kazakh|english))\b.*$",
+        " ",
+        text,
+    )
+    text = re.sub(
+        r"(?is)\b(?:отформатируйте\s+выходные\s+данные|создайте\s+структуру\s+json|убедитесь,?\s+что\s+.*?\s+представлен[ыа]?\s+на\s+.*?языке)\b.*$",
+        " ",
+        text,
+    )
+    instruction_patterns = (
+        r"(?i)\b(?:the\s+)?(?:findings?|description|impression|conclusion|recommendations?|response|output)\s+(?:should|must|need(?:s)?\s+to)\s+be\s+[^.!?]*[.!?]",
+        r"(?i)\b(?:выводы|описание|впечатление|заключение|рекомендаци[яи]|ответ|выходные\s+данные)\s+(?:должн[аоы]?|следует)\s+(?:быть|представлять\s+собой)?\s*[^.!?]*[.!?]",
+        r"(?i)\b(?:сипаттама|қорытынды|ұсыныстар|жауап)\s+[^.!?]*(?:болуы\s+керек|ұсынуы\s+керек)[^.!?]*[.!?]",
+    )
+    for pattern in instruction_patterns:
+        text = re.sub(pattern, " ", text)
     return re.sub(r"\s{2,}", " ", text).strip()
+
+
+def _sanitize_clinical_text(value: str | None) -> str | None:
+    if not value:
+        return None
+    text = _strip_instruction_noise(value)
+    text = re.sub(r"(?is)\*{0,2}(?:prediction|confidence|top\s*3|class|score|json)\*{0,2}\s*:.*$", " ", text)
+    text = re.sub(r"(?im)^\s*\d+\s*[.)]\s*", "", text)
+    text = re.sub(r"\s+\d+\s*[.)]\s*$", "", text)
+    text = re.sub(r"\*{1,3}", "", text)
+    text = re.sub(r"^[\s\"'«“]+|[\s\"'»”]+$", "", text.strip())
+    text = re.sub(r"\s+([.,;:])", r"\1", text)
+    text = re.sub(r"[ \t]{2,}", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+
+    unique: list[str] = []
+    seen: set[str] = set()
+    for paragraph in re.split(r"\n+", text):
+        paragraph = paragraph.strip(" -•\t")
+        if not paragraph:
+            continue
+        key = re.sub(r"\W+", "", paragraph.casefold())
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        unique.append(paragraph)
+    cleaned = "\n".join(unique).strip()
+    return cleaned[:1200].rstrip() or None
 
 
 def _split_labeled_sections(text: str, report_lang: ReportLang) -> dict[str, str]:
@@ -400,6 +455,9 @@ def _split_labeled_sections(text: str, report_lang: ReportLang) -> dict[str, str
         if not target:
             continue
         content = _translate_generated_text(content, report_lang)
+        content = _sanitize_clinical_text(content)
+        if not content:
+            continue
         if target in sections:
             sections[target] = f"{sections[target]}\n{content}".strip()
         else:
@@ -503,7 +561,10 @@ def _model_generated_sections(analysis: AIAnalysis, report_lang: ReportLang) -> 
     for key in ("findings", "impression", "recommendations"):
         value = _clean_generated_text(payload.get(key))
         if value:
-            sections[key] = _translate_generated_text(value, report_lang)
+            translated = _translate_generated_text(value, report_lang)
+            cleaned = _sanitize_clinical_text(translated)
+            if cleaned:
+                sections[key] = cleaned
 
     if sections:
         return sections
@@ -521,11 +582,16 @@ def _model_generated_sections(analysis: AIAnalysis, report_lang: ReportLang) -> 
     for key, aliases in headings.items():
         value = _response_section(response_text, aliases, tuple(item for item in stop_headings if item not in aliases))
         if value:
-            sections[key] = _translate_generated_text(value, report_lang)
+            translated = _translate_generated_text(value, report_lang)
+            cleaned = _sanitize_clinical_text(translated)
+            if cleaned:
+                sections[key] = cleaned
 
     if sections:
         return sections
-    return {"findings": _translate_generated_text(response_text, report_lang)}
+    translated = _translate_generated_text(response_text, report_lang)
+    cleaned = _sanitize_clinical_text(translated)
+    return {"findings": cleaned} if cleaned else {}
 
 
 def _confidence_line(text: dict[str, str], analysis: AIAnalysis) -> str:
@@ -545,61 +611,38 @@ def finding_label(finding: FindingClass | None, lang: str | None) -> str:
 def build_localized_ai_draft(study: Study, analysis: AIAnalysis | None, lang: str | None = "ru") -> str:
     report_lang = normalize_report_lang(lang)
     text = TEXT[report_lang]
-    lines = [
-        text["draft_title"],
-        f"{text['study']}: {study.accession_number}",
-        f"{text['patient']}: {study.patient_code}",
-        f"{text['study_type']}: {study.study_type}",
-        "",
-    ]
-    if study.clinical_note:
-        lines.extend([f"{text['clinical_note']}:", study.clinical_note, ""])
+    pending = {
+        "kk": {
+            "findings": "Сипаттаманы дәрігер сурет бойынша толтырады.",
+            "impression": "Дәрігерлік бағалау қажет.",
+        },
+        "ru": {
+            "findings": "Описание заполняется врачом по изображению.",
+            "impression": "Требуется врачебная оценка.",
+        },
+        "en": {
+            "findings": "Findings to be completed by the clinician from the image.",
+            "impression": "Clinician assessment is required.",
+        },
+    }[report_lang]
+
+    def render(sections: dict[str, str]) -> str:
+        blocks: list[str] = []
+        for key in ("findings", "impression", "recommendations"):
+            value = _sanitize_clinical_text(sections.get(key))
+            if value:
+                blocks.append(f"{text[key]}:\n{value}")
+        return "\n\n".join(blocks).strip()
 
     if not analysis or analysis.status.value != "completed":
-        lines.extend([text["no_analysis"], text["doctor_review"]])
-        return "\n".join(lines)
+        return render(pending)
 
     generated_sections = _model_generated_sections(analysis, report_lang)
     if generated_sections:
-        if analysis.predicted_class and not analysis.hidden_due_low_confidence:
-            lines.append(f"{text['ai_class']}: {finding_label(analysis.predicted_class, report_lang)}")
-        lines.append(_confidence_line(text, analysis))
-        if analysis.hidden_due_low_confidence or not analysis.predicted_class:
-            lines.extend(["", text["low_confidence"]])
-        for key in ("findings", "impression", "recommendations"):
-            value = generated_sections.get(key)
-            if value:
-                lines.extend(["", f"{text[key]}:", value])
-        lines.extend(["", text["doctor_review"]])
-        return "\n".join(lines)
+        return render(generated_sections)
 
     if analysis.hidden_due_low_confidence or not analysis.predicted_class:
-        lines.extend(
-            [
-                text["low_confidence"],
-                _confidence_line(text, analysis),
-                text["doctor_review"],
-            ]
-        )
-        return "\n".join(lines)
+        return render(pending)
 
     template = FINDING_TEXT[report_lang][analysis.predicted_class]
-    lines.extend(
-        [
-            f"{text['ai_class']}: {finding_label(analysis.predicted_class, report_lang)}",
-            _confidence_line(text, analysis),
-            "",
-            f"{text['findings']}:",
-            template["findings"],
-            "",
-            f"{text['impression']}:",
-            template["impression"],
-            "",
-            f"{text['recommendations']}:",
-            template["recommendations"],
-            "",
-            text["model_note"],
-            text["doctor_review"],
-        ]
-    )
-    return "\n".join(lines)
+    return render(template)

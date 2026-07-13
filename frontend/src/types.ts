@@ -130,6 +130,22 @@ export interface CRMRecord {
   due_at: string | null;
   created_by: User;
   updated_by: User | null;
+  participants: User[];
+  studies: Array<Pick<Study, "id" | "accession_number" | "patient_code" | "study_type" | "status">>;
+  activities: CRMActivity[];
   created_at: string;
   updated_at: string;
+}
+
+export interface CRMActivity {
+  id: number;
+  activity_type: string;
+  content: string;
+  author: User;
+  created_at: string;
+}
+
+export interface AssistantMessage {
+  role: "user" | "assistant";
+  content: string;
 }

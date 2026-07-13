@@ -5,6 +5,7 @@ import {
   BookOpen,
   CheckCircle,
   ClipboardList,
+  ExternalLink,
   Download,
   Eye,
   FileText,
@@ -13,7 +14,9 @@ import {
   Loader2,
   LogIn,
   LogOut,
+  MessageCircle,
   Moon,
+  Pencil,
   Play,
   Plus,
   RefreshCw,
@@ -21,10 +24,14 @@ import {
   Save,
   Search,
   Send,
+  SlidersHorizontal,
+  Sparkles,
   Stethoscope,
   Sun,
   UploadCloud,
+  UserRound,
   Users,
+  X,
   ZoomIn,
   ZoomOut
 } from "lucide-react";
@@ -34,6 +41,7 @@ import { api, currentToken, setAuthToken } from "./api";
 import type {
   AIAnalysis,
   AnalyticsOverview,
+  AssistantMessage,
   AuditLog,
   CRMRecord,
   FeedbackType,
@@ -52,9 +60,9 @@ const UI = {
   kk: {
     locale: "kk-KZ",
     appName: "MedAI Radiology",
-    appSubtitle: "Жергілікті AI-рентген талдау платформасы",
+    appSubtitle: "MedAI рентген талдау платформасы",
     loginTitle: "Клиникалық жұмыс орнына кіру",
-    loginLead: "DICOM, PNG және JPEG суреттерін жергілікті MedAI арқылы талдап, дәрігерге арналған қорытынды жобасын жасаңыз.",
+    loginLead: "DICOM, PNG және JPEG суреттерін MedAI арқылы талдап, дәрігерге арналған қорытынды жобасын жасаңыз.",
     login: "Логин",
     password: "Құпиясөз",
     signIn: "Кіру",
@@ -113,12 +121,12 @@ const UI = {
       wrong_region: "Аймақ қате",
       other: "Басқа"
     },
-    overviewHeroTitle: "Жергілікті MedAI негізіндегі радиология ассистенті",
+    overviewHeroTitle: "MedAI радиология ассистенті",
     overviewHeroText:
       "Платформа зерттеуді қабылдайды, суретті тексереді, клиникалық жазбамен бірге AI талдау жасайды, қорытынды жобасын дайындайды және PDF/Word экспортын береді. Деректер локалды компьютерде қалады.",
     startStudy: "Жаңа зерттеу",
     openReference: "Анықтамалық",
-    localModel: "Жергілікті AI",
+    localModel: "MedAI",
     modelValue: "AI",
     privacy: "Жеке режим",
     privacyValue: "Сыртқы API жоқ",
@@ -202,7 +210,7 @@ const UI = {
     send: "Жіберу",
     feedbackSaved: "Кері байланыс сақталды",
     aiWaiting: "MedAI талдап жатыр",
-    aiWaitingSub: "Сурет пен клиникалық жазба жергілікті AI жүйесіне жіберілді. Бірінші жауап бірнеше секундқа созылуы мүмкін.",
+    aiWaitingSub: "Сурет пен клиникалық жазба MedAI жүйесіне жіберілді. Бірінші жауап бірнеше секундқа созылуы мүмкін.",
     noData: "дерек жоқ",
     myLungs: "Өкпе талдауы",
     lungsCondition: "Өкпе жағдайы",
@@ -220,32 +228,32 @@ const UI = {
     frontalCxr: "Фронталды CXR",
     lateralCxr: "Бүйір CXR / CT",
     pdfWordExport: "PDF / Word экспорт",
-    localLora: "Локалды LoRA",
+    localLora: "MedAI",
     searchPlaceholder: "Іздеу...",
     heatmap: "Heatmap",
-    homeBadge: "Локалды AI көмекшісі кеуде зерттеулеріне арналған",
+    homeBadge: "Кеуде зерттеулеріне арналған MedAI көмекшісі",
     homeTitle: "MedAI кеуде снимогын тез талдайды",
     homeText: "Суретті жүктеңіз, AI қорытынды жобасын алыңыз және дәрігерлік тексеруге дайын жұмыс орнында зерттеуді жүргізіңіз.",
     homePrimary: "Зерттеуді бастау",
     homeSecondary: "Справочник ашу",
     homeCardTitle: "Chest AI",
-    homeCardText: "CXR, DICOM, JPEG және PNG үшін локалды талдау.",
+    homeCardText: "CXR, DICOM, JPEG және PNG талдауы.",
     homeFeatureOne: "AI талдау",
     homeFeatureTwo: "Қорытынды",
     homeFeatureThree: "Локалды дерек",
-    heroTitleOne: "Medicine",
-    heroTitleTwo: "",
-    heroMeta: "Жергілікті MedAI",
+    heroTitleOne: "Кеуде",
+    heroTitleTwo: "Радиология",
+    heroMeta: "MedAI",
     heroAction: "Кеуде AI жұмысын бастау",
-    heroNote: "MedAI: кеуде суреттерін талдауға, AI қорытынды жобасын жасауға және дәрігерлік тексеруге арналған жергілікті радиология жұмыс орны.",
+    heroNote: "MedAI: кеуде суреттерін талдауға, қорытынды жобасын жасауға және дәрігерлік тексеруге арналған радиология жұмыс орны.",
     heroSideText: "Кеуде AI жергілікті қорытындылар, зерттеулер және анықтамалық шолу үшін."
   },
   ru: {
     locale: "ru-RU",
     appName: "MedAI Radiology",
-    appSubtitle: "Локальная AI-платформа анализа рентген-снимков",
+    appSubtitle: "Платформа анализа рентген-снимков MedAI",
     loginTitle: "Вход в клиническое рабочее место",
-    loginLead: "Анализируйте DICOM, PNG и JPEG через локальную MedAI и формируйте черновики заключений для врача.",
+    loginLead: "Анализируйте DICOM, PNG и JPEG в MedAI и формируйте черновики заключений для врача.",
     login: "Логин",
     password: "Пароль",
     signIn: "Войти",
@@ -309,7 +317,7 @@ const UI = {
       "Платформа принимает исследование, проверяет снимок, анализирует изображение вместе с клинической заметкой, готовит черновик заключения и экспортирует PDF/Word. Данные остаются на локальном компьютере.",
     startStudy: "Новое исследование",
     openReference: "Справочник",
-    localModel: "Локальный AI",
+    localModel: "MedAI",
     modelValue: "AI",
     privacy: "Приватный режим",
     privacyValue: "Без внешнего API",
@@ -393,7 +401,7 @@ const UI = {
     send: "Отправить",
     feedbackSaved: "Обратная связь сохранена",
     aiWaiting: "MedAI анализирует",
-    aiWaitingSub: "Снимок и клиническая заметка отправлены в локальный AI. Первый ответ может занять несколько секунд.",
+    aiWaitingSub: "Снимок и клиническая заметка отправлены в MedAI. Первый ответ может занять несколько секунд.",
     noData: "нет данных",
     myLungs: "Мои легкие",
     lungsCondition: "Состояние легких",
@@ -411,32 +419,32 @@ const UI = {
     frontalCxr: "Фронтальный CXR",
     lateralCxr: "Боковой CXR / CT",
     pdfWordExport: "PDF / Word экспорт",
-    localLora: "Локальная LoRA",
+    localLora: "MedAI",
     searchPlaceholder: "Поиск...",
     heatmap: "Теплокарта",
-    homeBadge: "Локальный AI-ассистент для исследований грудной клетки",
+    homeBadge: "Ассистент MedAI для исследований грудной клетки",
     homeTitle: "MedAI помогает разбирать снимки ОГК",
     homeText: "Загрузите снимок, получите AI-черновик заключения и ведите исследование в аккуратном рабочем пространстве врача.",
     homePrimary: "Начать исследование",
     homeSecondary: "Открыть справочник",
     homeCardTitle: "Chest AI",
-    homeCardText: "Локальный анализ CXR, DICOM, JPEG и PNG.",
+    homeCardText: "Анализ CXR, DICOM, JPEG и PNG.",
     homeFeatureOne: "AI-анализ",
     homeFeatureTwo: "Заключение",
     homeFeatureThree: "Локальные данные",
     heroTitleOne: "Грудная",
     heroTitleTwo: "Радиология",
-    heroMeta: "Локальный MedAI",
-    heroAction: "Начать локальный AI-процесс ОГК",
-    heroNote: "MedAI: локальное рабочее место для анализа снимков грудной клетки, AI-черновиков заключений и врачебной проверки.",
+    heroMeta: "MedAI",
+    heroAction: "Начать работу с MedAI",
+    heroNote: "MedAI — рабочее место для анализа снимков грудной клетки, подготовки черновиков заключений и врачебной проверки.",
     heroSideText: "AI для локальных заключений, исследований и справочника ОГК."
   },
   en: {
     locale: "en-US",
     appName: "MedAI Radiology",
-    appSubtitle: "Local AI chest imaging workspace",
+    appSubtitle: "MedAI chest imaging workspace",
     loginTitle: "Sign in to the clinical workspace",
-    loginLead: "Analyze DICOM, PNG and JPEG images with local MedAI and prepare clinician-reviewed report drafts.",
+    loginLead: "Analyze DICOM, PNG and JPEG images with MedAI and prepare clinician-reviewed report drafts.",
     login: "Login",
     password: "Password",
     signIn: "Sign in",
@@ -495,12 +503,12 @@ const UI = {
       wrong_region: "Wrong region",
       other: "Other"
     },
-    overviewHeroTitle: "Local MedAI radiology assistant",
+    overviewHeroTitle: "MedAI radiology assistant",
     overviewHeroText:
       "The platform receives a study, validates the image, analyzes it together with clinical notes, prepares a report draft, and exports PDF/Word. Data stays on this computer.",
     startStudy: "New study",
     openReference: "Reference",
-    localModel: "Local AI",
+    localModel: "MedAI",
     modelValue: "AI",
     privacy: "Private mode",
     privacyValue: "No external API",
@@ -584,7 +592,7 @@ const UI = {
     send: "Send",
     feedbackSaved: "Feedback saved",
     aiWaiting: "MedAI is analyzing",
-    aiWaitingSub: "The image and clinical note were sent to the local AI. The first response can take a few seconds.",
+    aiWaitingSub: "The image and clinical note were sent to MedAI. The first response can take a few seconds.",
     noData: "no data",
     myLungs: "My Lungs",
     lungsCondition: "Lungs Status",
@@ -602,25 +610,133 @@ const UI = {
     frontalCxr: "Frontal PA CXR",
     lateralCxr: "Lateral CXR / CT",
     pdfWordExport: "PDF / Word Export",
-    localLora: "Local LoRA",
+    localLora: "MedAI",
     searchPlaceholder: "Search...",
     heatmap: "Heatmap",
-    homeBadge: "Local AI assistant for chest imaging",
+    homeBadge: "MedAI assistant for chest imaging",
     homeTitle: "MedAI helps read chest studies",
     homeText: "Upload an image, get an AI report draft, and review the study in a clean clinician workspace.",
     homePrimary: "Start study",
     homeSecondary: "Open reference",
     homeCardTitle: "Chest AI",
-    homeCardText: "Local analysis for CXR, DICOM, JPEG and PNG.",
+    homeCardText: "Analysis for CXR, DICOM, JPEG and PNG.",
     homeFeatureOne: "AI analysis",
     homeFeatureTwo: "Report draft",
     homeFeatureThree: "Local data",
     heroTitleOne: "Chest",
     heroTitleTwo: "Radiology",
-    heroMeta: "Local MedAI",
-    heroAction: "Start local chest AI workflow",
-    heroNote: "MedAI is a local radiology workspace for chest imaging, AI draft reports, and clinician review.",
+    heroMeta: "MedAI",
+    heroAction: "Start with MedAI",
+    heroNote: "MedAI is a radiology workspace for chest imaging, draft reports, and clinician review.",
     heroSideText: "Chest AI for local reports, studies, and reference review."
+  }
+} as const;
+
+const WORKSPACE_UI = {
+  kk: {
+    crmDepartment: "Пациенттермен жұмыс бөлімі",
+    crmDepartmentHint: "Ортақ міндеттер, жауаптылар, зерттеулер және байланыс тарихы",
+    crmNew: "Жаңа карточка",
+    crmBoard: "Бөлім тақтасы",
+    crmSearch: "Пациент немесе жазба бойынша іздеу",
+    crmAssignees: "Жауапты қызметкерлер",
+    crmStudies: "Зерттеулермен байланыс",
+    crmTimeline: "Әрекеттер тарихы",
+    crmAddNote: "Таймлайнға жазба қосу",
+    crmReadOnly: "Тек оқу режимі",
+    crmTeamAccess: "Бөлімге қолжетімді",
+    studyJournal: "Зерттеу журналы",
+    recordsShown: "жазба көрсетілді",
+    referenceTitle: "Клиникалық анықтамалық",
+    referenceHint: "Белгілер, қорытынды үлгілері және тексеру ескертпелері",
+    referenceSearch: "Патологияны іздеу",
+    examples: "Бақылау нүктелері",
+    details: "Толық карточка",
+    assistantTitle: "MedAI көмекшісі",
+    assistantSubtitle: "Клиникалық жұмыс пен CRM үшін",
+    assistantHello: "Сәлем! Зерттеу мәтінін құрылымдауға, терминді түсіндіруге немесе келесі әрекетті дайындауға көмектесемін.",
+    assistantPlaceholder: "MedAI-ға сұрақ жазыңыз...",
+    assistantAsk: "Жіберу",
+    assistantContext: "Таңдалған зерттеу контексті қосылған",
+    assistantSuggestions: ["Қорытынды құрылымын ұсын", "CRM келесі қадамын жаз", "Терминді түсіндір"],
+    medaiStatus: "MedAI дайын",
+    advancedFilters: "Қосымша сүзгілер",
+    reportPreview: "Дәрігерлік қорытынды",
+    editReport: "Өңдеу",
+    closeEditor: "Редакторды жабу",
+    reportEmpty: "Алдымен MedAI жобасын жасаңыз",
+    feedbackCompact: "Дәлсіздік туралы хабарлау",
+    lowConfidenceTitle: "Қолмен тексеру қажет"
+  },
+  ru: {
+    crmDepartment: "Отдел работы с пациентами",
+    crmDepartmentHint: "Общие задачи, ответственные, исследования и история контактов",
+    crmNew: "Новая карточка",
+    crmBoard: "Доска отдела",
+    crmSearch: "Поиск по пациенту или записи",
+    crmAssignees: "Ответственные сотрудники",
+    crmStudies: "Связанные исследования",
+    crmTimeline: "История действий",
+    crmAddNote: "Добавить заметку в таймлайн",
+    crmReadOnly: "Режим просмотра",
+    crmTeamAccess: "Доступно отделу",
+    studyJournal: "Журнал исследований",
+    recordsShown: "записей показано",
+    referenceTitle: "Клинический справочник",
+    referenceHint: "Признаки, шаблоны заключений и точки врачебной проверки",
+    referenceSearch: "Найти патологию",
+    examples: "Контрольные точки",
+    details: "Открыть полную карточку",
+    assistantTitle: "Помощник MedAI",
+    assistantSubtitle: "Для клинической работы и CRM",
+    assistantHello: "Здравствуйте! Помогу структурировать описание, объяснить термин или подготовить следующее действие по пациенту.",
+    assistantPlaceholder: "Спросите MedAI...",
+    assistantAsk: "Отправить",
+    assistantContext: "Учтён контекст выбранного исследования",
+    assistantSuggestions: ["Предложи структуру заключения", "Сформулируй следующий шаг CRM", "Объясни термин"],
+    medaiStatus: "MedAI готов",
+    advancedFilters: "Дополнительные фильтры",
+    reportPreview: "Врачебное заключение",
+    editReport: "Редактировать",
+    closeEditor: "Закрыть редактор",
+    reportEmpty: "Сначала сформируйте черновик MedAI",
+    feedbackCompact: "Сообщить о неточности",
+    lowConfidenceTitle: "Нужна ручная проверка"
+  },
+  en: {
+    crmDepartment: "Patient coordination department",
+    crmDepartmentHint: "Shared tasks, owners, linked studies, and contact history",
+    crmNew: "New card",
+    crmBoard: "Department board",
+    crmSearch: "Search patient or note",
+    crmAssignees: "Responsible team",
+    crmStudies: "Linked studies",
+    crmTimeline: "Activity timeline",
+    crmAddNote: "Add a timeline note",
+    crmReadOnly: "Read-only mode",
+    crmTeamAccess: "Department access",
+    studyJournal: "Study journal",
+    recordsShown: "records shown",
+    referenceTitle: "Clinical reference",
+    referenceHint: "Signs, report templates, and clinician review points",
+    referenceSearch: "Find a pathology",
+    examples: "Review points",
+    details: "Open full card",
+    assistantTitle: "MedAI assistant",
+    assistantSubtitle: "For clinical work and CRM",
+    assistantHello: "Hello! I can help structure a report, explain a term, or prepare the next patient action.",
+    assistantPlaceholder: "Ask MedAI...",
+    assistantAsk: "Send",
+    assistantContext: "Selected study context included",
+    assistantSuggestions: ["Suggest a report structure", "Draft the next CRM step", "Explain a term"],
+    medaiStatus: "MedAI ready",
+    advancedFilters: "More filters",
+    reportPreview: "Clinical report",
+    editReport: "Edit",
+    closeEditor: "Close editor",
+    reportEmpty: "Generate a MedAI draft first",
+    feedbackCompact: "Report an inaccuracy",
+    lowConfidenceTitle: "Manual review required"
   }
 } as const;
 
@@ -630,6 +746,7 @@ type LocalizedPathology = {
   signs: string;
   report_template: string;
   references: string;
+  examples?: string;
 };
 
 const PATHOLOGY_REFERENCE: Record<Lang, Record<string, LocalizedPathology>> = {
@@ -752,7 +869,8 @@ function localizedPathology(item: Pathology, lang: Lang): LocalizedPathology {
     label: item.slug.replace(/_/g, " ").toUpperCase(),
     signs: item.signs,
     report_template: item.report_template,
-    references: item.references ?? ""
+    references: item.references ?? "",
+    examples: item.examples ?? ""
   };
 }
 
@@ -769,14 +887,19 @@ function formatPercent(value: number | null | undefined) {
   return `${(value * 100).toFixed(1)}%`;
 }
 
-function parseProbabilities(value: string | null): [string, number][] {
-  if (!value) return [];
-  try {
-    const parsed = JSON.parse(value) as Record<string, number>;
-    return Object.entries(parsed).sort((a, b) => b[1] - a[1]);
-  } catch {
-    return [];
-  }
+type ClinicalReportSection = { title: string; body: string };
+
+function parseClinicalReport(value: string | null | undefined, lang: Lang): ClinicalReportSection[] {
+  const text = (value || "").trim();
+  if (!text) return [];
+  const headingPattern = /^(Описание|Заключение|Рекомендации|Сипаттама|Қорытынды|Ұсыныстар|Findings|Impression|Recommendations):\s*$/gim;
+  const matches = [...text.matchAll(headingPattern)];
+  if (!matches.length) return [{ title: UI[lang].report, body: text }];
+  return matches.map((match, index) => {
+    const start = (match.index ?? 0) + match[0].length;
+    const end = index + 1 < matches.length ? matches[index + 1].index ?? text.length : text.length;
+    return { title: match[1], body: text.slice(start, end).trim() };
+  }).filter((section) => section.body);
 }
 
 function canEditFinal(user: User | null) {
@@ -787,10 +910,19 @@ function canUseClinicalFlow(user: User | null) {
   return Boolean(user && ["admin", "radiologist", "physician", "expert"].includes(user.role));
 }
 
+function canViewCrm(user: User | null) {
+  return Boolean(user && ["admin", "radiologist", "physician", "expert", "analyst"].includes(user.role));
+}
+
+function canManageCrm(user: User | null) {
+  return Boolean(user && ["admin", "radiologist", "physician", "expert"].includes(user.role));
+}
+
 export default function App() {
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem("medicine_lang") as Lang) || "kk");
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("medicine_theme") as Theme) || "light");
   const ui = UI[lang];
+  const workspaceUi = WORKSPACE_UI[lang];
 
   const [user, setUser] = useState<User | null>(null);
   const [booting, setBooting] = useState(true);
@@ -809,12 +941,17 @@ export default function App() {
   const [aiResults, setAiResults] = useState<AIAnalysis[]>([]);
   const [report, setReport] = useState<Report | null>(null);
   const [finalText, setFinalText] = useState("");
+  const [reportEditing, setReportEditing] = useState(false);
   const [pathologies, setPathologies] = useState<Pathology[]>([]);
   const [audit, setAudit] = useState<AuditLog[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsOverview | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [doctors, setDoctors] = useState<User[]>([]);
   const [crmRecords, setCrmRecords] = useState<CRMRecord[]>([]);
+  const [crmSearch, setCrmSearch] = useState("");
+  const [crmSelectedId, setCrmSelectedId] = useState<number | null>(null);
+  const [crmActivity, setCrmActivity] = useState("");
+  const [referenceSearch, setReferenceSearch] = useState("");
   const [crmForm, setCrmForm] = useState({
     patient_code: "DEMO-001",
     contact_type: "consultation",
@@ -823,10 +960,12 @@ export default function App() {
     summary: "",
     note: "",
     next_step: "",
-    due_at: ""
+    due_at: "",
+    participant_ids: [] as number[],
+    linked_study_ids: [] as number[]
   });
 
-  const [filters, setFilters] = useState({ status: "", study_type: "", date_from: "", date_to: "" });
+  const [filters, setFilters] = useState({ search: "", status: "", study_type: "", date_from: "", date_to: "" });
   const [newStudy, setNewStudy] = useState({ patient_code: "DEMO-001", study_type: "CXR", clinical_note: "" });
   const [newFile, setNewFile] = useState<File | null>(null);
   const [autoAI, setAutoAI] = useState(true);
@@ -843,7 +982,16 @@ export default function App() {
 
   const latestAI = aiResults[0] ?? null;
   const selectedStudyAiBusy = Boolean(selectedStudy && aiRunningStudyId === selectedStudy.id);
-  const probabilityRows = useMemo(() => parseProbabilities(latestAI?.probabilities_json ?? null), [latestAI]);
+  const reportSections = useMemo(() => parseClinicalReport(finalText || report?.ai_draft_text, lang), [finalText, lang, report?.ai_draft_text]);
+  const selectedCrm = crmRecords.find((record) => record.id === crmSelectedId) ?? null;
+  const filteredPathologies = useMemo(() => {
+    const query = referenceSearch.trim().toLocaleLowerCase();
+    if (!query) return pathologies;
+    return pathologies.filter((item) => {
+      const localized = localizedPathology(item, lang);
+      return `${localized.title} ${localized.label} ${localized.signs}`.toLocaleLowerCase().includes(query);
+    });
+  }, [lang, pathologies, referenceSearch]);
 
   useEffect(() => {
     localStorage.setItem("medicine_lang", lang);
@@ -881,7 +1029,9 @@ export default function App() {
   }, []);
 
   async function loadInitial(nextUser = user) {
-    await Promise.all([loadStudies(), loadPathologies(), loadDoctors(), loadCrm()]);
+    const loaders: Promise<unknown>[] = [loadStudies(), loadPathologies(), loadDoctors()];
+    if (canViewCrm(nextUser)) loaders.push(loadCrm());
+    await Promise.all(loaders);
     if (nextUser && ["admin", "analyst", "expert"].includes(nextUser.role)) {
       await loadAnalytics();
     }
@@ -958,9 +1108,10 @@ export default function App() {
     setDoctors(data);
   }
 
-  async function loadCrm() {
-    const data = await api.listCrm();
+  async function loadCrm(search = crmSearch) {
+    const data = await api.listCrm(search.trim() ? { search: search.trim() } : {});
     setCrmRecords(data);
+    setCrmSelectedId((current) => current && data.some((record) => record.id === current) ? current : null);
   }
 
   async function saveCrmRecord(event: FormEvent) {
@@ -980,10 +1131,27 @@ export default function App() {
         summary: "",
         note: "",
         next_step: "",
-        due_at: ""
+        due_at: "",
+        participant_ids: [],
+        linked_study_ids: []
       });
       await loadCrm();
       flash(ui.crmSaved);
+    } catch (err) {
+      fail(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function addCrmActivity(event: FormEvent) {
+    event.preventDefault();
+    if (!selectedCrm || !crmActivity.trim()) return;
+    setBusy(true);
+    try {
+      await api.addCrmActivity(selectedCrm.id, crmActivity.trim());
+      setCrmActivity("");
+      await loadCrm();
     } catch (err) {
       fail(err);
     } finally {
@@ -1000,9 +1168,10 @@ export default function App() {
       setAiResults(await api.listAI(studyId));
       await loadPreview(studyId);
       try {
-        const nextReport = await api.getReport(studyId);
+        const nextReport = await api.getReport(studyId, lang);
         setReport(nextReport);
         setFinalText(nextReport.final_text || nextReport.ai_draft_text || "");
+        setReportEditing(false);
       } catch {
         setReport(null);
         setFinalText("");
@@ -1051,6 +1220,7 @@ export default function App() {
           const draft = await api.createDraft(uploaded.id, lang);
           setReport(draft);
           setFinalText(draft.ai_draft_text || draft.final_text || "");
+          setReportEditing(false);
         } finally {
           setAiRunningStudyId(null);
         }
@@ -1079,6 +1249,7 @@ export default function App() {
         const nextReport = await api.createDraft(selectedStudy.id, lang);
         setReport(nextReport);
         setFinalText(nextReport.ai_draft_text || nextReport.final_text || "");
+        setReportEditing(false);
       }
       const detail = await api.getStudy(selectedStudy.id);
       setSelectedStudy(detail);
@@ -1099,6 +1270,7 @@ export default function App() {
       const nextReport = await api.createDraft(selectedStudy.id, lang);
       setReport(nextReport);
       setFinalText(nextReport.ai_draft_text || nextReport.final_text || "");
+      setReportEditing(false);
       setSelectedStudy(await api.getStudy(selectedStudy.id));
       await loadStudies();
       flash(ui.draftDone);
@@ -1115,6 +1287,7 @@ export default function App() {
     try {
       const nextReport = await api.saveReport(selectedStudy.id, finalText);
       setReport(nextReport);
+      setReportEditing(false);
       setSelectedStudy(await api.getStudy(selectedStudy.id));
       await loadStudies();
       flash(ui.saved);
@@ -1201,7 +1374,15 @@ export default function App() {
     return (
       <main className="publicShell">
         <header className="publicHeader">
-          <span className="photonBrand">MedAI</span>
+          <div className="photonBrand">
+            <span className="brandSignal" aria-hidden="true">
+              <Activity size={18} />
+            </span>
+            <span className="photonBrandCopy">
+              <strong>MedAI</strong>
+              <small>Chest intelligence</small>
+            </span>
+          </div>
           <div className="headerControls">
             <ThemeSwitch theme={theme} setTheme={setTheme} />
             <LanguageSwitch lang={lang} setLang={setLang} />
@@ -1214,10 +1395,15 @@ export default function App() {
 
         <section className="photonDashboard overviewScene publicOverview">
           <div className="photonCopy dashboardCopy">
+            <div className="heroEyebrow">
+              <span className="liveDot" />
+              <span>{ui.localModel}</span>
+              <b>CXR / DICOM</b>
+            </div>
             <h1>
               <span>{ui.heroTitleOne}</span>
               <span>
-                {ui.heroTitleTwo} <b>A.I.</b>
+                {ui.heroTitleTwo} <b>MedAI</b>
               </span>
             </h1>
             <div className="photonMeta">
@@ -1232,10 +1418,42 @@ export default function App() {
               <span>{ui.heroAction}</span>
             </div>
             <p className="photonNote">{ui.heroNote}</p>
+            <div className="heroSpecGrid" aria-label={ui.heroMeta}>
+              <div>
+                <span>01</span>
+                <strong>DICOM</strong>
+                <small>{ui.homeFeatureThree}</small>
+              </div>
+              <div>
+                <span>02</span>
+                <strong>MedAI</strong>
+                <small>{ui.homeFeatureOne}</small>
+              </div>
+              <div>
+                <span>03</span>
+                <strong>MD review</strong>
+                <small>{ui.homeFeatureTwo}</small>
+              </div>
+            </div>
           </div>
 
           <div className="photonVisual dashboardVisual" aria-hidden="true">
+            <div className="scanOrbit orbitOne" />
+            <div className="scanOrbit orbitTwo" />
             <img src="/neon_lungs_hero_transparent.png" alt="" />
+            <div className="lungAxis">
+              <span>R</span>
+              <i />
+              <span>L</span>
+            </div>
+            <div className="visualTelemetry telemetryTop">
+              <small>VIEW</small>
+              <strong>PA • CXR</strong>
+            </div>
+            <div className="visualTelemetry telemetryBottom">
+              <small>ASSIST</small>
+              <strong>MedAI</strong>
+            </div>
           </div>
 
           <aside className="photonSide dashboardSide">
@@ -1244,6 +1462,11 @@ export default function App() {
             </p>
             <span />
             <p>{ui.heroSideText}</p>
+            <div className="sideStatus">
+              <span />
+              <b>MedAI</b>
+              <small>ONLINE</small>
+            </div>
           </aside>
 
           <footer className="photonFooter overviewFooter">
@@ -1293,20 +1516,27 @@ export default function App() {
     <div className="appShell">
       <aside className="sidebar">
         <div className="brand">
-          <strong>MedAI</strong>
-          <span>{ui.roles[user.role]}</span>
+          <span className="brandSymbol" aria-hidden="true">
+            <Activity size={21} />
+          </span>
+          <span className="brandCopy">
+            <strong>MedAI</strong>
+            <small>{ui.roles[user.role]}</small>
+          </span>
         </div>
         <nav>
           <NavButton active={view === "studies"} icon={<Activity size={18} />} label={ui.nav.studies} onClick={() => setView("studies")} />
-          <NavButton
-            active={view === "crm"}
-            icon={<ClipboardList size={18} />}
-            label={ui.nav.crm}
-            onClick={async () => {
-              setView("crm");
-              await loadCrm();
-            }}
-          />
+          {canViewCrm(user) && (
+            <NavButton
+              active={view === "crm"}
+              icon={<ClipboardList size={18} />}
+              label={ui.nav.crm}
+              onClick={async () => {
+                setView("crm");
+                await loadCrm();
+              }}
+            />
+          )}
           <NavButton active={view === "reference"} icon={<BookOpen size={18} />} label={ui.nav.reference} onClick={() => setView("reference")} />
           {["admin", "analyst", "expert"].includes(user.role) && (
             <NavButton
@@ -1362,10 +1592,16 @@ export default function App() {
             <h1>{ui.titles[view]}</h1>
             <p>{user.full_name}</p>
           </div>
-          <button className="ghostButton" onClick={() => loadInitial()} disabled={busy}>
-            <RefreshCw size={18} />
-            {ui.refresh}
-          </button>
+          <div className="topbarActions">
+            <span className="systemChip">
+              <i />
+              {workspaceUi.medaiStatus}
+            </span>
+            <button className="ghostButton" onClick={() => loadInitial()} disabled={busy}>
+              <RefreshCw size={18} />
+              {ui.refresh}
+            </button>
+          </div>
         </header>
 
         {notice && <div className="notice">{notice}</div>}
@@ -1427,7 +1663,13 @@ export default function App() {
                   <h2>{ui.filters}</h2>
                   <Search size={20} />
                 </div>
-                <div className="filterGrid">
+                <div className="filterGrid filterGridPrimary">
+                  <input
+                    className="filterSearch"
+                    placeholder={`${ui.searchPlaceholder} ${ui.patientCode.toLocaleLowerCase()}`}
+                    value={filters.search}
+                    onChange={(event) => setFilters({ ...filters, search: event.target.value })}
+                  />
                   <select value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })}>
                     <option value="">{ui.allStatuses}</option>
                     {Object.entries(ui.statuses).map(([value, label]) => (
@@ -1436,17 +1678,26 @@ export default function App() {
                       </option>
                     ))}
                   </select>
-                  <input placeholder={ui.type} value={filters.study_type} onChange={(event) => setFilters({ ...filters, study_type: event.target.value })} />
-                  <input type="date" value={filters.date_from} onChange={(event) => setFilters({ ...filters, date_from: event.target.value })} />
-                  <input type="date" value={filters.date_to} onChange={(event) => setFilters({ ...filters, date_to: event.target.value })} />
                 </div>
+                <details className="advancedFilters">
+                  <summary><SlidersHorizontal size={16} />{workspaceUi.advancedFilters}</summary>
+                  <div>
+                    <input placeholder={ui.type} value={filters.study_type} onChange={(event) => setFilters({ ...filters, study_type: event.target.value })} />
+                    <input type="date" value={filters.date_from} onChange={(event) => setFilters({ ...filters, date_from: event.target.value })} />
+                    <input type="date" value={filters.date_to} onChange={(event) => setFilters({ ...filters, date_to: event.target.value })} />
+                  </div>
+                </details>
                 <button className="ghostButton" onClick={() => loadStudies()} disabled={busy}>
                   <Search size={18} />
                   {ui.apply}
                 </button>
               </div>
 
-              <div className="studyList">
+              <div className="studyJournalHeader">
+                <span>{workspaceUi.studyJournal}</span>
+                <small>{studies.length} {workspaceUi.recordsShown}</small>
+              </div>
+              <div className="studyList" aria-label={workspaceUi.studyJournal}>
                 {studies.map((study) => (
                   <button
                     className={`studyRow ${selectedStudy?.id === study.id ? "active" : ""} ${aiRunningStudyId === study.id ? "processing" : ""}`}
@@ -1538,15 +1789,15 @@ export default function App() {
                     </div>
                   </section>
 
-                  <section className="clinicalGrid">
-                    <div className="toolPanel">
+                  <section className="clinicalGrid clinicianOutputGrid">
+                    <div className="toolPanel analysisPanel">
                       <div className="panelHeader">
                         <h2>{ui.aiAnalysis}</h2>
                         <Activity size={20} />
                       </div>
-                      <div className="disclaimer">
+                      <div className="clinicalNotice">
                         <AlertTriangle size={18} />
-                        <strong>{ui.disclaimer}</strong>
+                        <span>{ui.disclaimer}</span>
                       </div>
                       <div className="modelSelector">
                         <label htmlFor="medai-model-variant">{ui.modelSelector}</label>
@@ -1571,39 +1822,20 @@ export default function App() {
                         {selectedStudyAiBusy ? ui.aiWaiting : ui.runAI}
                       </button>
                       {latestAI && (
-                        <div className="aiResult">
-                          <div className="metricLine">
-                            <span>{ui.status}</span>
-                            <strong>{latestAI.status}</strong>
-                          </div>
-            <div className="metricLine modelVersionLine">
-              <span>{ui.modelCurrent}</span>
-              <strong>{latestAI.model_version === "medai-pneumonia-v1" ? ui.modelTuned : ui.modelBase}</strong>
-            </div>
-                          {latestAI.hidden_due_low_confidence ? (
-                            <div className="warningBox">{ui.lowConfidenceWarning}</div>
-                          ) : (
-                            <div className="prediction">
-                              {latestAI.predicted_class ? ui.findings[latestAI.predicted_class] : ui.classUnknown}
-                            </div>
-                          )}
-                          <div className="metricLine">
-                            <span>{ui.confidence}</span>
-                            <strong>{formatPercent(latestAI.confidence)}</strong>
-                          </div>
-                          <div className="metricLine">
-                            <span>{ui.threshold}</span>
-                            <strong>{formatPercent(latestAI.threshold)}</strong>
-                          </div>
-                          <div className="probabilityList">
-                            {probabilityRows.map(([label, score]) => (
-                              <div key={label}>
-                                <span>{ui.findings[label as keyof typeof ui.findings] ?? label}</span>
-                                <meter min={0} max={1} value={score} />
-                                <b>{formatPercent(score)}</b>
-                              </div>
-                            ))}
-                          </div>
+                        <div className={`clinicalAiSummary ${latestAI.hidden_due_low_confidence ? "needsReview" : ""}`}>
+                          <small>{latestAI.hidden_due_low_confidence ? workspaceUi.lowConfidenceTitle : ui.aiDone}</small>
+                          <strong>
+                            {latestAI.hidden_due_low_confidence
+                              ? workspaceUi.lowConfidenceTitle
+                              : latestAI.predicted_class
+                                ? ui.findings[latestAI.predicted_class]
+                                : ui.classUnknown}
+                          </strong>
+                          <div className="confidenceTrack"><i style={{ width: `${Math.max(3, (latestAI.confidence ?? 0) * 100)}%` }} /></div>
+                          <span>{ui.confidence}: {formatPercent(latestAI.confidence)}</span>
+<span className="modelVersionLine">
+{ui.modelCurrent}: {latestAI.model_version === "medai-pneumonia-v1" ? ui.modelTuned : ui.modelBase}
+</span>
                         </div>
                       )}
                       <button className="ghostButton" onClick={createDraft} disabled={busy || !latestAI}>
@@ -1614,22 +1846,32 @@ export default function App() {
 
                     <div className="toolPanel reportPanel">
                       <div className="panelHeader">
-                        <h2>{ui.report}</h2>
+                        <div><small>{ui.aiDraft}</small><h2>{workspaceUi.reportPreview}</h2></div>
                         <FileText size={20} />
                       </div>
-                      <label>
-                        {ui.aiDraft}
-                        <textarea value={report?.ai_draft_text ?? ""} readOnly rows={8} />
-                      </label>
-                      <label>
-                        {ui.finalText}
-                        <textarea value={finalText} onChange={(event) => setFinalText(event.target.value)} readOnly={!canEditFinal(user)} rows={9} />
-                      </label>
+                      {reportEditing ? (
+                        <label className="reportEditor">
+                          {ui.finalText}
+                          <textarea value={finalText} onChange={(event) => setFinalText(event.target.value)} rows={14} autoFocus />
+                        </label>
+                      ) : reportSections.length ? (
+                        <div className="clinicalReportPreview">
+                          {reportSections.map((section) => (
+                            <section key={section.title}>
+                              <span>{section.title}</span>
+                              <p>{section.body}</p>
+                            </section>
+                          ))}
+                        </div>
+                      ) : <div className="reportEmptyState"><FileText size={22} /><span>{workspaceUi.reportEmpty}</span></div>}
                       <div className="buttonRow">
-                        <button className="ghostButton" onClick={saveReport} disabled={busy || !canEditFinal(user)}>
-                          <Save size={18} />
-                          {ui.save}
-                        </button>
+                        {canEditFinal(user) && (
+                          <button className="ghostButton" onClick={() => setReportEditing((value) => !value)} disabled={busy}>
+                            <Pencil size={17} />
+                            {reportEditing ? workspaceUi.closeEditor : workspaceUi.editReport}
+                          </button>
+                        )}
+                        {reportEditing && <button className="ghostButton" onClick={saveReport} disabled={busy || !finalText}><Save size={18} />{ui.save}</button>}
                         <button className="primaryButton" onClick={confirmReport} disabled={busy || !canEditFinal(user) || !finalText}>
                           <CheckCircle size={18} />
                           {ui.confirm}
@@ -1648,23 +1890,17 @@ export default function App() {
                       <small>{ui.confirmedAt}: {formatDate(report?.confirmed_at, lang)}</small>
                     </div>
 
-                    <div className="toolPanel">
-                      <div className="panelHeader">
-                        <h2>{ui.feedbackTitle}</h2>
-                        <Send size={20} />
-                      </div>
-                      <select value={feedbackType} onChange={(event) => setFeedbackType(event.target.value as FeedbackType)}>
-                        {Object.entries(ui.feedback).map(([value, label]) => (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
-                      <textarea value={feedbackComment} onChange={(event) => setFeedbackComment(event.target.value)} rows={4} placeholder={ui.feedbackComment} />
-                      <button className="ghostButton" onClick={sendFeedback} disabled={busy || !latestAI}>
-                        <Send size={18} />
-                        {ui.send}
-                      </button>
+                    <div className="toolPanel feedbackPanel">
+                      <details>
+                        <summary><span><Send size={17} />{workspaceUi.feedbackCompact}</span><Plus size={16} /></summary>
+                        <div>
+                          <select value={feedbackType} onChange={(event) => setFeedbackType(event.target.value as FeedbackType)}>
+                            {Object.entries(ui.feedback).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                          </select>
+                          <textarea value={feedbackComment} onChange={(event) => setFeedbackComment(event.target.value)} rows={3} placeholder={ui.feedbackComment} />
+                          <button className="ghostButton" onClick={sendFeedback} disabled={busy || !latestAI}><Send size={18} />{ui.send}</button>
+                        </div>
+                      </details>
                     </div>
                   </section>
                 </>
@@ -1679,147 +1915,180 @@ export default function App() {
         )}
 
         {view === "crm" && (
-          <section className="crmDashboard">
+          <section className="crmWorkspace">
             <div className="crmHero">
               <div>
-                <span>{ui.crmSubtitle}</span>
-                <h2>{ui.crmTitle}</h2>
+                <span>{workspaceUi.crmDepartmentHint}</span>
+                <h2>{workspaceUi.crmDepartment}</h2>
+                <small className="accessPill">
+                  <Users size={14} />
+                  {canManageCrm(user) ? workspaceUi.crmTeamAccess : workspaceUi.crmReadOnly}
+                </small>
               </div>
               <div className="crmVitals">
-                <div>
-                  <strong>{crmRecords.filter((record) => record.status === "active").length}</strong>
-                  <span>{ui.crmActive}</span>
-                </div>
-                <div>
-                  <strong>{crmRecords.filter((record) => record.status === "follow_up").length}</strong>
-                  <span>{ui.crmFollowUp}</span>
-                </div>
-                <div>
-                  <strong>{crmRecords.filter((record) => record.priority === "urgent").length}</strong>
-                  <span>{ui.crmUrgent}</span>
-                </div>
+                <div><strong>{crmRecords.filter((record) => record.status === "active").length}</strong><span>{ui.crmActive}</span></div>
+                <div><strong>{crmRecords.filter((record) => record.status === "follow_up").length}</strong><span>{ui.crmFollowUp}</span></div>
+                <div><strong>{crmRecords.filter((record) => record.priority === "urgent" && record.status !== "closed").length}</strong><span>{ui.crmUrgent}</span></div>
               </div>
             </div>
 
-            <form className="crmComposer" onSubmit={saveCrmRecord}>
-              <div className="panelHeader">
-                <h2>{ui.crmSave}</h2>
-                <ClipboardList size={20} />
-              </div>
-              <div className="crmFormGrid">
-                <label>
-                  {ui.patientCode}
-                  <input value={crmForm.patient_code} onChange={(event) => setCrmForm({ ...crmForm, patient_code: event.target.value })} />
-                </label>
-                <label>
-                  {ui.crmContact}
-                  <select value={crmForm.contact_type} onChange={(event) => setCrmForm({ ...crmForm, contact_type: event.target.value })}>
-                    <option value="consultation">Consultation</option>
-                    <option value="call">Call</option>
-                    <option value="follow_up">Follow-up</option>
-                    <option value="report">Report</option>
-                  </select>
-                </label>
-                <label>
-                  {ui.status}
-                  <select value={crmForm.status} onChange={(event) => setCrmForm({ ...crmForm, status: event.target.value })}>
-                    <option value="active">{ui.crmActive}</option>
-                    <option value="follow_up">{ui.crmFollowUp}</option>
-                    <option value="closed">{ui.crmClosed}</option>
-                  </select>
-                </label>
-                <label>
-                  {ui.crmPriority}
-                  <select value={crmForm.priority} onChange={(event) => setCrmForm({ ...crmForm, priority: event.target.value })}>
-                    <option value="normal">{ui.crmNormal}</option>
-                    <option value="high">{ui.crmHigh}</option>
-                    <option value="urgent">{ui.crmUrgent}</option>
-                  </select>
-                </label>
-              </div>
+            <div className="crmToolbar">
               <label>
-                {ui.crmSummary}
-                <input value={crmForm.summary} onChange={(event) => setCrmForm({ ...crmForm, summary: event.target.value })} />
+                <Search size={18} />
+                <input
+                  value={crmSearch}
+                  onChange={(event) => setCrmSearch(event.target.value)}
+                  onKeyDown={(event) => event.key === "Enter" && loadCrm()}
+                  placeholder={workspaceUi.crmSearch}
+                />
               </label>
-              <label>
-                {ui.crmNote}
-                <textarea value={crmForm.note} onChange={(event) => setCrmForm({ ...crmForm, note: event.target.value })} rows={6} />
-              </label>
-              <div className="crmFormGrid two">
-                <label>
-                  {ui.crmNextStep}
-                  <input value={crmForm.next_step} onChange={(event) => setCrmForm({ ...crmForm, next_step: event.target.value })} />
-                </label>
-                <label>
-                  {ui.crmDue}
-                  <input type="datetime-local" value={crmForm.due_at} onChange={(event) => setCrmForm({ ...crmForm, due_at: event.target.value })} />
-                </label>
-              </div>
-              <button className="primaryButton" disabled={busy || !crmForm.patient_code || !crmForm.summary || !crmForm.note}>
-                <Save size={18} />
-                {ui.crmSave}
+              <button className="ghostButton" onClick={() => loadCrm()} disabled={busy}>
+                <Search size={17} /> {ui.apply}
               </button>
-            </form>
+            </div>
 
-            <div className="crmBoard">
-              {crmRecords.length === 0 && (
-                <div className="emptyState large visualEmpty crmVisualEmpty">
-                  <img src="/medical_lungs_xray.png" alt="" />
-                  <span>{ui.crmEmpty}</span>
-                </div>
+            <div className={`crmOperations ${canManageCrm(user) ? "" : "viewerOnly"}`}>
+              {canManageCrm(user) && (
+                <form className="crmComposer" onSubmit={saveCrmRecord}>
+                  <div className="panelHeader">
+                    <div><small>{workspaceUi.crmNew}</small><h2>{ui.crmSave}</h2></div>
+                    <Plus size={20} />
+                  </div>
+                  <div className="crmFormGrid">
+                    <label>{ui.patientCode}<input value={crmForm.patient_code} onChange={(event) => setCrmForm({ ...crmForm, patient_code: event.target.value })} /></label>
+                    <label>{ui.crmContact}
+                      <select value={crmForm.contact_type} onChange={(event) => setCrmForm({ ...crmForm, contact_type: event.target.value })}>
+                        <option value="consultation">Consultation</option><option value="call">Call</option><option value="follow_up">Follow-up</option><option value="report">Report</option>
+                      </select>
+                    </label>
+                    <label>{ui.status}
+                      <select value={crmForm.status} onChange={(event) => setCrmForm({ ...crmForm, status: event.target.value })}>
+                        <option value="active">{ui.crmActive}</option><option value="follow_up">{ui.crmFollowUp}</option><option value="closed">{ui.crmClosed}</option>
+                      </select>
+                    </label>
+                    <label>{ui.crmPriority}
+                      <select value={crmForm.priority} onChange={(event) => setCrmForm({ ...crmForm, priority: event.target.value })}>
+                        <option value="normal">{ui.crmNormal}</option><option value="high">{ui.crmHigh}</option><option value="urgent">{ui.crmUrgent}</option>
+                      </select>
+                    </label>
+                  </div>
+                  <label>{ui.crmSummary}<input value={crmForm.summary} onChange={(event) => setCrmForm({ ...crmForm, summary: event.target.value })} /></label>
+                  <label>{ui.crmNote}<textarea value={crmForm.note} onChange={(event) => setCrmForm({ ...crmForm, note: event.target.value })} rows={4} /></label>
+                  <div className="crmFormGrid two">
+                    <label>{ui.crmNextStep}<input value={crmForm.next_step} onChange={(event) => setCrmForm({ ...crmForm, next_step: event.target.value })} /></label>
+                    <label>{ui.crmDue}<input type="datetime-local" value={crmForm.due_at} onChange={(event) => setCrmForm({ ...crmForm, due_at: event.target.value })} /></label>
+                  </div>
+                  <details className="crmPicker">
+                    <summary>{workspaceUi.crmAssignees}<span>{crmForm.participant_ids.length}</span></summary>
+                    <div>
+                      {doctors.map((doctor) => (
+                        <label key={doctor.id} className={crmForm.participant_ids.includes(doctor.id) ? "selected" : ""}>
+                          <input type="checkbox" checked={crmForm.participant_ids.includes(doctor.id)} onChange={() => setCrmForm({
+                            ...crmForm,
+                            participant_ids: crmForm.participant_ids.includes(doctor.id)
+                              ? crmForm.participant_ids.filter((id) => id !== doctor.id)
+                              : [...crmForm.participant_ids, doctor.id]
+                          })} />
+                          {doctor.full_name}
+                        </label>
+                      ))}
+                    </div>
+                  </details>
+                  <details className="crmPicker compact">
+                    <summary>{workspaceUi.crmStudies}<span>{crmForm.linked_study_ids.length}</span></summary>
+                    <div>
+                      {studies.slice(0, 12).map((study) => (
+                        <label key={study.id} className={crmForm.linked_study_ids.includes(study.id) ? "selected" : ""}>
+                          <input type="checkbox" checked={crmForm.linked_study_ids.includes(study.id)} onChange={() => setCrmForm({
+                            ...crmForm,
+                            linked_study_ids: crmForm.linked_study_ids.includes(study.id)
+                              ? crmForm.linked_study_ids.filter((id) => id !== study.id)
+                              : [...crmForm.linked_study_ids, study.id]
+                          })} />
+                          {study.patient_code} · {study.study_type}
+                        </label>
+                      ))}
+                    </div>
+                  </details>
+                  <button className="primaryButton" disabled={busy || !crmForm.patient_code || !crmForm.summary || !crmForm.note}>
+                    {busy ? <Loader2 size={18} className="spinIcon" /> : <Save size={18} />} {ui.crmSave}
+                  </button>
+                </form>
               )}
-              {crmRecords.map((record) => (
-                <article className={`crmCard ${record.priority}`} key={record.id}>
-                  <div className="crmCardTop">
-                    <span>{record.patient_code}</span>
-                    <b>{record.priority === "urgent" ? ui.crmUrgent : record.priority === "high" ? ui.crmHigh : ui.crmNormal}</b>
+
+              <div className="crmDepartmentBoard">
+                <div className="panelHeader"><div><small>{crmRecords.length} {workspaceUi.recordsShown}</small><h2>{workspaceUi.crmBoard}</h2></div><ClipboardList size={20} /></div>
+                {!crmRecords.length ? (
+                  <div className="emptyState large visualEmpty crmVisualEmpty"><img src="/medical_lungs_xray.png" alt="" /><span>{ui.crmEmpty}</span></div>
+                ) : (
+                  <div className="crmKanban">
+                    {(["active", "follow_up", "closed"] as const).map((column) => (
+                      <section className={`crmLane ${column}`} key={column}>
+                        <header><span>{column === "active" ? ui.crmActive : column === "follow_up" ? ui.crmFollowUp : ui.crmClosed}</span><b>{crmRecords.filter((record) => record.status === column).length}</b></header>
+                        <div>
+                          {crmRecords.filter((record) => record.status === column).map((record) => (
+                            <button className={`crmCard ${record.priority} ${record.id === crmSelectedId ? "selected" : ""}`} key={record.id} onClick={() => setCrmSelectedId(record.id)}>
+                              <div className="crmCardTop"><span>{record.patient_code}</span><b>{record.priority === "urgent" ? ui.crmUrgent : record.priority === "high" ? ui.crmHigh : ui.crmNormal}</b></div>
+                              <h3>{record.summary}</h3><p>{record.note}</p>
+                              <div className="crmCardMeta"><span>{record.next_step || "—"}</span><span>{formatDate(record.due_at || record.updated_at, lang)}</span></div>
+                              <div className="crmCardFooter">
+                                <span className="avatarStack">{(record.participants ?? []).slice(0, 3).map((member) => <i key={member.id} title={member.full_name}>{member.full_name.split(" ").map((part) => part[0]).slice(0, 2).join("")}</i>)}</span>
+                                <small>{(record.studies ?? []).length ? `${record.studies.length} CXR` : record.created_by.full_name}</small>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
                   </div>
-                  <h3>{record.summary}</h3>
-                  <p>{record.note}</p>
-                  <div className="crmCardMeta">
-                    <span>{record.status === "follow_up" ? ui.crmFollowUp : record.status === "closed" ? ui.crmClosed : ui.crmActive}</span>
-                    <span>{record.next_step || "—"}</span>
-                    <span>{formatDate(record.due_at || record.updated_at, lang)}</span>
-                  </div>
-                  <div className="crmCardFooter">
-                    <small>{record.created_by.full_name}</small>
-                    <button
-                      className="iconButton"
-                      title={ui.crmClosed}
-                      aria-label={ui.crmClosed}
-                      onClick={async () => {
-                        await api.updateCrm(record.id, { status: "closed" });
-                        await loadCrm();
-                      }}
-                    >
-                      <CheckCircle size={16} />
-                    </button>
-                  </div>
-                </article>
-              ))}
+                )}
+
+                {selectedCrm && (
+                  <aside className="crmDetail">
+                    <div className="crmDetailHeader"><div><small>{selectedCrm.patient_code}</small><h3>{selectedCrm.summary}</h3></div><button className="iconButton" onClick={() => setCrmSelectedId(null)} aria-label="Close"><X size={17} /></button></div>
+                    <div className="crmDetailGrid">
+                      <div><span>{workspaceUi.crmAssignees}</span><strong>{(selectedCrm.participants ?? []).map((member) => member.full_name).join(", ") || "—"}</strong></div>
+                      <div><span>{ui.crmNextStep}</span><strong>{selectedCrm.next_step || "—"}</strong></div>
+                    </div>
+                    {!!(selectedCrm.studies ?? []).length && <div className="linkedStudies"><span>{workspaceUi.crmStudies}</span>{selectedCrm.studies.map((study) => <button key={study.id} onClick={() => openStudy(study.id)}>{study.accession_number}<ExternalLink size={13} /></button>)}</div>}
+                    <div className="crmTimeline"><h4>{workspaceUi.crmTimeline}</h4>{(selectedCrm.activities ?? []).slice(0, 8).map((activity) => <div key={activity.id}><i /><p>{activity.content}<small>{activity.author.full_name} · {formatDate(activity.created_at, lang)}</small></p></div>)}</div>
+                    {canManageCrm(user) && <form className="crmActivityForm" onSubmit={addCrmActivity}><input value={crmActivity} onChange={(event) => setCrmActivity(event.target.value)} placeholder={workspaceUi.crmAddNote} /><button className="primaryButton" disabled={busy || !crmActivity.trim()}><Send size={16} /></button></form>}
+                  </aside>
+                )}
+              </div>
             </div>
           </section>
         )}
 
         {view === "reference" && (
-          <section className="referenceGrid">
-            {pathologies.map((item) => {
-              const localized = localizedPathology(item, lang);
-              return (
-                <article className="referenceItem" key={item.id}>
-                  <div className="referenceVisual">
-                    <img src="/medical_lungs_xray.png" alt="" />
-                    <span>{localized.title.slice(0, 2).toUpperCase()}</span>
-                  </div>
-                  <h2>{localized.title}</h2>
-                  <h3>{localized.label}</h3>
-                  <p>{localized.signs}</p>
-                  <h3>{ui.report}</h3>
-                  <p>{localized.report_template}</p>
-                  {localized.references && <small>{localized.references}</small>}
-                </article>
-              );
-            })}
+          <section className="referenceWorkspace">
+            <div className="referenceHero">
+              <div><small>MedAI · CXR</small><h2>{workspaceUi.referenceTitle}</h2><p>{workspaceUi.referenceHint}</p></div>
+              <label><Search size={18} /><input value={referenceSearch} onChange={(event) => setReferenceSearch(event.target.value)} placeholder={workspaceUi.referenceSearch} /></label>
+              <strong>{filteredPathologies.length}<span>{ui.nav.reference}</span></strong>
+            </div>
+            <div className="referenceGrid">
+              {filteredPathologies.map((item) => {
+                const localized = localizedPathology(item, lang);
+                return (
+                  <article className="referenceItem" key={item.id}>
+                    <div className="referenceVisual">
+                      <img src="/medical_lungs_xray.png" alt="" />
+                      <span>{localized.title.slice(0, 2).toUpperCase()}</span>
+                    </div>
+                    <div className="referenceCardCopy">
+                      <small>{localized.label}</small><h2>{localized.title}</h2><p>{localized.signs}</p>
+                      <details>
+                        <summary>{workspaceUi.details}<ExternalLink size={14} /></summary>
+                        <h3>{ui.report}</h3><p>{localized.report_template}</p>
+                        {(localized.examples || item.examples) && <><h3>{workspaceUi.examples}</h3><p>{localized.examples || item.examples}</p></>}
+                        {localized.references && <small className="referenceSource">{localized.references}</small>}
+                      </details>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </section>
         )}
 
@@ -1902,6 +2171,74 @@ export default function App() {
           </section>
         )}
       </main>
+      <MedAIAssistant lang={lang} studyId={selectedStudy?.id} />
+    </div>
+  );
+}
+
+function MedAIAssistant({ lang, studyId }: { lang: Lang; studyId?: number }) {
+  const labels = WORKSPACE_UI[lang];
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<AssistantMessage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [assistantError, setAssistantError] = useState("");
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    const content = input.trim();
+    if (!content || loading) return;
+    const nextMessages: AssistantMessage[] = [...messages, { role: "user", content }];
+    setMessages(nextMessages);
+    setInput("");
+    setLoading(true);
+    setAssistantError("");
+    try {
+      const response = await api.chatAssistant(nextMessages, lang, studyId);
+      setMessages([...nextMessages, { role: "assistant", content: response.message }]);
+    } catch (err) {
+      setAssistantError(err instanceof Error ? err.message : "MedAI unavailable");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className={`medaiAssistant ${open ? "open" : ""}`}>
+      {open && (
+        <section className="assistantPanel" aria-label={labels.assistantTitle}>
+          <header>
+            <span className="assistantMark"><Sparkles size={18} /></span>
+            <div><strong>{labels.assistantTitle}</strong><small><i />{labels.assistantSubtitle}</small></div>
+            <button onClick={() => setOpen(false)} aria-label="Close"><X size={18} /></button>
+          </header>
+          <div className="assistantMessages">
+            {!messages.length && <div className="assistantWelcome"><Sparkles size={20} /><p>{labels.assistantHello}</p><div>{labels.assistantSuggestions.map((suggestion) => <button key={suggestion} onClick={() => setInput(suggestion)}>{suggestion}</button>)}</div></div>}
+            {messages.map((message, index) => (
+              <div className={`assistantMessage ${message.role}`} key={`${message.role}-${index}`}>
+                <span>{message.role === "assistant" ? <Sparkles size={14} /> : <UserRound size={14} />}</span>
+                <p>{message.content}</p>
+              </div>
+            ))}
+            {loading && <div className="assistantTyping"><i /><i /><i /></div>}
+            {assistantError && <div className="assistantError">{assistantError}</div>}
+          </div>
+          {studyId && <div className="assistantContext"><Activity size={14} />{labels.assistantContext}</div>}
+          <form onSubmit={submit}>
+            <textarea rows={2} value={input} onChange={(event) => setInput(event.target.value)} placeholder={labels.assistantPlaceholder} onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              }
+            }} />
+            <button disabled={loading || !input.trim()} aria-label={labels.assistantAsk}>{loading ? <Loader2 size={18} className="spinIcon" /> : <Send size={18} />}</button>
+          </form>
+        </section>
+      )}
+      <button className="assistantTrigger" onClick={() => setOpen((value) => !value)} aria-label={labels.assistantTitle}>
+        {open ? <X size={22} /> : <MessageCircle size={22} />}
+        {!open && <span>MedAI</span>}
+      </button>
     </div>
   );
 }

@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_current_user
@@ -41,10 +42,12 @@ def ensure_study_access(user: User, study: Study) -> None:
 
 @router.get("", response_model=list[StudyOut])
 def list_studies(
+    search: str | None = Query(default=None, max_length=120),
     status: StudyStatus | None = Query(default=None),
     study_type: str | None = Query(default=None),
     date_from: date | None = Query(default=None),
     date_to: date | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=200),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[Study]:
@@ -58,6 +61,9 @@ def list_studies(
         )
     if status:
         query = query.filter(Study.status == status)
+    if search:
+        pattern = f"%{search.strip()}%"
+        query = query.filter(or_(Study.accession_number.ilike(pattern), Study.patient_code.ilike(pattern)))
     if study_type:
         query = query.filter(Study.study_type == study_type)
     if date_from:
@@ -66,7 +72,7 @@ def list_studies(
     if date_to:
         end = datetime.combine(date_to, time.max, tzinfo=timezone.utc)
         query = query.filter(Study.created_at <= end)
-    return query.order_by(Study.created_at.desc()).all()
+    return query.order_by(Study.created_at.desc()).limit(limit).all()
 
 
 @router.post("", response_model=StudyDetail, status_code=201)

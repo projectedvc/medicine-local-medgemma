@@ -75,6 +75,17 @@ npm install
 npm run dev
 ```
 
+## Помощник MedAI
+
+Ключ хранится только на backend. Добавьте его в `backend/.env` (для локального запуска) или в переменные окружения backend-сервиса:
+
+```env
+GROQ_API_KEY=your_key_here
+GROQ_MODEL=llama-3.3-70b-versatile
+```
+
+Не добавляйте ключ в `frontend/.env` и не используйте префикс `VITE_`: такие значения попадут в браузерную сборку.
+
 ## Подключение GPU-сервера jupiter
 
 В `medicine\.env` для Docker или `medicine\backend\.env` для локального backend укажите адрес inference API:
