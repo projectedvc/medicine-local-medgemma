@@ -1362,25 +1362,58 @@ input[type="checkbox"] {
   display: none;
 }
 
-.imageStage img,
-.heatmapOverlay {
+.viewerImageFrame {
   position: absolute;
-  max-width: 92%;
   max-height: 92%;
-  object-fit: contain;
   transform-origin: center;
   user-select: none;
   pointer-events: none;
 }
 
-.heatmapOverlay {
-  width: min(70%, 520px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 56% 55%, rgba(239, 51, 77, 0.72), rgba(245, 158, 11, 0.34) 24%, transparent 50%),
-    radial-gradient(circle at 38% 43%, rgba(250, 204, 21, 0.42), transparent 36%);
-  mix-blend-mode: screen;
+.viewerImageFrame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+.localizationBox {
+  position: absolute;
+  z-index: 2;
+  border: 2px solid #43e2b3;
+  border-radius: 8px;
+  background: rgba(67, 226, 179, 0.1);
+  box-shadow: 0 0 0 1px rgba(3, 15, 29, 0.8), 0 0 24px rgba(67, 226, 179, 0.42);
+}
+
+.localizationBox span {
+  position: absolute;
+  left: -2px;
+  bottom: calc(100% + 5px);
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: #43e2b3;
+  color: #04231c;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.localizationHint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.07);
+  color: #e8bd68;
+  font-size: 11px;
+  font-weight: 750;
 }
 
 .imageStageLoader {
@@ -4565,15 +4598,24 @@ textarea:focus {
 }
 
 .clinicianOutputGrid {
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: minmax(330px, 380px) minmax(0, 1fr);
   grid-template-areas:
     "analysis report"
     "feedback report";
   gap: 16px;
 }
 
-.analysisPanel { grid-area: analysis; }
-.reportPanel { grid-area: report; }
+.analysisPanel {
+  grid-area: analysis;
+  border-color: rgba(42, 210, 219, 0.3);
+  background: linear-gradient(160deg, rgba(9, 28, 44, 0.98), rgba(5, 17, 32, 0.96));
+  box-shadow: 0 22px 52px rgba(0, 170, 190, 0.08);
+}
+
+.reportPanel {
+  grid-area: report;
+  min-height: 440px;
+}
 .feedbackPanel { grid-area: feedback; }
 
 .clinicalNotice {
@@ -4594,6 +4636,38 @@ textarea:focus {
 .clinicalNotice svg {
   flex: 0 0 auto;
   margin-top: 1px;
+}
+
+.modelQualityWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 10px 0 12px;
+  padding: 12px;
+  border: 1px solid rgba(239, 91, 111, 0.32);
+  border-radius: 13px;
+  background: rgba(190, 39, 64, 0.1);
+  color: #ffadb9;
+}
+
+.modelQualityWarning svg {
+  flex: 0 0 auto;
+}
+
+.modelQualityWarning div {
+  display: grid;
+  gap: 4px;
+}
+
+.modelQualityWarning strong {
+  font-size: 11px;
+}
+
+.modelQualityWarning span {
+  color: var(--muted-strong);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 .clinicalAiSummary {
@@ -4624,6 +4698,14 @@ textarea:focus {
   line-height: 1.25;
 }
 
+.analysisWarningText {
+  margin: 0;
+  color: #efc275;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
 .confidenceTrack {
   height: 5px;
   overflow: hidden;
@@ -4647,6 +4729,63 @@ textarea:focus {
   gap: 10px;
 }
 
+.aiConclusionCard {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 20px;
+  border: 1px solid rgba(56, 216, 207, 0.3);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(18, 67, 75, 0.28), rgba(4, 23, 39, 0.72));
+  box-shadow: inset 3px 0 0 #36d8ca;
+}
+
+.aiConclusionCard.withheld {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.07);
+  box-shadow: inset 3px 0 0 #e8a93e;
+}
+
+.aiConclusionCard > span {
+  color: var(--primary-bright);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.aiConclusionCard > p {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(18px, 1.45vw, 23px);
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.aiEvidenceList {
+  display: grid;
+  gap: 7px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.aiEvidenceList strong {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.aiEvidenceList ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted-strong);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .clinicalReportPreview > section {
   display: grid;
   grid-template-columns: minmax(105px, 0.22fr) minmax(0, 1fr);
@@ -4667,7 +4806,7 @@ textarea:focus {
 
 .clinicalReportPreview p {
   color: var(--muted-strong);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.65;
   white-space: pre-line;
 }
@@ -4886,6 +5025,49 @@ textarea:focus {
   border-color: #c9dce5;
   background: #f7fafc;
   color: #17364c;
+}
+
+:root[data-theme="light"] .analysisPanel {
+  border-color: #9edce0;
+  background: linear-gradient(160deg, #ffffff, #f3fbfc);
+  box-shadow: 0 20px 46px rgba(28, 107, 127, 0.1);
+}
+
+:root[data-theme="light"] .modelQualityWarning {
+  border-color: #efbcc5;
+  background: #fff0f2;
+  color: #a32f43;
+}
+
+:root[data-theme="light"] .modelQualityWarning span {
+  color: #6b3440;
+}
+
+:root[data-theme="light"] .aiConclusionCard {
+  border-color: #9dded9;
+  background: linear-gradient(145deg, #f0fffd, #ffffff);
+  box-shadow: inset 3px 0 0 #159e94;
+}
+
+:root[data-theme="light"] .aiConclusionCard.withheld {
+  border-color: #edcf9b;
+  background: #fff8e9;
+  box-shadow: inset 3px 0 0 #c88416;
+}
+
+:root[data-theme="light"] .aiConclusionCard > span {
+  color: #087e85;
+}
+
+:root[data-theme="light"] .aiConclusionCard > p,
+:root[data-theme="light"] .aiEvidenceList ul {
+  color: #102f42;
+}
+
+:root[data-theme="light"] .localizationHint {
+  border-color: #e6c995;
+  background: #fff8e9;
+  color: #8f5d0b;
 }
 
 :root[data-theme="light"] .assistantPanel,

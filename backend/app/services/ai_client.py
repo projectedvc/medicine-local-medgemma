@@ -156,6 +156,18 @@ def _normalize_probabilities(raw: Any) -> dict[str, float]:
     return {str(key): _parse_confidence(value) for key, value in raw.items()}
 
 
+def _normalize_untrusted_bbox(value: Any) -> list[float] | None:
+    """Keep normalized geometry only; provenance is checked separately."""
+    if not isinstance(value, list) or len(value) != 4:
+        return None
+    try:
+        bbox = [float(item) for item in value]
+    except (TypeError, ValueError):
+        return None
+    x1, y1, x2, y2 = bbox
+    return bbox if 0 <= x1 < x2 <= 1 and 0 <= y1 < y2 <= 1 else None
+
+
 def _extract_json_from_text(text: str) -> dict[str, Any] | None:
     decoder = json.JSONDecoder()
     candidates = [text.strip()]
@@ -214,6 +226,15 @@ def _parse_text_confidence(text: str) -> float:
 
 def normalize_ai_response(raw: dict[str, Any]) -> AIResult:
     payload = _remove_template_values(_merge_generated_payload(raw))
+    payload["bbox"] = _normalize_untrusted_bbox(payload.get("bbox"))
+    # The current pneumonia corpus has image-level labels only. A box generated
+    # by the language model has no localization supervision and must not be shown.
+    payload["localization"] = {
+        "validated": False,
+        "source": None,
+        "bbox": None,
+        "reason": "class_only_training_data",
+    }
     response_text = next(
         (
             raw.get(key)
@@ -243,6 +264,10 @@ def normalize_ai_response(raw: dict[str, Any]) -> AIResult:
             confidence = max(probabilities.values(), default=0.0)
     if confidence == 0.0 and response_text:
         confidence = _parse_text_confidence(response_text)
+
+    if predicted_class is None:
+        confidence = 0.0
+        probabilities = {}
 
     if not probabilities and predicted_class and confidence > 0:
         probabilities = {predicted_class.value: confidence}
@@ -315,7 +340,7 @@ async def run_ai_inference(
     clinical_note: str | None = None,
     study_type: str | None = None,
     lang: str | None = None,
-    model_variant: str = "pneumonia_v1",
+    model_variant: str = "base",
 ) -> AIResult:
     path = Path(image_path)
     if not path.exists():

@@ -48,3 +48,46 @@ class AIAnalysis(Base):
             or data.get("response")
             or data.get("text")
         )
+
+    @property
+    def evidence(self) -> list[str]:
+        """Return only concise, non-empty visual findings from the model payload."""
+        try:
+            data = json.loads(self.raw_response_json or "{}")
+        except Exception:
+            return []
+        evidence = data.get("evidence")
+        if not isinstance(evidence, list):
+            return []
+        return [str(item).strip() for item in evidence[:3] if str(item).strip()]
+
+    @property
+    def localization_bbox(self) -> list[float] | None:
+        """Expose a box only when a validated localization model produced it."""
+        try:
+            data = json.loads(self.raw_response_json or "{}")
+        except Exception:
+            return None
+        localization = data.get("localization")
+        if not isinstance(localization, dict) or localization.get("validated") is not True:
+            return None
+        bbox = localization.get("bbox")
+        if not isinstance(bbox, list) or len(bbox) != 4:
+            return None
+        try:
+            values = [float(value) for value in bbox]
+        except (TypeError, ValueError):
+            return None
+        x1, y1, x2, y2 = values
+        if not (0 <= x1 < x2 <= 1 and 0 <= y1 < y2 <= 1):
+            return None
+        return values
+
+    @property
+    def localization_status(self) -> str:
+        return "available" if self.localization_bbox else "unavailable_class_only"
+
+    @property
+    def model_quality_status(self) -> str:
+        # The pneumonia adapter failed the current balanced smoke gate (2/12 usable answers).
+        return "failed" if self.model_version == "medai-pneumonia-v1" else "unvalidated"

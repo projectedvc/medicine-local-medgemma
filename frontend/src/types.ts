@@ -60,6 +60,11 @@ export interface AIAnalysis {
   status: AIJobStatus;
   predicted_class: FindingClass | null;
   raw_predicted_label: string | null;
+  ai_text: string | null;
+  evidence: string[];
+  localization_bbox: [number, number, number, number] | null;
+  localization_status: "available" | "unavailable_class_only";
+  model_quality_status: "failed" | "unvalidated";
   confidence: number | null;
   threshold: number;
   hidden_due_low_confidence: boolean;

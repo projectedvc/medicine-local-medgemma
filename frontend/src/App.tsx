@@ -7,7 +7,6 @@ import {
   ClipboardList,
   ExternalLink,
   Download,
-  Eye,
   FileText,
   ImagePlus,
   Languages,
@@ -188,8 +187,16 @@ const UI = {
     threshold: "Шек",
     model: "AI",
     modelSelector: "MedAI нұсқасы",
-    modelBase: "Негізгі MedAI",
-    modelTuned: "Оқытылған MedAI — пневмония / норма",
+    modelBase: "Негізгі MedAI — салыстыру үшін",
+    modelTuned: "Эксперименттік — сапа тексерісінен өтпеді",
+    modelTunedWarning: "Бұл нұсқа теңгерілген тексерістен өтпеді: 12 жауаптың 2-еуі ғана жарамды болды. Диагностикалық нәтиже қайта оқытуға дейін жасырылады.",
+    qualityGateFailed: "Сапа тексерісінен өтпеді",
+    preliminaryConclusion: "MedAI алдын ала қорытындысы",
+    evidenceTitle: "Көрінетін белгілер",
+    localizationUnavailable: "Локализация қолжетімсіз: бұл нұсқа координаттарсыз, тек сурет кластарымен оқытылған.",
+    localizationLabel: "Модель белгілеген аймақ",
+    resultWithheld: "Диагностикалық жауап сапа тексерісіне байланысты көрсетілмеді.",
+    confidenceUncalibrated: "Модель бағасы (калибрленбеген)",
     modelCurrent: "Таңдалған нұсқа",
     dataset: "Дерек",
     classUnknown: "Класс анықталмады",
@@ -379,8 +386,16 @@ const UI = {
     threshold: "Порог",
     model: "AI",
     modelSelector: "Версия MedAI",
-    modelBase: "Базовая MedAI",
-    modelTuned: "Дообученная MedAI — пневмония / норма",
+    modelBase: "Базовая MedAI — для сравнения",
+    modelTuned: "Экспериментальная — проверку не прошла",
+    modelTunedWarning: "Эта версия не прошла сбалансированную проверку: пригодны только 2 ответа из 12. Диагностический результат скрывается до повторного обучения.",
+    qualityGateFailed: "Не прошла контроль качества",
+    preliminaryConclusion: "Предварительное заключение MedAI",
+    evidenceTitle: "Видимые признаки",
+    localizationUnavailable: "Локализация недоступна: эта версия обучена только на классах снимков, без координат очага.",
+    localizationLabel: "Область, отмеченная моделью",
+    resultWithheld: "Диагностический ответ скрыт из-за непрохождения контроля качества.",
+    confidenceUncalibrated: "Оценка модели (не калибрована)",
     modelCurrent: "Выбранная версия",
     dataset: "Данные",
     classUnknown: "Класс не определен",
@@ -570,8 +585,16 @@ const UI = {
     threshold: "Threshold",
     model: "AI",
     modelSelector: "MedAI version",
-    modelBase: "Base MedAI",
-    modelTuned: "Fine-tuned MedAI — pneumonia / normal",
+    modelBase: "Base MedAI — comparison only",
+    modelTuned: "Experimental — quality gate failed",
+    modelTunedWarning: "This version failed balanced validation: only 2 of 12 answers were usable. Its diagnostic output is withheld until retraining.",
+    qualityGateFailed: "Quality gate failed",
+    preliminaryConclusion: "Preliminary MedAI conclusion",
+    evidenceTitle: "Visible findings",
+    localizationUnavailable: "Localization is unavailable: this version was trained on image classes only, without lesion coordinates.",
+    localizationLabel: "Region marked by the model",
+    resultWithheld: "The diagnostic output is withheld because the quality gate failed.",
+    confidenceUncalibrated: "Model estimate (uncalibrated)",
     modelCurrent: "Selected version",
     dataset: "Data",
     classUnknown: "Class not defined",
@@ -931,7 +954,7 @@ export default function App() {
   const [view, setView] = useState<View>("studies");
   const [showLoginPanel, setShowLoginPanel] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [modelVariant, setModelVariant] = useState<"base" | "pneumonia_v1">("pneumonia_v1");
+  const [modelVariant, setModelVariant] = useState<"base" | "pneumonia_v1">("base");
   const [aiRunningStudyId, setAiRunningStudyId] = useState<number | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -978,7 +1001,7 @@ export default function App() {
   const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
-  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [imageAspect, setImageAspect] = useState(4 / 3);
 
   const latestAI = aiResults[0] ?? null;
   const selectedStudyAiBusy = Boolean(selectedStudy && aiRunningStudyId === selectedStudy.id);
@@ -1743,9 +1766,6 @@ export default function App() {
                       <IconButton label={ui.reset} onClick={resetViewer}>
                         <RotateCcw size={18} />
                       </IconButton>
-                      <IconButton label={ui.heatmap} active={showHeatmap} onClick={() => setShowHeatmap((value) => !value)}>
-                        <Eye size={18} />
-                      </IconButton>
                       <label>
                         {ui.brightness}
                         <input type="range" min="50" max="160" value={brightness} onChange={(event) => setBrightness(Number(event.target.value))} />
@@ -1765,17 +1785,41 @@ export default function App() {
                       onMouseLeave={() => setDrag(null)}
                     >
                       {previewUrl ? (
-                        <>
+                        <div
+                          className="viewerImageFrame"
+                          style={{
+                            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                            width: `min(92%, ${Math.round(515 * imageAspect)}px)`,
+                            aspectRatio: imageAspect
+                          }}
+                        >
                           <img
                             src={previewUrl}
                             alt=""
+                            onLoad={(event) => {
+                              const image = event.currentTarget;
+                              if (image.naturalWidth && image.naturalHeight) {
+                                setImageAspect(image.naturalWidth / image.naturalHeight);
+                              }
+                            }}
                             style={{
-                              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                               filter: `brightness(${brightness}%) contrast(${contrast}%)`
                             }}
                           />
-                          {showHeatmap && <div className="heatmapOverlay" style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }} />}
-                        </>
+                          {latestAI?.localization_bbox && !latestAI.hidden_due_low_confidence && (
+                            <div
+                              className="localizationBox"
+                              style={{
+                                left: `${latestAI.localization_bbox[0] * 100}%`,
+                                top: `${latestAI.localization_bbox[1] * 100}%`,
+                                width: `${(latestAI.localization_bbox[2] - latestAI.localization_bbox[0]) * 100}%`,
+                                height: `${(latestAI.localization_bbox[3] - latestAI.localization_bbox[1]) * 100}%`
+                              }}
+                            >
+                              <span>{ui.localizationLabel}</span>
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <div className="emptyState">{ui.previewMissing}</div>
                       )}
@@ -1787,6 +1831,12 @@ export default function App() {
                         </div>
                       )}
                     </div>
+                    {latestAI?.localization_status === "unavailable_class_only" && (
+                      <div className="localizationHint">
+                        <AlertTriangle size={16} />
+                        <span>{ui.localizationUnavailable}</span>
+                      </div>
+                    )}
                   </section>
 
                   <section className="clinicalGrid clinicianOutputGrid">
@@ -1807,10 +1857,16 @@ export default function App() {
                           onChange={(event) => setModelVariant(event.target.value as "base" | "pneumonia_v1")}
                           disabled={busy || selectedStudyAiBusy}
                         >
-                          <option value="pneumonia_v1">{ui.modelTuned}</option>
                           <option value="base">{ui.modelBase}</option>
+                          <option value="pneumonia_v1">{ui.modelTuned}</option>
                         </select>
                       </div>
+                      {modelVariant === "pneumonia_v1" && (
+                        <div className="modelQualityWarning">
+                          <AlertTriangle size={17} />
+                          <div><strong>{ui.qualityGateFailed}</strong><span>{ui.modelTunedWarning}</span></div>
+                        </div>
+                      )}
                       {selectedStudyAiBusy && (
                         <div className="inlineAiStatus">
                           <Loader2 size={18} />
@@ -1822,20 +1878,31 @@ export default function App() {
                         {selectedStudyAiBusy ? ui.aiWaiting : ui.runAI}
                       </button>
                       {latestAI && (
-                        <div className={`clinicalAiSummary ${latestAI.hidden_due_low_confidence ? "needsReview" : ""}`}>
-                          <small>{latestAI.hidden_due_low_confidence ? workspaceUi.lowConfidenceTitle : ui.aiDone}</small>
+                        <div className={`clinicalAiSummary ${latestAI.hidden_due_low_confidence || latestAI.model_quality_status === "failed" ? "needsReview" : ""}`}>
+                          <small>
+                            {latestAI.model_quality_status === "failed"
+                              ? ui.qualityGateFailed
+                              : latestAI.hidden_due_low_confidence
+                                ? workspaceUi.lowConfidenceTitle
+                                : ui.aiDone}
+                          </small>
                           <strong>
                             {latestAI.hidden_due_low_confidence
-                              ? workspaceUi.lowConfidenceTitle
+                              ? ui.resultWithheld
                               : latestAI.predicted_class
                                 ? ui.findings[latestAI.predicted_class]
                                 : ui.classUnknown}
                           </strong>
-                          <div className="confidenceTrack"><i style={{ width: `${Math.max(3, (latestAI.confidence ?? 0) * 100)}%` }} /></div>
-                          <span>{ui.confidence}: {formatPercent(latestAI.confidence)}</span>
-<span className="modelVersionLine">
-{ui.modelCurrent}: {latestAI.model_version === "medai-pneumonia-v1" ? ui.modelTuned : ui.modelBase}
-</span>
+                          {latestAI.model_quality_status !== "failed" && (
+                            <>
+                              <div className="confidenceTrack"><i style={{ width: `${Math.max(3, (latestAI.confidence ?? 0) * 100)}%` }} /></div>
+                              <span>{ui.confidenceUncalibrated}: {formatPercent(latestAI.confidence)}</span>
+                            </>
+                          )}
+                          {latestAI.warning && <p className="analysisWarningText">{latestAI.warning}</p>}
+                          <span className="modelVersionLine">
+                            {ui.modelCurrent}: {latestAI.model_version === "medai-pneumonia-v1" ? ui.modelTuned : ui.modelBase}
+                          </span>
                         </div>
                       )}
                       <button
@@ -1853,6 +1920,23 @@ export default function App() {
                         <div><small>{ui.aiDraft}</small><h2>{workspaceUi.reportPreview}</h2></div>
                         <FileText size={20} />
                       </div>
+                      {latestAI && (
+                        <div className={`aiConclusionCard ${latestAI.hidden_due_low_confidence ? "withheld" : ""}`}>
+                          <span>{ui.preliminaryConclusion}</span>
+                          <p>
+                            {latestAI.hidden_due_low_confidence
+                              ? latestAI.warning || ui.resultWithheld
+                              : latestAI.ai_text
+                                || (latestAI.predicted_class ? ui.findings[latestAI.predicted_class] : ui.classUnknown)}
+                          </p>
+                          {!latestAI.hidden_due_low_confidence && (latestAI.evidence?.length ?? 0) > 0 && (
+                            <div className="aiEvidenceList">
+                              <strong>{ui.evidenceTitle}</strong>
+                              <ul>{latestAI.evidence?.map((item) => <li key={item}>{item}</li>)}</ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       {reportEditing ? (
                         <label className="reportEditor">
                           {ui.finalText}

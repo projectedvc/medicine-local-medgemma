@@ -106,7 +106,7 @@ export const api = {
 
   previewImage: (studyId: number) => requestBlob(`/studies/${studyId}/image/preview`),
 
-  runAI: (studyId: number, wait = true, auto = false, lang = "ru", modelVariant: "base" | "pneumonia_v1" = "pneumonia_v1") =>
+  runAI: (studyId: number, wait = true, auto = false, lang = "ru", modelVariant: "base" | "pneumonia_v1" = "base") =>
     request<AIAnalysis>(`/studies/${studyId}/ai/run`, {
       method: "POST",
       body: JSON.stringify({ wait, auto, lang, model_variant: modelVariant })

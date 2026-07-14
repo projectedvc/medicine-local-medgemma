@@ -55,3 +55,39 @@ def test_template_values_are_not_exposed_as_clinical_text():
     assert result.confidence == 0.0
     assert result.raw_response["impression"] is None
     assert result.raw_response["evidence"] == []
+
+
+def test_not_diagnostic_cannot_keep_a_high_confidence():
+    result = normalize_ai_response(
+        {"finding": "not_diagnostic", "confidence": 0.85, "impression": "Недостаточно данных."}
+    )
+
+    assert result.predicted_class is None
+    assert result.confidence == 0.0
+    assert result.probabilities == {}
+
+
+def test_class_only_model_does_not_publish_generated_coordinates():
+    result = normalize_ai_response(
+        {
+            "finding": "pneumonia",
+            "confidence": 0.91,
+            "bbox": [0.1, 0.2, 0.8, 0.9],
+            "impression": "Признаки пневмонии.",
+        }
+    )
+
+    assert result.raw_response["localization"] == {
+        "validated": False,
+        "source": None,
+        "bbox": None,
+        "reason": "class_only_training_data",
+    }
+
+
+def test_absolute_pixel_bbox_is_rejected():
+    result = normalize_ai_response(
+        {"finding": "pneumonia", "confidence": 0.9, "bbox": [78, 28, 934, 733]}
+    )
+
+    assert result.raw_response["bbox"] is None

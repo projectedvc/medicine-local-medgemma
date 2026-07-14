@@ -26,9 +26,8 @@ ADAPTER_NAME = "pneumonia_v1"
 MODEL_LABELS = {"base": "medai-base", "pneumonia_v1": "medai-pneumonia-v1"}
 DEFAULT_PROMPT = """Внимательно оцените саму рентгенограмму грудной клетки.
 Выберите один класс: normal, pneumonia или not_diagnostic. Верните только JSON с полями
-finding, confidence, bbox, impression и evidence. confidence — числовая уверенность по этому
-снимку от 0.01 до 0.99; значение 0 допустимо только для нечитаемого снимка. bbox укажите только
-как нормализованные [x1,y1,x2,y2] в диапазоне 0..1 при надёжной локализации, иначе null.
+finding, confidence, impression и evidence. confidence — числовая уверенность по этому
+снимку от 0.01 до 0.99; значение 0 допустимо только для нечитаемого снимка.
 impression — фактическое краткое заключение на русском по этому пациенту, evidence — реально
 видимые признаки. Не копируйте инструкцию, описания полей, шаблоны или примеры."""
 
@@ -155,14 +154,12 @@ def _clean_model_text(text: str) -> str:
     except (TypeError, ValueError):
         confidence = 0.0
 
-    bbox = obj.get("bbox")
-    if not (
-        isinstance(bbox, list)
-        and len(bbox) == 4
-        and all(isinstance(value, (int, float)) for value in bbox)
-        and all(0.0 <= float(value) <= 1.0 for value in bbox)
-    ):
-        bbox = None
+    if finding == "not_diagnostic":
+        confidence = 0.0
+
+    # This dataset contains image-level labels, not boxes or masks. Do not
+    # manufacture lesion coordinates from a generative response.
+    bbox = None
 
     impression = re.sub(r"\s+", " ", str(obj.get("impression") or "")).strip()
     generic_impression = impression.casefold().strip(" .:_-").replace(" ", "_")
@@ -200,6 +197,12 @@ def _clean_model_text(text: str) -> str:
         "finding": finding,
         "confidence": round(confidence, 4),
         "bbox": bbox,
+        "localization": {
+            "validated": False,
+            "source": None,
+            "bbox": None,
+            "reason": "class_only_training_data",
+        },
         "impression": impression[:300],
         "evidence": evidence,
     }
@@ -253,11 +256,11 @@ async def generate(request: Request) -> dict[str, Any]:
         body = await request.json()
         image_value = body.get("image_base64", "")
         prompt = body.get("prompt") or DEFAULT_PROMPT
-        model_variant = body.get("model_variant") or ADAPTER_NAME
+        model_variant = body.get("model_variant") or "base"
     else:
         form = await request.form()
         prompt = str(form.get("prompt") or DEFAULT_PROMPT)
-        model_variant = str(form.get("model_variant") or ADAPTER_NAME)
+        model_variant = str(form.get("model_variant") or "base")
         upload = form.get("file")
         if upload is None:
             raise HTTPException(status_code=422, detail="file is required")
