@@ -5027,6 +5027,19 @@ textarea:focus {
   color: #17364c;
 }
 
+.reportQuarantined {
+  border-color: rgba(245, 158, 11, 0.28);
+  background: rgba(245, 158, 11, 0.06);
+  color: #e8bd68;
+}
+
+.reportQuarantined span {
+  max-width: 520px;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
 :root[data-theme="light"] .analysisPanel {
   border-color: #9edce0;
   background: linear-gradient(160deg, #ffffff, #f3fbfc);
@@ -5068,6 +5081,12 @@ textarea:focus {
   border-color: #e6c995;
   background: #fff8e9;
   color: #8f5d0b;
+}
+
+:root[data-theme="light"] .reportQuarantined {
+  border-color: #e6c995;
+  background: #fff8e9;
+  color: #7e520b;
 }
 
 :root[data-theme="light"] .assistantPanel,

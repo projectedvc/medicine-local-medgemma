@@ -196,6 +196,7 @@ const UI = {
     localizationUnavailable: "Локализация қолжетімсіз: бұл нұсқа координаттарсыз, тек сурет кластарымен оқытылған.",
     localizationLabel: "Модель белгілеген аймақ",
     resultWithheld: "Диагностикалық жауап сапа тексерісіне байланысты көрсетілмеді.",
+    reportQuarantined: "Осы тексерілмеген модель жасаған ескі AI жобасы да жасырылды. Жаңа талдауды іске қосыңыз немесе дәрігер қорытындыны қолмен жазыңыз.",
     confidenceUncalibrated: "Модель бағасы (калибрленбеген)",
     modelCurrent: "Таңдалған нұсқа",
     dataset: "Дерек",
@@ -395,6 +396,7 @@ const UI = {
     localizationUnavailable: "Локализация недоступна: эта версия обучена только на классах снимков, без координат очага.",
     localizationLabel: "Область, отмеченная моделью",
     resultWithheld: "Диагностический ответ скрыт из-за непрохождения контроля качества.",
+    reportQuarantined: "Старый AI-черновик этой непроверенной версии также скрыт. Запустите новый анализ или подготовьте заключение врача вручную.",
     confidenceUncalibrated: "Оценка модели (не калибрована)",
     modelCurrent: "Выбранная версия",
     dataset: "Данные",
@@ -594,6 +596,7 @@ const UI = {
     localizationUnavailable: "Localization is unavailable: this version was trained on image classes only, without lesion coordinates.",
     localizationLabel: "Region marked by the model",
     resultWithheld: "The diagnostic output is withheld because the quality gate failed.",
+    reportQuarantined: "The old AI draft from this unvalidated version is also withheld. Run a new analysis or prepare the clinician report manually.",
     confidenceUncalibrated: "Model estimate (uncalibrated)",
     modelCurrent: "Selected version",
     dataset: "Data",
@@ -1945,6 +1948,11 @@ export default function App() {
                           {ui.finalText}
                           <textarea value={finalText} onChange={(event) => setFinalText(event.target.value)} rows={14} autoFocus />
                         </label>
+                      ) : latestAIWithheld && !report?.confirmed_at ? (
+                        <div className="reportEmptyState reportQuarantined">
+                          <AlertTriangle size={22} />
+                          <span>{ui.reportQuarantined}</span>
+                        </div>
                       ) : reportSections.length ? (
                         <div className="clinicalReportPreview">
                           {reportSections.map((section) => (
@@ -1963,7 +1971,7 @@ export default function App() {
                           </button>
                         )}
                         {reportEditing && <button className="ghostButton" onClick={saveReport} disabled={busy || !finalText}><Save size={18} />{ui.save}</button>}
-                        <button className="primaryButton" onClick={confirmReport} disabled={busy || !canEditFinal(user) || !finalText}>
+                        <button className="primaryButton" onClick={confirmReport} disabled={busy || latestAIWithheld || !canEditFinal(user) || !finalText}>
                           <CheckCircle size={18} />
                           {ui.confirm}
                         </button>
