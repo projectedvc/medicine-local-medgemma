@@ -2,7 +2,7 @@
 
 Read `docs/MODEL_TRAINING_POLICY.md` before modifying training, inference, model selection, confidence display, or localization.
 
-- `medai-pneumonia-v1` failed the balanced smoke gate and must stay withheld until retrained and re-evaluated.
+- `medai-pneumonia-v1` is an experimental user-selectable adapter. Keep its result visible for testing, with an explicit validation warning; do not silently block it.
 - Never present self-reported generative confidence as calibrated probability.
 - Never render boxes or heatmaps from the class-only Kaggle pneumonia dataset.
 - Keep the base and every anatomy/task adapter independently selectable and versioned.

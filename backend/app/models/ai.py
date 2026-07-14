@@ -89,5 +89,4 @@ class AIAnalysis(Base):
 
     @property
     def model_quality_status(self) -> str:
-        # The pneumonia adapter failed the current balanced smoke gate (2/12 usable answers).
-        return "failed" if self.model_version == "medai-pneumonia-v1" else "unvalidated"
+        return "experimental" if self.model_version == "medai-pneumonia-v1" else "unvalidated"

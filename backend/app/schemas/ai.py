@@ -20,7 +20,7 @@ class AIAnalysisOut(ORMModel):
     evidence: list[str] = Field(default_factory=list)
     localization_bbox: list[float] | None = None
     localization_status: Literal["available", "unavailable_class_only"] = "unavailable_class_only"
-    model_quality_status: Literal["failed", "unvalidated"] = "unvalidated"
+    model_quality_status: Literal["experimental", "unvalidated"] = "unvalidated"
     confidence: float | None
     threshold: float
     hidden_due_low_confidence: bool
@@ -39,4 +39,4 @@ class RunAIRequest(BaseModel):
     wait: bool = True
     auto: bool = False
     lang: str = "ru"
-    model_variant: Literal["base", "pneumonia_v1"] = "base"
+    model_variant: Literal["base", "pneumonia_v1"] = "pneumonia_v1"

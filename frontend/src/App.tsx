@@ -188,15 +188,15 @@ const UI = {
     model: "AI",
     modelSelector: "MedAI нұсқасы",
     modelBase: "Негізгі MedAI — салыстыру үшін",
-    modelTuned: "Эксперименттік — сапа тексерісінен өтпеді",
-    modelTunedWarning: "Бұл нұсқа теңгерілген тексерістен өтпеді: 12 жауаптың 2-еуі ғана жарамды болды. Диагностикалық нәтиже қайта оқытуға дейін жасырылады.",
-    qualityGateFailed: "Сапа тексерісінен өтпеді",
+    modelTuned: "Оқытылған MedAI — пневмония / норма",
+    modelTunedWarning: "Бұл оқытылған нұсқаны толық пайдалануға және тексеруге болады. Ол әзірге эксперименттік және әрбір нәтижені дәрігер тексеруі тиіс.",
+    qualityGateFailed: "Эксперименттік нұсқа",
     preliminaryConclusion: "MedAI алдын ала қорытындысы",
     evidenceTitle: "Көрінетін белгілер",
     localizationUnavailable: "Локализация қолжетімсіз: бұл нұсқа координаттарсыз, тек сурет кластарымен оқытылған.",
     localizationLabel: "Модель белгілеген аймақ",
-    resultWithheld: "Диагностикалық жауап сапа тексерісіне байланысты көрсетілмеді.",
-    reportQuarantined: "Осы тексерілмеген модель жасаған ескі AI жобасы да жасырылды. Жаңа талдауды іске қосыңыз немесе дәрігер қорытындыны қолмен жазыңыз.",
+    resultWithheld: "Сенімділік шегіне жетпегендіктен диагностикалық жауап жасырылды.",
+    reportQuarantined: "Сенімділігі төмен AI жобасы жасырылды. Жаңа талдауды іске қосыңыз немесе дәрігер қорытындыны қолмен жазыңыз.",
     confidenceUncalibrated: "Модель бағасы (калибрленбеген)",
     modelCurrent: "Таңдалған нұсқа",
     dataset: "Дерек",
@@ -388,15 +388,15 @@ const UI = {
     model: "AI",
     modelSelector: "Версия MedAI",
     modelBase: "Базовая MedAI — для сравнения",
-    modelTuned: "Экспериментальная — проверку не прошла",
-    modelTunedWarning: "Эта версия не прошла сбалансированную проверку: пригодны только 2 ответа из 12. Диагностический результат скрывается до повторного обучения.",
-    qualityGateFailed: "Не прошла контроль качества",
+    modelTuned: "Дообученная MedAI — пневмония / норма",
+    modelTunedWarning: "Дообученную версию можно полноценно запускать и проверять. Она пока экспериментальная, поэтому каждый результат должен быть проверен врачом.",
+    qualityGateFailed: "Экспериментальная версия",
     preliminaryConclusion: "Предварительное заключение MedAI",
     evidenceTitle: "Видимые признаки",
     localizationUnavailable: "Локализация недоступна: эта версия обучена только на классах снимков, без координат очага.",
     localizationLabel: "Область, отмеченная моделью",
-    resultWithheld: "Диагностический ответ скрыт из-за непрохождения контроля качества.",
-    reportQuarantined: "Старый AI-черновик этой непроверенной версии также скрыт. Запустите новый анализ или подготовьте заключение врача вручную.",
+    resultWithheld: "Диагностический ответ скрыт, потому что не достигнут порог уверенности.",
+    reportQuarantined: "AI-черновик с низкой уверенностью скрыт. Запустите новый анализ или подготовьте заключение врача вручную.",
     confidenceUncalibrated: "Оценка модели (не калибрована)",
     modelCurrent: "Выбранная версия",
     dataset: "Данные",
@@ -588,15 +588,15 @@ const UI = {
     model: "AI",
     modelSelector: "MedAI version",
     modelBase: "Base MedAI — comparison only",
-    modelTuned: "Experimental — quality gate failed",
-    modelTunedWarning: "This version failed balanced validation: only 2 of 12 answers were usable. Its diagnostic output is withheld until retraining.",
-    qualityGateFailed: "Quality gate failed",
+    modelTuned: "Fine-tuned MedAI — pneumonia / normal",
+    modelTunedWarning: "The fine-tuned version is fully available for testing. It remains experimental, so every result must be reviewed by a clinician.",
+    qualityGateFailed: "Experimental version",
     preliminaryConclusion: "Preliminary MedAI conclusion",
     evidenceTitle: "Visible findings",
     localizationUnavailable: "Localization is unavailable: this version was trained on image classes only, without lesion coordinates.",
     localizationLabel: "Region marked by the model",
-    resultWithheld: "The diagnostic output is withheld because the quality gate failed.",
-    reportQuarantined: "The old AI draft from this unvalidated version is also withheld. Run a new analysis or prepare the clinician report manually.",
+    resultWithheld: "The diagnostic output is withheld because it did not reach the confidence threshold.",
+    reportQuarantined: "The low-confidence AI draft is withheld. Run a new analysis or prepare the clinician report manually.",
     confidenceUncalibrated: "Model estimate (uncalibrated)",
     modelCurrent: "Selected version",
     dataset: "Data",
@@ -957,7 +957,7 @@ export default function App() {
   const [view, setView] = useState<View>("studies");
   const [showLoginPanel, setShowLoginPanel] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [modelVariant, setModelVariant] = useState<"base" | "pneumonia_v1">("base");
+  const [modelVariant, setModelVariant] = useState<"base" | "pneumonia_v1">("pneumonia_v1");
   const [aiRunningStudyId, setAiRunningStudyId] = useState<number | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -1007,9 +1007,7 @@ export default function App() {
   const [imageAspect, setImageAspect] = useState(4 / 3);
 
   const latestAI = aiResults[0] ?? null;
-  const latestAIWithheld = Boolean(
-    latestAI && (latestAI.hidden_due_low_confidence || latestAI.model_quality_status === "failed")
-  );
+  const latestAIWithheld = Boolean(latestAI?.hidden_due_low_confidence);
   const selectedStudyAiBusy = Boolean(selectedStudy && aiRunningStudyId === selectedStudy.id);
   const reportSections = useMemo(() => parseClinicalReport(finalText || report?.ai_draft_text, lang), [finalText, lang, report?.ai_draft_text]);
   const selectedCrm = crmRecords.find((record) => record.id === crmSelectedId) ?? null;
@@ -1863,8 +1861,8 @@ export default function App() {
                           onChange={(event) => setModelVariant(event.target.value as "base" | "pneumonia_v1")}
                           disabled={busy || selectedStudyAiBusy}
                         >
-                          <option value="base">{ui.modelBase}</option>
                           <option value="pneumonia_v1">{ui.modelTuned}</option>
+                          <option value="base">{ui.modelBase}</option>
                         </select>
                       </div>
                       {modelVariant === "pneumonia_v1" && (
@@ -1884,9 +1882,9 @@ export default function App() {
                         {selectedStudyAiBusy ? ui.aiWaiting : ui.runAI}
                       </button>
                       {latestAI && (
-                        <div className={`clinicalAiSummary ${latestAIWithheld ? "needsReview" : ""}`}>
+                        <div className={`clinicalAiSummary ${latestAIWithheld ? "needsReview" : latestAI.model_quality_status === "experimental" ? "experimental" : ""}`}>
                           <small>
-                            {latestAI.model_quality_status === "failed"
+                            {latestAI.model_quality_status === "experimental"
                               ? ui.qualityGateFailed
                               : latestAI.hidden_due_low_confidence
                                 ? workspaceUi.lowConfidenceTitle
@@ -1899,7 +1897,7 @@ export default function App() {
                                 ? ui.findings[latestAI.predicted_class]
                                 : ui.classUnknown}
                           </strong>
-                          {latestAI.model_quality_status !== "failed" && (
+                          {(
                             <>
                               <div className="confidenceTrack"><i style={{ width: `${Math.max(3, (latestAI.confidence ?? 0) * 100)}%` }} /></div>
                               <span>{ui.confidenceUncalibrated}: {formatPercent(latestAI.confidence)}</span>

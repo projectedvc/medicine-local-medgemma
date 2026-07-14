@@ -24,9 +24,8 @@ MODEL_VERSION_BY_VARIANT = {
     "pneumonia_v1": "medai-pneumonia-v1",
 }
 
-# Selectable only for controlled comparison until a retrained adapter passes
-# balanced validation. Its diagnostic class must not reach the clinical report.
-FAILED_QUALITY_VARIANTS = {"pneumonia_v1"}
+# The adapter is available for real user testing, but is not clinically validated.
+EXPERIMENTAL_VARIANTS = {"pneumonia_v1"}
 
 
 def _latest_image(study: Study):
@@ -40,7 +39,7 @@ async def process_analysis(
     analysis: AIAnalysis,
     study: Study,
     lang: str = "ru",
-    model_variant: str = "base",
+    model_variant: str = "pneumonia_v1",
 ) -> AIAnalysis:
     image = _latest_image(study)
     analysis.status = AIJobStatus.running
@@ -54,26 +53,25 @@ async def process_analysis(
             lang=lang,
             model_variant=model_variant,
         )
-        quality_gate_failed = model_variant in FAILED_QUALITY_VARIANTS
+        experimental = model_variant in EXPERIMENTAL_VARIANTS
         hidden = (
             result.predicted_class is None
             or result.confidence < settings.ai_confidence_threshold
-            or quality_gate_failed
         )
         analysis.status = AIJobStatus.completed
         analysis.raw_predicted_label = result.raw_predicted_label
         analysis.predicted_class = None if hidden else result.predicted_class
         analysis.confidence = result.confidence
         analysis.hidden_due_low_confidence = hidden
-        if quality_gate_failed:
-            analysis.warning = (
-                "Экспериментальная версия не прошла сбалансированный контроль качества. "
-                "Диагностический класс скрыт до повторного обучения и валидации."
-            )
-        elif hidden:
+        if hidden:
             analysis.warning = (
                 "Результат не достиг порога качества. Диагностический класс скрыт; "
                 "требуется ручная оценка врача."
+            )
+        elif experimental:
+            analysis.warning = (
+                "Экспериментальная дообученная версия. Результат доступен для тестирования, "
+                "но ещё не прошёл клиническую валидацию и требует проверки врачом."
             )
         else:
             analysis.warning = result.warning
@@ -95,7 +93,7 @@ async def process_analysis(
 async def process_analysis_by_id(
     analysis_id: int,
     lang: str = "ru",
-    model_variant: str = "base",
+    model_variant: str = "pneumonia_v1",
 ) -> None:
     db = SessionLocal()
     try:

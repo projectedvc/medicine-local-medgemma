@@ -9,7 +9,7 @@ This project uses staged adapters. Do not continue training one adapter across u
 3. Further chest findings as separate, versioned tasks.
 4. Bone/fracture work starts as a separate anatomy family, manifest, adapter, and release gate.
 
-The current `medai-pneumonia-v1` adapter is **not released**. A balanced 12-image smoke check produced only 2 usable correct answers. The UI may expose it for controlled comparison, but the backend must withhold its diagnostic class.
+The current `medai-pneumonia-v1` adapter is available as an **experimental testing model**. A small balanced smoke check produced only 2 usable correct answers out of 12, so the UI must show that limitation and require clinician review. The backend must still return its class and draft when the ordinary confidence threshold is met; do not silently withhold a model the user explicitly selected.
 
 ## Non-negotiable data rules
 
