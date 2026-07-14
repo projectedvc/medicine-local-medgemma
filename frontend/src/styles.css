@@ -5056,6 +5056,10 @@ textarea:focus {
   color: #6b3440;
 }
 
+:root[data-theme="light"] .analysisWarningText {
+  color: #7b510b;
+}
+
 :root[data-theme="light"] .aiConclusionCard {
   border-color: #9dded9;
   background: linear-gradient(145deg, #f0fffd, #ffffff);
