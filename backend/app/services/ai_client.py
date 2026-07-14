@@ -37,6 +37,9 @@ LABEL_MAP: dict[str, FindingClass] = {
     "no findings": FindingClass.normal,
     "pneumonia": FindingClass.pneumonia,
     "infiltration": FindingClass.pneumonia,
+    "other abnormal": FindingClass.other_abnormal,
+    "other_abnormal": FindingClass.other_abnormal,
+    "abnormal": FindingClass.other_abnormal,
     "pleural effusion": FindingClass.pleural_effusion,
     "pleural_effusion": FindingClass.pleural_effusion,
     "effusion": FindingClass.pleural_effusion,
@@ -53,7 +56,7 @@ LABEL_MAP: dict[str, FindingClass] = {
 
 GENERATE_PROMPT = (
     "Inspect the chest radiograph itself. Choose exactly one finding: normal, pneumonia, "
-    "pneumothorax, pleural_effusion, atelectasis, or not_diagnostic. Return only a JSON object "
+    "other_abnormal, pneumothorax, pleural_effusion, atelectasis, or not_diagnostic. Return only a JSON object "
     "with the keys finding, confidence, bbox, impression, and evidence. confidence must be a "
     "number from 0.01 to 0.99 based on this image; use 0 only when the image is unreadable. "
     "bbox must be null unless a reliable normalized [x1,y1,x2,y2] region in the 0..1 range is "
@@ -168,6 +171,26 @@ def _normalize_untrusted_bbox(value: Any) -> list[float] | None:
     return bbox if 0 <= x1 < x2 <= 1 and 0 <= y1 < y2 <= 1 else None
 
 
+def _normalize_localization(value: Any) -> dict[str, Any]:
+    """Preserve geometry only when the GPU service attaches validated provenance."""
+    if not isinstance(value, dict):
+        return {
+            "validated": False,
+            "source": None,
+            "bbox": None,
+            "reason": "missing_localization_provenance",
+        }
+    bbox = _normalize_untrusted_bbox(value.get("bbox"))
+    source = str(value.get("source") or "").strip() or None
+    validated = value.get("validated") is True and bbox is not None and source is not None
+    return {
+        "validated": validated,
+        "source": source if validated else None,
+        "bbox": bbox if validated else None,
+        "reason": None if validated else str(value.get("reason") or "unvalidated_localization"),
+    }
+
+
 def _extract_json_from_text(text: str) -> dict[str, Any] | None:
     decoder = json.JSONDecoder()
     candidates = [text.strip()]
@@ -227,14 +250,7 @@ def _parse_text_confidence(text: str) -> float:
 def normalize_ai_response(raw: dict[str, Any]) -> AIResult:
     payload = _remove_template_values(_merge_generated_payload(raw))
     payload["bbox"] = _normalize_untrusted_bbox(payload.get("bbox"))
-    # The current pneumonia corpus has image-level labels only. A box generated
-    # by the language model has no localization supervision and must not be shown.
-    payload["localization"] = {
-        "validated": False,
-        "source": None,
-        "bbox": None,
-        "reason": "class_only_training_data",
-    }
+    payload["localization"] = _normalize_localization(payload.get("localization"))
     response_text = next(
         (
             raw.get(key)

@@ -28,6 +28,7 @@ REPORT_SUBTITLE = "MedAI Radiology Assistant"
 FINDING_LABELS: dict[FindingClass, str] = {
     FindingClass.normal: "Норма / Normal",
     FindingClass.pneumonia: "Пневмония / Pneumonia",
+    FindingClass.other_abnormal: "Басқа патология / Другая патология",
     FindingClass.pleural_effusion: "Плевралық сұйықтық / Плевральный выпот",
     FindingClass.pneumothorax: "Пневмоторакс / Pneumothorax",
     FindingClass.atelectasis: "Ателектаз / Atelectasis",
@@ -41,6 +42,10 @@ TEMPLATES: dict[FindingClass, str] = {
     FindingClass.pneumonia: (
         "Өкпе тінінде инфильтративті өзгерістерге сәйкес болуы мүмкін белгілер байқалады. "
         "Клиникалық деректермен және дәрігердің тікелей бағалауымен салыстыру қажет."
+    ),
+    FindingClass.other_abnormal: (
+        "Кеуде рентгенограммасында пневмония ретінде сенімді жіктелмейтін патологиялық өзгерістер бар. "
+        "Суретті рентгенолог тікелей сипаттауы қажет."
     ),
     FindingClass.pleural_effusion: (
         "Плевра қуысында сұйықтық болуы мүмкін белгілер байқалады. Жағы, көлемі және "

@@ -43,6 +43,7 @@ class AIJobStatus(str, Enum):
 class FindingClass(str, Enum):
     normal = "normal"
     pneumonia = "pneumonia"
+    other_abnormal = "other_abnormal"
     pleural_effusion = "pleural_effusion"
     pneumothorax = "pneumothorax"
     atelectasis = "atelectasis"
@@ -51,6 +52,7 @@ class FindingClass(str, Enum):
 FINDING_LABELS: dict[FindingClass, str] = {
     FindingClass.normal: "Норма",
     FindingClass.pneumonia: "Пневмония",
+    FindingClass.other_abnormal: "Другая патология",
     FindingClass.pleural_effusion: "Плевральный выпот",
     FindingClass.pneumothorax: "Пневмоторакс",
     FindingClass.atelectasis: "Ателектаз",

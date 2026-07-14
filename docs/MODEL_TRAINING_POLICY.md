@@ -4,7 +4,7 @@ This project uses staged adapters. Do not continue training one adapter across u
 
 ## Current chest sequence
 
-1. `cxr_pneumonia_v2`: NORMAL vs PNEUMONIA.
+1. `medai-rsna-pneumonia-v2`: NORMAL vs PNEUMONIA vs OTHER_ABNORMAL, trained with patient-separated RSNA tasks.
 2. A separate pneumothorax adapter/dataset after the binary adapter passes its gate.
 3. Further chest findings as separate, versioned tasks.
 4. Bone/fracture work starts as a separate anatomy family, manifest, adapter, and release gate.
@@ -24,7 +24,9 @@ The current `medai-pneumonia-v1` adapter is available as an **experimental testi
 
 ## Localization
 
-The Kaggle pneumonia dataset has image-level class labels only. It cannot supervise lesion boxes, masks, or trustworthy heatmaps. Never display a generated box from this adapter.
+The legacy Kaggle pneumonia dataset has image-level class labels only. It cannot supervise lesion boxes, masks, or trustworthy heatmaps. Never display a generated box from that adapter.
+
+The RSNA v2 dataset contains adjudicated pneumonia boxes. The platform may show them only when the untouched-test localization gate passes independently from the classification gate. A classification release does not automatically validate localization.
 
 Localization requires a separate dataset with expert boxes/masks and a separately validated detector or segmentation model. The production API exposes a region only when it arrives as:
 
@@ -38,7 +40,7 @@ Localization requires a separate dataset with expert boxes/masks and a separatel
 }
 ```
 
-Coordinates are normalized to the source image. Until that pipeline exists, return `localization.validated=false` and show an explicit “localization unavailable” message.
+Coordinates are normalized to the source image. When the gate is unavailable or fails, return `localization.validated=false` and show an explicit “localization unavailable” message.
 
 ## Corrected training and release gate
 

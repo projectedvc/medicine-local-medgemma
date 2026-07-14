@@ -14,7 +14,9 @@ export type StudyStatus =
 
 export type AIJobStatus = "queued" | "running" | "completed" | "failed";
 
-export type FindingClass = "normal" | "pneumonia" | "pleural_effusion" | "pneumothorax" | "atelectasis";
+export type FindingClass = "normal" | "pneumonia" | "other_abnormal" | "pleural_effusion" | "pneumothorax" | "atelectasis";
+
+export type ModelVariant = "base" | "pneumonia_v1" | "rsna_v2";
 
 export type FeedbackType = "false_positive" | "false_negative" | "wrong_region" | "other";
 
@@ -63,8 +65,8 @@ export interface AIAnalysis {
   ai_text: string | null;
   evidence: string[];
   localization_bbox: [number, number, number, number] | null;
-  localization_status: "available" | "unavailable_class_only";
-  model_quality_status: "experimental" | "unvalidated";
+  localization_status: "available" | "not_applicable" | "unavailable_unvalidated" | "unavailable_class_only";
+  model_quality_status: "experimental" | "candidate" | "validated" | "unvalidated";
   confidence: number | null;
   threshold: number;
   hidden_due_low_confidence: boolean;

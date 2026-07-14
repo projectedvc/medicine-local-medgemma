@@ -81,8 +81,34 @@ def test_class_only_model_does_not_publish_generated_coordinates():
         "validated": False,
         "source": None,
         "bbox": None,
-        "reason": "class_only_training_data",
+        "reason": "missing_localization_provenance",
     }
+
+
+def test_test_gated_localization_is_preserved():
+    result = normalize_ai_response(
+        {
+            "finding": "pneumonia",
+            "confidence": 0.91,
+            "localization": {
+                "validated": True,
+                "source": "medai-rsna-pneumonia-v2:test-gated-boxes",
+                "bbox": [0.1, 0.2, 0.8, 0.9],
+            },
+        }
+    )
+
+    assert result.raw_response["localization"]["validated"] is True
+    assert result.raw_response["localization"]["bbox"] == [0.1, 0.2, 0.8, 0.9]
+
+
+def test_rsna_other_abnormal_is_a_supported_triage_class():
+    result = normalize_ai_response(
+        {"finding": "other_abnormal", "confidence": 0.86, "impression": "Другая патология."}
+    )
+
+    assert result.predicted_class == FindingClass.other_abnormal
+    assert result.confidence == 0.86
 
 
 def test_absolute_pixel_bbox_is_rejected():

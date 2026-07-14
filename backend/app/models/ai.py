@@ -85,8 +85,28 @@ class AIAnalysis(Base):
 
     @property
     def localization_status(self) -> str:
-        return "available" if self.localization_bbox else "unavailable_class_only"
+        if self.localization_bbox:
+            return "available"
+        try:
+            data = json.loads(self.raw_response_json or "{}")
+        except Exception:
+            return "unavailable_unvalidated"
+        localization = data.get("localization")
+        reason = localization.get("reason") if isinstance(localization, dict) else None
+        if reason in {"normal_study", "no_localizable_pneumonia", "not_applicable"}:
+            return "not_applicable"
+        if reason == "class_only_training_data":
+            return "unavailable_class_only"
+        return "unavailable_unvalidated"
 
     @property
     def model_quality_status(self) -> str:
-        return "experimental" if self.model_version == "medai-pneumonia-v1" else "unvalidated"
+        if self.model_version == "medai-pneumonia-v1":
+            return "experimental"
+        if self.model_version == "medai-rsna-pneumonia-v2":
+            try:
+                data = json.loads(self.raw_response_json or "{}")
+            except Exception:
+                return "candidate"
+            return "validated" if data.get("quality_gate_passed") is True else "candidate"
+        return "unvalidated"

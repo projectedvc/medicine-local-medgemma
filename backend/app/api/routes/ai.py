@@ -22,10 +22,11 @@ router = APIRouter(prefix="/studies/{study_id}/ai", tags=["ai"])
 MODEL_VERSION_BY_VARIANT = {
     "base": "medai-base",
     "pneumonia_v1": "medai-pneumonia-v1",
+    "rsna_v2": "medai-rsna-pneumonia-v2",
 }
 
 # The adapter is available for real user testing, but is not clinically validated.
-EXPERIMENTAL_VARIANTS = {"pneumonia_v1"}
+EXPERIMENTAL_VARIANTS = {"pneumonia_v1", "rsna_v2"}
 
 
 def _latest_image(study: Study):
@@ -39,7 +40,7 @@ async def process_analysis(
     analysis: AIAnalysis,
     study: Study,
     lang: str = "ru",
-    model_variant: str = "pneumonia_v1",
+    model_variant: str = "base",
 ) -> AIAnalysis:
     image = _latest_image(study)
     analysis.status = AIJobStatus.running
@@ -93,7 +94,7 @@ async def process_analysis(
 async def process_analysis_by_id(
     analysis_id: int,
     lang: str = "ru",
-    model_variant: str = "pneumonia_v1",
+    model_variant: str = "base",
 ) -> None:
     db = SessionLocal()
     try:

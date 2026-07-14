@@ -78,6 +78,7 @@ FINDING_LABELS = {
     "kk": {
         FindingClass.normal: "Норма",
         FindingClass.pneumonia: "Пневмония",
+        FindingClass.other_abnormal: "Басқа патология",
         FindingClass.pleural_effusion: "Плевралық сұйықтық",
         FindingClass.pneumothorax: "Пневмоторакс",
         FindingClass.atelectasis: "Ателектаз",
@@ -85,6 +86,7 @@ FINDING_LABELS = {
     "ru": {
         FindingClass.normal: "Норма",
         FindingClass.pneumonia: "Пневмония",
+        FindingClass.other_abnormal: "Другая патология",
         FindingClass.pleural_effusion: "Плевральный выпот",
         FindingClass.pneumothorax: "Пневмоторакс",
         FindingClass.atelectasis: "Ателектаз",
@@ -92,6 +94,7 @@ FINDING_LABELS = {
     "en": {
         FindingClass.normal: "Normal",
         FindingClass.pneumonia: "Pneumonia",
+        FindingClass.other_abnormal: "Other abnormality",
         FindingClass.pleural_effusion: "Pleural effusion",
         FindingClass.pneumothorax: "Pneumothorax",
         FindingClass.atelectasis: "Atelectasis",
@@ -110,6 +113,11 @@ FINDING_TEXT = {
             "findings": "Өкпе тінінде инфильтративті өзгерістерге сәйкес келуі мүмкін рентгенологиялық белгілер байқалады.",
             "impression": "Пневмония ықтималдығы бар. Клиникалық және зертханалық деректермен салыстыру қажет.",
             "recommendations": "Емдеуші дәрігер бағалауы, қабыну маркерлерімен салыстыру және динамикалық бақылау ұсынылады.",
+        },
+        FindingClass.other_abnormal: {
+            "findings": "Кеуде рентгенограммасында пневмония ретінде сенімді жіктелмейтін патологиялық өзгерістер бар.",
+            "impression": "Басқа рентгенологиялық патология. Дәрігердің тікелей сипаттауы қажет.",
+            "recommendations": "Суретті рентгенолог толық бағалап, клиникалық деректермен салыстыруы керек.",
         },
         FindingClass.pleural_effusion: {
             "findings": "Плевра қуысында сұйықтық болуына күмәнді белгілер байқалады.",
@@ -138,6 +146,11 @@ FINDING_TEXT = {
             "impression": "Вероятна пневмония. Требуется сопоставление с клинической картиной и лабораторными данными.",
             "recommendations": "Рекомендована оценка лечащим врачом, корреляция с маркерами воспаления и контроль в динамике.",
         },
+        FindingClass.other_abnormal: {
+            "findings": "На рентгенограмме имеются патологические изменения, которые модель не относит уверенно к пневмонии.",
+            "impression": "Другая рентгенологическая патология. Требуется непосредственное описание врачом.",
+            "recommendations": "Рентгенологу необходимо полностью оценить снимок и сопоставить изменения с клиническими данными.",
+        },
         FindingClass.pleural_effusion: {
             "findings": "Определяются признаки, подозрительные на наличие жидкости в плевральной полости.",
             "impression": "Вероятен плевральный выпот. Сторону и объем необходимо уточнить врачом по изображению.",
@@ -164,6 +177,11 @@ FINDING_TEXT = {
             "findings": "Imaging signs may correspond to infiltrative change in the lung parenchyma.",
             "impression": "Pneumonia is possible. Correlation with clinical and laboratory findings is required.",
             "recommendations": "Clinician review, correlation with inflammatory markers, and follow-up imaging as indicated are recommended.",
+        },
+        FindingClass.other_abnormal: {
+            "findings": "The radiograph contains abnormal findings that are not confidently classified as pneumonia.",
+            "impression": "Other radiographic abnormality. Direct clinician description is required.",
+            "recommendations": "A radiologist should review the complete image and correlate the findings clinically.",
         },
         FindingClass.pleural_effusion: {
             "findings": "Findings are suspicious for fluid in the pleural space.",

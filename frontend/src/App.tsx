@@ -46,6 +46,7 @@ import type {
   FeedbackType,
   Pathology,
   Report,
+  ModelVariant,
   Study,
   StudyStatus,
   User
@@ -110,6 +111,7 @@ const UI = {
     findings: {
       normal: "Норма",
       pneumonia: "Пневмония",
+      other_abnormal: "Басқа патология",
       pleural_effusion: "Плевралық сұйықтық",
       pneumothorax: "Пневмоторакс",
       atelectasis: "Ателектаз"
@@ -189,11 +191,14 @@ const UI = {
     modelSelector: "MedAI нұсқасы",
     modelBase: "Негізгі MedAI — салыстыру үшін",
     modelTuned: "Оқытылған MedAI — пневмония / норма",
+    modelRsna: "Жаңа MedAI — пневмония, норма және аймақ",
     modelTunedWarning: "Бұл оқытылған нұсқаны толық пайдалануға және тексеруге болады. Ол әзірге эксперименттік және әрбір нәтижені дәрігер тексеруі тиіс.",
+    modelRsnaWarning: "Бұл нұсқа пациенттер бойынша бөлінген RSNA деректерінде оқытылып, бөлек тесттен өтеді. Аймақ тек локализация сапа шегінен өткенде көрсетіледі.",
     qualityGateFailed: "Эксперименттік нұсқа",
+    qualityGateCandidate: "Сапасы тексерілетін нұсқа",
     preliminaryConclusion: "MedAI алдын ала қорытындысы",
     evidenceTitle: "Көрінетін белгілер",
-    localizationUnavailable: "Локализация қолжетімсіз: бұл нұсқа координаттарсыз, тек сурет кластарымен оқытылған.",
+    localizationUnavailable: "Нақты аймақ көрсетілмеді: ол бұл қорытындыға қолданылмайды немесе локализация сапа шегінен әлі өтпеді.",
     localizationLabel: "Модель белгілеген аймақ",
     resultWithheld: "Сенімділік шегіне жетпегендіктен диагностикалық жауап жасырылды.",
     reportQuarantined: "Сенімділігі төмен AI жобасы жасырылды. Жаңа талдауды іске қосыңыз немесе дәрігер қорытындыны қолмен жазыңыз.",
@@ -310,6 +315,7 @@ const UI = {
     findings: {
       normal: "Норма",
       pneumonia: "Пневмония",
+      other_abnormal: "Другая патология",
       pleural_effusion: "Плевральный выпот",
       pneumothorax: "Пневмоторакс",
       atelectasis: "Ателектаз"
@@ -389,11 +395,14 @@ const UI = {
     modelSelector: "Версия MedAI",
     modelBase: "Базовая MedAI — для сравнения",
     modelTuned: "Дообученная MedAI — пневмония / норма",
+    modelRsna: "Новая MedAI — пневмония, норма и область",
     modelTunedWarning: "Дообученную версию можно полноценно запускать и проверять. Она пока экспериментальная, поэтому каждый результат должен быть проверен врачом.",
+    modelRsnaWarning: "Эта версия обучена на RSNA с разделением по пациентам и проходит отдельный тест. Область показывается только после прохождения порога качества локализации.",
     qualityGateFailed: "Экспериментальная версия",
+    qualityGateCandidate: "Версия на проверке качества",
     preliminaryConclusion: "Предварительное заключение MedAI",
     evidenceTitle: "Видимые признаки",
-    localizationUnavailable: "Локализация недоступна: эта версия обучена только на классах снимков, без координат очага.",
+    localizationUnavailable: "Точная область не показана: она не применима к этому выводу или локализация еще не прошла порог качества.",
     localizationLabel: "Область, отмеченная моделью",
     resultWithheld: "Диагностический ответ скрыт, потому что не достигнут порог уверенности.",
     reportQuarantined: "AI-черновик с низкой уверенностью скрыт. Запустите новый анализ или подготовьте заключение врача вручную.",
@@ -510,6 +519,7 @@ const UI = {
     findings: {
       normal: "Normal",
       pneumonia: "Pneumonia",
+      other_abnormal: "Other abnormality",
       pleural_effusion: "Pleural effusion",
       pneumothorax: "Pneumothorax",
       atelectasis: "Atelectasis"
@@ -589,11 +599,14 @@ const UI = {
     modelSelector: "MedAI version",
     modelBase: "Base MedAI — comparison only",
     modelTuned: "Fine-tuned MedAI — pneumonia / normal",
+    modelRsna: "New MedAI — pneumonia, normal and region",
     modelTunedWarning: "The fine-tuned version is fully available for testing. It remains experimental, so every result must be reviewed by a clinician.",
+    modelRsnaWarning: "This version is trained on patient-separated RSNA data and undergoes a separate test. A region is shown only after the localization quality gate passes.",
     qualityGateFailed: "Experimental version",
+    qualityGateCandidate: "Quality-gated candidate",
     preliminaryConclusion: "Preliminary MedAI conclusion",
     evidenceTitle: "Visible findings",
-    localizationUnavailable: "Localization is unavailable: this version was trained on image classes only, without lesion coordinates.",
+    localizationUnavailable: "No precise region is shown: it is not applicable to this result or localization has not passed its quality gate yet.",
     localizationLabel: "Region marked by the model",
     resultWithheld: "The diagnostic output is withheld because it did not reach the confidence threshold.",
     reportQuarantined: "The low-confidence AI draft is withheld. Run a new analysis or prepare the clinician report manually.",
@@ -957,7 +970,7 @@ export default function App() {
   const [view, setView] = useState<View>("studies");
   const [showLoginPanel, setShowLoginPanel] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [modelVariant, setModelVariant] = useState<"base" | "pneumonia_v1">("pneumonia_v1");
+  const [modelVariant, setModelVariant] = useState<ModelVariant>("base");
   const [aiRunningStudyId, setAiRunningStudyId] = useState<number | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -1835,7 +1848,7 @@ export default function App() {
                         </div>
                       )}
                     </div>
-                    {latestAI?.localization_status === "unavailable_class_only" && (
+                    {latestAI && ["unavailable_class_only", "unavailable_unvalidated"].includes(latestAI.localization_status) && (
                       <div className="localizationHint">
                         <AlertTriangle size={16} />
                         <span>{ui.localizationUnavailable}</span>
@@ -1858,9 +1871,10 @@ export default function App() {
                         <select
                           id="medai-model-variant"
                           value={modelVariant}
-                          onChange={(event) => setModelVariant(event.target.value as "base" | "pneumonia_v1")}
+                          onChange={(event) => setModelVariant(event.target.value as ModelVariant)}
                           disabled={busy || selectedStudyAiBusy}
                         >
+                          <option value="rsna_v2">{ui.modelRsna}</option>
                           <option value="pneumonia_v1">{ui.modelTuned}</option>
                           <option value="base">{ui.modelBase}</option>
                         </select>
@@ -1869,6 +1883,12 @@ export default function App() {
                         <div className="modelQualityWarning">
                           <AlertTriangle size={17} />
                           <div><strong>{ui.qualityGateFailed}</strong><span>{ui.modelTunedWarning}</span></div>
+                        </div>
+                      )}
+                      {modelVariant === "rsna_v2" && (
+                        <div className="modelQualityWarning candidate">
+                          <Activity size={17} />
+                          <div><strong>{ui.qualityGateCandidate}</strong><span>{ui.modelRsnaWarning}</span></div>
                         </div>
                       )}
                       {selectedStudyAiBusy && (
@@ -1882,13 +1902,15 @@ export default function App() {
                         {selectedStudyAiBusy ? ui.aiWaiting : ui.runAI}
                       </button>
                       {latestAI && (
-                        <div className={`clinicalAiSummary ${latestAIWithheld ? "needsReview" : latestAI.model_quality_status === "experimental" ? "experimental" : ""}`}>
+                        <div className={`clinicalAiSummary ${latestAIWithheld ? "needsReview" : latestAI.model_quality_status === "experimental" ? "experimental" : latestAI.model_quality_status === "candidate" ? "candidate" : ""}`}>
                           <small>
-                            {latestAI.model_quality_status === "experimental"
-                              ? ui.qualityGateFailed
-                              : latestAI.hidden_due_low_confidence
-                                ? workspaceUi.lowConfidenceTitle
-                                : ui.aiDone}
+                            {latestAI.hidden_due_low_confidence
+                              ? workspaceUi.lowConfidenceTitle
+                              : latestAI.model_quality_status === "experimental"
+                                ? ui.qualityGateFailed
+                                : latestAI.model_quality_status === "candidate"
+                                  ? ui.qualityGateCandidate
+                                  : ui.aiDone}
                           </small>
                           <strong>
                             {latestAIWithheld
@@ -1905,7 +1927,11 @@ export default function App() {
                           )}
                           {latestAI.warning && <p className="analysisWarningText">{latestAI.warning}</p>}
                           <span className="modelVersionLine">
-                            {ui.modelCurrent}: {latestAI.model_version === "medai-pneumonia-v1" ? ui.modelTuned : ui.modelBase}
+                            {ui.modelCurrent}: {latestAI.model_version === "medai-rsna-pneumonia-v2"
+                              ? ui.modelRsna
+                              : latestAI.model_version === "medai-pneumonia-v1"
+                                ? ui.modelTuned
+                                : ui.modelBase}
                           </span>
                         </div>
                       )}
