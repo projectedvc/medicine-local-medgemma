@@ -1004,6 +1004,9 @@ export default function App() {
   const [imageAspect, setImageAspect] = useState(4 / 3);
 
   const latestAI = aiResults[0] ?? null;
+  const latestAIWithheld = Boolean(
+    latestAI && (latestAI.hidden_due_low_confidence || latestAI.model_quality_status === "failed")
+  );
   const selectedStudyAiBusy = Boolean(selectedStudy && aiRunningStudyId === selectedStudy.id);
   const reportSections = useMemo(() => parseClinicalReport(finalText || report?.ai_draft_text, lang), [finalText, lang, report?.ai_draft_text]);
   const selectedCrm = crmRecords.find((record) => record.id === crmSelectedId) ?? null;
@@ -1806,7 +1809,7 @@ export default function App() {
                               filter: `brightness(${brightness}%) contrast(${contrast}%)`
                             }}
                           />
-                          {latestAI?.localization_bbox && !latestAI.hidden_due_low_confidence && (
+                          {latestAI?.localization_bbox && !latestAIWithheld && (
                             <div
                               className="localizationBox"
                               style={{
@@ -1878,7 +1881,7 @@ export default function App() {
                         {selectedStudyAiBusy ? ui.aiWaiting : ui.runAI}
                       </button>
                       {latestAI && (
-                        <div className={`clinicalAiSummary ${latestAI.hidden_due_low_confidence || latestAI.model_quality_status === "failed" ? "needsReview" : ""}`}>
+                        <div className={`clinicalAiSummary ${latestAIWithheld ? "needsReview" : ""}`}>
                           <small>
                             {latestAI.model_quality_status === "failed"
                               ? ui.qualityGateFailed
@@ -1887,7 +1890,7 @@ export default function App() {
                                 : ui.aiDone}
                           </small>
                           <strong>
-                            {latestAI.hidden_due_low_confidence
+                            {latestAIWithheld
                               ? ui.resultWithheld
                               : latestAI.predicted_class
                                 ? ui.findings[latestAI.predicted_class]
@@ -1908,7 +1911,7 @@ export default function App() {
                       <button
                         className="ghostButton"
                         onClick={createDraft}
-                        disabled={busy || !latestAI || latestAI.hidden_due_low_confidence || !latestAI.predicted_class}
+                        disabled={busy || !latestAI || latestAIWithheld || !latestAI.predicted_class}
                       >
                         <FileText size={18} />
                         {ui.createDraft}
@@ -1921,15 +1924,15 @@ export default function App() {
                         <FileText size={20} />
                       </div>
                       {latestAI && (
-                        <div className={`aiConclusionCard ${latestAI.hidden_due_low_confidence ? "withheld" : ""}`}>
+                        <div className={`aiConclusionCard ${latestAIWithheld ? "withheld" : ""}`}>
                           <span>{ui.preliminaryConclusion}</span>
                           <p>
-                            {latestAI.hidden_due_low_confidence
+                            {latestAIWithheld
                               ? latestAI.warning || ui.resultWithheld
                               : latestAI.ai_text
                                 || (latestAI.predicted_class ? ui.findings[latestAI.predicted_class] : ui.classUnknown)}
                           </p>
-                          {!latestAI.hidden_due_low_confidence && (latestAI.evidence?.length ?? 0) > 0 && (
+                          {!latestAIWithheld && (latestAI.evidence?.length ?? 0) > 0 && (
                             <div className="aiEvidenceList">
                               <strong>{ui.evidenceTitle}</strong>
                               <ul>{latestAI.evidence?.map((item) => <li key={item}>{item}</li>)}</ul>
