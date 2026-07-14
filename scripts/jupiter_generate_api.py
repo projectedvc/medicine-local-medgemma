@@ -24,11 +24,27 @@ DEFAULT_ADAPTER_PATH = Path(
 )
 ADAPTER_NAME = "pneumonia_v1"
 MODEL_LABELS = {"base": "medai-base", "pneumonia_v1": "medai-pneumonia-v1"}
-DEFAULT_PROMPT = """Проанализируйте рентгенограмму грудной клетки.
-Верните только один компактный JSON без markdown и пояснений:
-{"finding":"normal|pneumonia|not_diagnostic","confidence":0.0,"bbox":null,"impression":"краткое врачебное заключение","evidence":["до 3 кратких признаков"]}
-bbox укажите как [x1,y1,x2,y2] в долях 0..1 только при уверенной локализации; иначе null.
-Не добавляйте сведения о модели, технические инструкции, идентификаторы и повторения."""
+DEFAULT_PROMPT = """Внимательно оцените саму рентгенограмму грудной клетки.
+Выберите один класс: normal, pneumonia или not_diagnostic. Верните только JSON с полями
+finding, confidence, bbox, impression и evidence. confidence — числовая уверенность по этому
+снимку от 0.01 до 0.99; значение 0 допустимо только для нечитаемого снимка. bbox укажите только
+как нормализованные [x1,y1,x2,y2] в диапазоне 0..1 при надёжной локализации, иначе null.
+impression — фактическое краткое заключение на русском по этому пациенту, evidence — реально
+видимые признаки. Не копируйте инструкцию, описания полей, шаблоны или примеры."""
+
+_PLACEHOLDER_TEXTS = {
+    "one short clinical conclusion",
+    "up to three visible radiographic signs",
+    "краткое врачебное заключение",
+    "до 3 кратких признаков",
+}
+
+
+def _is_placeholder_text(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    normalized = re.sub(r"\s+", " ", value).strip().casefold().strip(" .:_-")
+    return normalized in _PLACEHOLDER_TEXTS
 
 app = FastAPI(title="MedAI GPU API", version="2.0")
 app.add_middleware(
@@ -144,6 +160,7 @@ def _clean_model_text(text: str) -> str:
         isinstance(bbox, list)
         and len(bbox) == 4
         and all(isinstance(value, (int, float)) for value in bbox)
+        and all(0.0 <= float(value) <= 1.0 for value in bbox)
     ):
         bbox = None
 
@@ -153,6 +170,7 @@ def _clean_model_text(text: str) -> str:
         "{" in impression
         or '"finding"' in impression
         or len(impression) > 300
+        or _is_placeholder_text(impression)
         or generic_impression in {
             "normal", "pneumonia", "pneumothorax", "pleural_effusion", "atelectasis", "not_diagnostic"
         }
@@ -173,7 +191,7 @@ def _clean_model_text(text: str) -> str:
     if isinstance(raw_evidence, list):
         for item in raw_evidence:
             value = re.sub(r"\s+", " ", str(item)).strip()
-            if value and "{" not in value and value not in evidence:
+            if value and "{" not in value and not _is_placeholder_text(value) and value not in evidence:
                 evidence.append(value[:220])
             if len(evidence) == 3:
                 break

@@ -1838,7 +1838,11 @@ export default function App() {
 </span>
                         </div>
                       )}
-                      <button className="ghostButton" onClick={createDraft} disabled={busy || !latestAI}>
+                      <button
+                        className="ghostButton"
+                        onClick={createDraft}
+                        disabled={busy || !latestAI || latestAI.hidden_due_low_confidence || !latestAI.predicted_class}
+                      >
                         <FileText size={18} />
                         {ui.createDraft}
                       </button>

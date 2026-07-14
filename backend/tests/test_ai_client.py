@@ -1,5 +1,5 @@
 from app.models.enums import FindingClass
-from app.services.ai_client import _candidate_endpoints, normalize_ai_response
+from app.services.ai_client import GENERATE_PROMPT, _candidate_endpoints, normalize_ai_response
 
 
 def test_generate_response_extracts_structured_json():
@@ -32,3 +32,26 @@ def test_candidate_endpoints_support_generate_urls():
         ("https://example.test/generate", "generate")
     ]
     assert ("https://example.test/generate", "generate") in _candidate_endpoints("https://example.test")
+
+
+def test_generate_prompt_has_no_copyable_schema_placeholders():
+    assert "one short clinical conclusion" not in GENERATE_PROMPT
+    assert "up to three visible radiographic signs" not in GENERATE_PROMPT
+    assert '"confidence":0.0' not in GENERATE_PROMPT
+
+
+def test_template_values_are_not_exposed_as_clinical_text():
+    result = normalize_ai_response(
+        {
+            "text": (
+                '{"finding":"normal","confidence":0.0,"bbox":null,'
+                '"impression":"one short clinical conclusion",'
+                '"evidence":["up to three visible radiographic signs"]}'
+            )
+        }
+    )
+
+    assert result.predicted_class == FindingClass.normal
+    assert result.confidence == 0.0
+    assert result.raw_response["impression"] is None
+    assert result.raw_response["evidence"] == []

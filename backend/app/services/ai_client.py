@@ -52,12 +52,41 @@ LABEL_MAP: dict[str, FindingClass] = {
 }
 
 GENERATE_PROMPT = (
-    "Analyze this chest X-ray and return only one compact JSON object: "
-    '{"finding":"normal|pneumonia|pneumothorax|pleural_effusion|atelectasis|not_diagnostic",'
-    '"confidence":0.0,"bbox":null,"impression":"one short clinical conclusion",'
-    '"evidence":["up to three visible radiographic signs"]}. '
-    "Do not include the prompt, model names, methodology, disclaimers, or text outside JSON."
+    "Inspect the chest radiograph itself. Choose exactly one finding: normal, pneumonia, "
+    "pneumothorax, pleural_effusion, atelectasis, or not_diagnostic. Return only a JSON object "
+    "with the keys finding, confidence, bbox, impression, and evidence. confidence must be a "
+    "number from 0.01 to 0.99 based on this image; use 0 only when the image is unreadable. "
+    "bbox must be null unless a reliable normalized [x1,y1,x2,y2] region in the 0..1 range is "
+    "available. impression must be an actual concise Russian radiology conclusion for this "
+    "patient. evidence must contain only actual visible radiographic signs. Do not copy these "
+    "instructions and never return field descriptions, placeholders, example values, model names, "
+    "methodology, disclaimers, markdown, or text outside JSON."
 )
+
+_PLACEHOLDER_TEXTS = {
+    "one short clinical conclusion",
+    "up to three visible radiographic signs",
+    "краткое врачебное заключение",
+    "до 3 кратких признаков",
+}
+
+
+def _is_placeholder_text(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    normalized = re.sub(r"\s+", " ", value).strip().casefold().strip(" .:_-")
+    return normalized in _PLACEHOLDER_TEXTS
+
+
+def _remove_template_values(payload: dict[str, Any]) -> dict[str, Any]:
+    """Prevent prompt/schema placeholders from reaching a clinical report."""
+    cleaned = dict(payload)
+    if _is_placeholder_text(cleaned.get("impression")):
+        cleaned["impression"] = None
+    evidence = cleaned.get("evidence")
+    if isinstance(evidence, list):
+        cleaned["evidence"] = [item for item in evidence if not _is_placeholder_text(item)]
+    return cleaned
 
 
 def _env_bool(name: str, default: bool) -> bool:
@@ -184,7 +213,7 @@ def _parse_text_confidence(text: str) -> float:
 
 
 def normalize_ai_response(raw: dict[str, Any]) -> AIResult:
-    payload = _merge_generated_payload(raw)
+    payload = _remove_template_values(_merge_generated_payload(raw))
     response_text = next(
         (
             raw.get(key)
