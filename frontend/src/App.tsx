@@ -2,9 +2,12 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Bell,
   BookOpen,
   CheckCircle,
+  ChevronDown,
   ClipboardList,
+  Clock3,
   ExternalLink,
   Download,
   FileText,
@@ -23,6 +26,8 @@ import {
   Save,
   Search,
   Send,
+  Settings,
+  ShieldCheck,
   SlidersHorizontal,
   Sparkles,
   Stethoscope,
@@ -189,13 +194,13 @@ const UI = {
     threshold: "Шек",
     model: "AI",
     modelSelector: "MedAI нұсқасы",
-    modelBase: "Негізгі MedAI — салыстыру үшін",
+    modelBase: "Стандартты MedGemma 1.5",
     modelTuned: "Оқытылған MedAI — пневмония / норма",
-    modelRsna: "Жаңа MedAI — пневмония, норма және аймақ",
+    modelRsna: "MedAI 1.0 — пневмония / норма",
     modelTunedWarning: "Бұл оқытылған нұсқаны толық пайдалануға және тексеруге болады. Ол әзірге эксперименттік және әрбір нәтижені дәрігер тексеруі тиіс.",
-    modelRsnaWarning: "Бұл нұсқа пациенттер бойынша бөлінген RSNA деректерінде оқытылып, бөлек тесттен өтеді. Аймақ тек локализация сапа шегінен өткенде көрсетіледі.",
+    modelRsnaWarning: "MedAI 1.0 пациенттер бойынша бөлінген RSNA тестінде базалық модельден жоғары нәтиже көрсетті. Координаттар тек локализация сапа шегінен өткенде көрсетіледі.",
     qualityGateFailed: "Эксперименттік нұсқа",
-    qualityGateCandidate: "Сапасы тексерілетін нұсқа",
+    qualityGateCandidate: "MedAI 1.0 · тест режимі",
     preliminaryConclusion: "MedAI алдын ала қорытындысы",
     evidenceTitle: "Көрінетін белгілер",
     localizationUnavailable: "Нақты аймақ көрсетілмеді: ол бұл қорытындыға қолданылмайды немесе локализация сапа шегінен әлі өтпеді.",
@@ -393,13 +398,13 @@ const UI = {
     threshold: "Порог",
     model: "AI",
     modelSelector: "Версия MedAI",
-    modelBase: "Базовая MedAI — для сравнения",
+    modelBase: "Стандартная MedGemma 1.5",
     modelTuned: "Дообученная MedAI — пневмония / норма",
-    modelRsna: "Новая MedAI — пневмония, норма и область",
+    modelRsna: "MedAI 1.0 — пневмония / норма",
     modelTunedWarning: "Дообученную версию можно полноценно запускать и проверять. Она пока экспериментальная, поэтому каждый результат должен быть проверен врачом.",
-    modelRsnaWarning: "Эта версия обучена на RSNA с разделением по пациентам и проходит отдельный тест. Область показывается только после прохождения порога качества локализации.",
+    modelRsnaWarning: "MedAI 1.0 превзошла базовую модель на отдельном RSNA test. Координаты отображаются только после прохождения независимого порога качества локализации.",
     qualityGateFailed: "Экспериментальная версия",
-    qualityGateCandidate: "Версия на проверке качества",
+    qualityGateCandidate: "MedAI 1.0 · тестовый режим",
     preliminaryConclusion: "Предварительное заключение MedAI",
     evidenceTitle: "Видимые признаки",
     localizationUnavailable: "Точная область не показана: она не применима к этому выводу или локализация еще не прошла порог качества.",
@@ -597,13 +602,13 @@ const UI = {
     threshold: "Threshold",
     model: "AI",
     modelSelector: "MedAI version",
-    modelBase: "Base MedAI — comparison only",
+    modelBase: "Standard MedGemma 1.5",
     modelTuned: "Fine-tuned MedAI — pneumonia / normal",
-    modelRsna: "New MedAI — pneumonia, normal and region",
+    modelRsna: "MedAI 1.0 — pneumonia / normal",
     modelTunedWarning: "The fine-tuned version is fully available for testing. It remains experimental, so every result must be reviewed by a clinician.",
-    modelRsnaWarning: "This version is trained on patient-separated RSNA data and undergoes a separate test. A region is shown only after the localization quality gate passes.",
+    modelRsnaWarning: "MedAI 1.0 outperformed the base model on a separate patient-split RSNA test. Coordinates appear only after the independent localization quality gate passes.",
     qualityGateFailed: "Experimental version",
-    qualityGateCandidate: "Quality-gated candidate",
+    qualityGateCandidate: "MedAI 1.0 · test mode",
     preliminaryConclusion: "Preliminary MedAI conclusion",
     evidenceTitle: "Visible findings",
     localizationUnavailable: "No precise region is shown: it is not applicable to this result or localization has not passed its quality gate yet.",
@@ -779,6 +784,75 @@ const WORKSPACE_UI = {
   }
 } as const;
 
+const EXPERIENCE_UI = {
+  kk: {
+    profileTitle: "Менің профилім",
+    profileSettings: "Интерфейс баптаулары",
+    profileAudit: "Әрекеттер журналы",
+    account: "Тіркелгі",
+    preferences: "Жұмыс ортасы",
+    interfaceTheme: "Түс тақырыбы",
+    language: "Интерфейс тілі",
+    security: "Қауіпсіздік",
+    activeSession: "Қорғалған сессия белсенді",
+    notificationCenter: "CRM ескертулері",
+    notificationNote: "Жедел және мерзімі өткен карточкалар профильде көрсетіледі.",
+    newCrm: "Жаңа карточка",
+    allStatuses: "Барлық мәртебе",
+    allPriorities: "Барлық басымдық",
+    overdue: "Мерзімі өтті",
+    moveTo: "Мәртебені өзгерту",
+    nextAction: "Келесі әрекет",
+    contactType: "Байланыс",
+    clearFilters: "Тазарту",
+    updated: "Карточка жаңартылды"
+  },
+  ru: {
+    profileTitle: "Мой профиль",
+    profileSettings: "Настройки интерфейса",
+    profileAudit: "Журнал действий",
+    account: "Учётная запись",
+    preferences: "Рабочая среда",
+    interfaceTheme: "Цветовая тема",
+    language: "Язык интерфейса",
+    security: "Безопасность",
+    activeSession: "Защищённая сессия активна",
+    notificationCenter: "Уведомления CRM",
+    notificationNote: "Срочные и просроченные карточки отображаются в профиле.",
+    newCrm: "Новая карточка",
+    allStatuses: "Все статусы",
+    allPriorities: "Все приоритеты",
+    overdue: "Просрочено",
+    moveTo: "Изменить статус",
+    nextAction: "Следующее действие",
+    contactType: "Контакт",
+    clearFilters: "Сбросить",
+    updated: "Карточка обновлена"
+  },
+  en: {
+    profileTitle: "My profile",
+    profileSettings: "Interface settings",
+    profileAudit: "Activity log",
+    account: "Account",
+    preferences: "Workspace",
+    interfaceTheme: "Color theme",
+    language: "Interface language",
+    security: "Security",
+    activeSession: "Protected session is active",
+    notificationCenter: "CRM notifications",
+    notificationNote: "Urgent and overdue cards appear in the profile menu.",
+    newCrm: "New card",
+    allStatuses: "All statuses",
+    allPriorities: "All priorities",
+    overdue: "Overdue",
+    moveTo: "Change status",
+    nextAction: "Next action",
+    contactType: "Contact",
+    clearFilters: "Reset",
+    updated: "Card updated"
+  }
+} as const;
+
 type LocalizedPathology = {
   title: string;
   label: string;
@@ -926,6 +1000,19 @@ function formatPercent(value: number | null | undefined) {
   return `${(value * 100).toFixed(1)}%`;
 }
 
+function profileInitials(value: string) {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "MD";
+}
+
+function isCrmOverdue(record: CRMRecord) {
+  return Boolean(record.due_at && record.status !== "closed" && new Date(record.due_at).getTime() < Date.now());
+}
+
 type ClinicalReportSection = { title: string; body: string };
 
 function parseClinicalReport(value: string | null | undefined, lang: Lang): ClinicalReportSection[] {
@@ -962,6 +1049,7 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("medicine_theme") as Theme) || "light");
   const ui = UI[lang];
   const workspaceUi = WORKSPACE_UI[lang];
+  const experienceUi = EXPERIENCE_UI[lang];
 
   const [user, setUser] = useState<User | null>(null);
   const [booting, setBooting] = useState(true);
@@ -969,6 +1057,7 @@ export default function App() {
   const [password, setPassword] = useState("");
   const [view, setView] = useState<View>("studies");
   const [showLoginPanel, setShowLoginPanel] = useState(false);
+  const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [busy, setBusy] = useState(false);
   const [modelVariant, setModelVariant] = useState<ModelVariant>("base");
   const [aiRunningStudyId, setAiRunningStudyId] = useState<number | null>(null);
@@ -988,6 +1077,9 @@ export default function App() {
   const [doctors, setDoctors] = useState<User[]>([]);
   const [crmRecords, setCrmRecords] = useState<CRMRecord[]>([]);
   const [crmSearch, setCrmSearch] = useState("");
+  const [crmStatusFilter, setCrmStatusFilter] = useState("");
+  const [crmPriorityFilter, setCrmPriorityFilter] = useState("");
+  const [crmComposerOpen, setCrmComposerOpen] = useState(false);
   const [crmSelectedId, setCrmSelectedId] = useState<number | null>(null);
   const [crmActivity, setCrmActivity] = useState("");
   const [referenceSearch, setReferenceSearch] = useState("");
@@ -1024,6 +1116,17 @@ export default function App() {
   const selectedStudyAiBusy = Boolean(selectedStudy && aiRunningStudyId === selectedStudy.id);
   const reportSections = useMemo(() => parseClinicalReport(finalText || report?.ai_draft_text, lang), [finalText, lang, report?.ai_draft_text]);
   const selectedCrm = crmRecords.find((record) => record.id === crmSelectedId) ?? null;
+  const visibleCrmRecords = useMemo(
+    () => crmRecords.filter((record) => (
+      (!crmStatusFilter || record.status === crmStatusFilter)
+      && (!crmPriorityFilter || record.priority === crmPriorityFilter)
+    )),
+    [crmPriorityFilter, crmRecords, crmStatusFilter]
+  );
+  const urgentCrmCount = useMemo(
+    () => crmRecords.filter((record) => record.status !== "closed" && (record.priority === "urgent" || isCrmOverdue(record))).length,
+    [crmRecords]
+  );
   const filteredPathologies = useMemo(() => {
     const query = referenceSearch.trim().toLocaleLowerCase();
     if (!query) return pathologies;
@@ -1114,6 +1217,7 @@ export default function App() {
     setDoctors([]);
     setPreviewUrl(null);
     setShowLoginPanel(false);
+    setShowProfilePanel(false);
     setView("studies");
   }
 
@@ -1176,7 +1280,23 @@ export default function App() {
         linked_study_ids: []
       });
       await loadCrm();
+      setCrmComposerOpen(false);
       flash(ui.crmSaved);
+    } catch (err) {
+      fail(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function updateCrmStatus(record: CRMRecord, status: "active" | "follow_up" | "closed") {
+    if (record.status === status) return;
+    setBusy(true);
+    try {
+      const updated = await api.updateCrm(record.id, { status });
+      setCrmRecords((current) => current.map((item) => item.id === updated.id ? updated : item));
+      setCrmSelectedId(updated.id);
+      flash(experienceUi.updated);
     } catch (err) {
       fail(err);
     } finally {
@@ -1641,8 +1761,68 @@ export default function App() {
               <RefreshCw size={18} />
               {ui.refresh}
             </button>
+            {canViewCrm(user) && (
+              <button
+                className="notificationButton"
+                type="button"
+                aria-label={experienceUi.notificationCenter}
+                onClick={async () => {
+                  setView("crm");
+                  await loadCrm();
+                }}
+              >
+                <Bell size={18} />
+                {urgentCrmCount > 0 && <b>{urgentCrmCount > 9 ? "9+" : urgentCrmCount}</b>}
+              </button>
+            )}
+            <div className="profileMenu">
+              <button className="profileTrigger" type="button" onClick={() => setShowProfilePanel(true)}>
+                <span className="profileAvatar">{profileInitials(user.full_name)}</span>
+                <span className="profileTriggerCopy"><strong>{user.full_name}</strong><small>{ui.roles[user.role]}</small></span>
+                <ChevronDown size={16} />
+              </button>
+              <div className="profileDropdown" role="menu">
+                <div className="profileDropdownIdentity">
+                  <span className="profileAvatar large">{profileInitials(user.full_name)}</span>
+                  <div><strong>{user.full_name}</strong><small>@{user.login}</small></div>
+                </div>
+                <button type="button" onClick={() => setShowProfilePanel(true)}><UserRound size={17} /><span>{experienceUi.profileTitle}</span></button>
+                <button type="button" onClick={() => setShowProfilePanel(true)}><Settings size={17} /><span>{experienceUi.profileSettings}</span></button>
+                {["admin", "analyst", "expert"].includes(user.role) && (
+                  <button type="button" onClick={async () => { setView("audit"); await loadAudit(); }}><ShieldCheck size={17} /><span>{experienceUi.profileAudit}</span></button>
+                )}
+                <div className="profileDropdownDivider" />
+                <button className="danger" type="button" onClick={logout}><LogOut size={17} /><span>{ui.logout}</span></button>
+              </div>
+            </div>
           </div>
         </header>
+
+        {showProfilePanel && (
+          <div className="profileOverlay" role="presentation" onMouseDown={() => setShowProfilePanel(false)}>
+            <section className="profilePanel" role="dialog" aria-modal="true" aria-label={experienceUi.profileTitle} onMouseDown={(event) => event.stopPropagation()}>
+              <header>
+                <div><small>{experienceUi.account}</small><h2>{experienceUi.profileTitle}</h2></div>
+                <button className="iconButton" type="button" aria-label="Close" onClick={() => setShowProfilePanel(false)}><X size={18} /></button>
+              </header>
+              <div className="profileIdentityCard">
+                <span className="profileAvatar hero">{profileInitials(user.full_name)}</span>
+                <div><h3>{user.full_name}</h3><p>{ui.roles[user.role]} · @{user.login}</p><span><i />{experienceUi.activeSession}</span></div>
+              </div>
+              <div className="profileFacts">
+                <div><span>ID</span><strong>#{user.id}</strong></div>
+                <div><span>{experienceUi.security}</span><strong>{user.is_active ? "Active" : "Disabled"}</strong></div>
+                <div><span>{experienceUi.notificationCenter}</span><strong>{urgentCrmCount}</strong></div>
+              </div>
+              <div className="profilePreferences">
+                <div className="profileSectionTitle"><Settings size={17} /><span>{experienceUi.preferences}</span></div>
+                <label><span>{experienceUi.interfaceTheme}</span><ThemeSwitch theme={theme} setTheme={setTheme} /></label>
+                <label><span>{experienceUi.language}</span><LanguageSwitch lang={lang} setLang={setLang} /></label>
+              </div>
+              <div className="profileSecurityNote"><ShieldCheck size={18} /><div><strong>{experienceUi.security}</strong><span>{experienceUi.notificationNote}</span></div></div>
+            </section>
+          </div>
+        )}
 
         {notice && <div className="notice">{notice}</div>}
         {error && <div className="errorLine">{error}</div>}
@@ -1875,7 +2055,6 @@ export default function App() {
                           disabled={busy || selectedStudyAiBusy}
                         >
                           <option value="rsna_v2">{ui.modelRsna}</option>
-                          <option value="pneumonia_v1">{ui.modelTuned}</option>
                           <option value="base">{ui.modelBase}</option>
                         </select>
                       </div>
@@ -2056,7 +2235,7 @@ export default function App() {
             </div>
 
             <div className="crmToolbar">
-              <label>
+              <label className="crmSearchField">
                 <Search size={18} />
                 <input
                   value={crmSearch}
@@ -2065,13 +2244,37 @@ export default function App() {
                   placeholder={workspaceUi.crmSearch}
                 />
               </label>
-              <button className="ghostButton" onClick={() => loadCrm()} disabled={busy}>
-                <Search size={17} /> {ui.apply}
-              </button>
+              <div className="crmToolbarFilters">
+                <select aria-label={experienceUi.allStatuses} value={crmStatusFilter} onChange={(event) => setCrmStatusFilter(event.target.value)}>
+                  <option value="">{experienceUi.allStatuses}</option>
+                  <option value="active">{ui.crmActive}</option>
+                  <option value="follow_up">{ui.crmFollowUp}</option>
+                  <option value="closed">{ui.crmClosed}</option>
+                </select>
+                <select aria-label={experienceUi.allPriorities} value={crmPriorityFilter} onChange={(event) => setCrmPriorityFilter(event.target.value)}>
+                  <option value="">{experienceUi.allPriorities}</option>
+                  <option value="normal">{ui.crmNormal}</option>
+                  <option value="high">{ui.crmHigh}</option>
+                  <option value="urgent">{ui.crmUrgent}</option>
+                </select>
+                {(crmSearch || crmStatusFilter || crmPriorityFilter) && (
+                  <button className="ghostButton compact" type="button" onClick={() => { setCrmSearch(""); setCrmStatusFilter(""); setCrmPriorityFilter(""); void loadCrm(""); }}>
+                    <X size={16} /> {experienceUi.clearFilters}
+                  </button>
+                )}
+                <button className="ghostButton compact" type="button" onClick={() => loadCrm()} disabled={busy}>
+                  <Search size={17} /> {ui.apply}
+                </button>
+                {canManageCrm(user) && (
+                  <button className="primaryButton compact" type="button" onClick={() => setCrmComposerOpen((value) => !value)}>
+                    {crmComposerOpen ? <X size={17} /> : <Plus size={17} />} {crmComposerOpen ? workspaceUi.closeEditor : experienceUi.newCrm}
+                  </button>
+                )}
+              </div>
             </div>
 
-            <div className={`crmOperations ${canManageCrm(user) ? "" : "viewerOnly"}`}>
-              {canManageCrm(user) && (
+            <div className={`crmOperations ${canManageCrm(user) && crmComposerOpen ? "composerVisible" : "viewerOnly"}`}>
+              {canManageCrm(user) && crmComposerOpen && (
                 <form className="crmComposer" onSubmit={saveCrmRecord}>
                   <div className="panelHeader">
                     <div><small>{workspaceUi.crmNew}</small><h2>{ui.crmSave}</h2></div>
@@ -2140,20 +2343,24 @@ export default function App() {
               )}
 
               <div className="crmDepartmentBoard">
-                <div className="panelHeader"><div><small>{crmRecords.length} {workspaceUi.recordsShown}</small><h2>{workspaceUi.crmBoard}</h2></div><ClipboardList size={20} /></div>
-                {!crmRecords.length ? (
+                <div className="panelHeader"><div><small>{visibleCrmRecords.length} {workspaceUi.recordsShown}</small><h2>{workspaceUi.crmBoard}</h2></div><ClipboardList size={20} /></div>
+                {!visibleCrmRecords.length ? (
                   <div className="emptyState large visualEmpty crmVisualEmpty"><img src="/medical_lungs_xray.png" alt="" /><span>{ui.crmEmpty}</span></div>
                 ) : (
                   <div className="crmKanban">
                     {(["active", "follow_up", "closed"] as const).map((column) => (
                       <section className={`crmLane ${column}`} key={column}>
-                        <header><span>{column === "active" ? ui.crmActive : column === "follow_up" ? ui.crmFollowUp : ui.crmClosed}</span><b>{crmRecords.filter((record) => record.status === column).length}</b></header>
+                        <header><span>{column === "active" ? ui.crmActive : column === "follow_up" ? ui.crmFollowUp : ui.crmClosed}</span><b>{visibleCrmRecords.filter((record) => record.status === column).length}</b></header>
                         <div>
-                          {crmRecords.filter((record) => record.status === column).map((record) => (
+                          {visibleCrmRecords.filter((record) => record.status === column).map((record) => (
                             <button className={`crmCard ${record.priority} ${record.id === crmSelectedId ? "selected" : ""}`} key={record.id} onClick={() => setCrmSelectedId(record.id)}>
                               <div className="crmCardTop"><span>{record.patient_code}</span><b>{record.priority === "urgent" ? ui.crmUrgent : record.priority === "high" ? ui.crmHigh : ui.crmNormal}</b></div>
+                              <div className="crmCardTags">
+                                <span><MessageCircle size={12} />{record.contact_type}</span>
+                                {record.due_at && <span className={isCrmOverdue(record) ? "overdue" : ""}><Clock3 size={12} />{isCrmOverdue(record) ? experienceUi.overdue : formatDate(record.due_at, lang)}</span>}
+                              </div>
                               <h3>{record.summary}</h3><p>{record.note}</p>
-                              <div className="crmCardMeta"><span>{record.next_step || "—"}</span><span>{formatDate(record.due_at || record.updated_at, lang)}</span></div>
+                              <div className="crmCardMeta"><span><b>{experienceUi.nextAction}</b>{record.next_step || "—"}</span><span>{formatDate(record.updated_at, lang)}</span></div>
                               <div className="crmCardFooter">
                                 <span className="avatarStack">{(record.participants ?? []).slice(0, 3).map((member) => <i key={member.id} title={member.full_name}>{member.full_name.split(" ").map((part) => part[0]).slice(0, 2).join("")}</i>)}</span>
                                 <small>{(record.studies ?? []).length ? `${record.studies.length} CXR` : record.created_by.full_name}</small>
@@ -2169,9 +2376,28 @@ export default function App() {
                 {selectedCrm && (
                   <aside className="crmDetail">
                     <div className="crmDetailHeader"><div><small>{selectedCrm.patient_code}</small><h3>{selectedCrm.summary}</h3></div><button className="iconButton" onClick={() => setCrmSelectedId(null)} aria-label="Close"><X size={17} /></button></div>
+                    {canManageCrm(user) && (
+                      <div className="crmStatusRail">
+                        <span>{experienceUi.moveTo}</span>
+                        <div>
+                          {(["active", "follow_up", "closed"] as const).map((status) => (
+                            <button
+                              type="button"
+                              key={status}
+                              className={selectedCrm.status === status ? "active" : ""}
+                              disabled={busy || selectedCrm.status === status}
+                              onClick={() => updateCrmStatus(selectedCrm, status)}
+                            >
+                              {status === "active" ? ui.crmActive : status === "follow_up" ? ui.crmFollowUp : ui.crmClosed}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <div className="crmDetailGrid">
                       <div><span>{workspaceUi.crmAssignees}</span><strong>{(selectedCrm.participants ?? []).map((member) => member.full_name).join(", ") || "—"}</strong></div>
                       <div><span>{ui.crmNextStep}</span><strong>{selectedCrm.next_step || "—"}</strong></div>
+                      <div><span>{experienceUi.contactType}</span><strong>{selectedCrm.contact_type}</strong></div>
                     </div>
                     {!!(selectedCrm.studies ?? []).length && <div className="linkedStudies"><span>{workspaceUi.crmStudies}</span>{selectedCrm.studies.map((study) => <button key={study.id} onClick={() => openStudy(study.id)}>{study.accession_number}<ExternalLink size={13} /></button>)}</div>}
                     <div className="crmTimeline"><h4>{workspaceUi.crmTimeline}</h4>{(selectedCrm.activities ?? []).slice(0, 8).map((activity) => <div key={activity.id}><i /><p>{activity.content}<small>{activity.author.full_name} · {formatDate(activity.created_at, lang)}</small></p></div>)}</div>

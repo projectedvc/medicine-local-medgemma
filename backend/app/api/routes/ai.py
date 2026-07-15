@@ -22,7 +22,7 @@ router = APIRouter(prefix="/studies/{study_id}/ai", tags=["ai"])
 MODEL_VERSION_BY_VARIANT = {
     "base": "medai-base",
     "pneumonia_v1": "medai-pneumonia-v1",
-    "rsna_v2": "medai-rsna-pneumonia-v2",
+    "rsna_v2": "medai-1.0",
 }
 
 # The adapter is available for real user testing, but is not clinically validated.

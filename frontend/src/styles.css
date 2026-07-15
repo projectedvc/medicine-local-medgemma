@@ -5140,3 +5140,461 @@ textarea:focus {
     gap: 7px;
   }
 }
+
+/* MedAI 1.0 interface: calm clinical surfaces with a restrained medical accent. */
+:root {
+  --medical: #18c9a3;
+  --medical-strong: #0aa77f;
+  --medical-cyan: #35bfe2;
+  --medical-soft: rgba(24, 201, 163, 0.12);
+  --medical-line: rgba(52, 211, 176, 0.28);
+  --radius: 14px;
+}
+
+:root[data-theme="light"] {
+  --medical: #0e9f7a;
+  --medical-strong: #08785e;
+  --medical-cyan: #158eaf;
+  --medical-soft: rgba(14, 159, 122, 0.09);
+  --medical-line: rgba(14, 159, 122, 0.24);
+}
+
+.sidebar {
+  border-right-color: var(--medical-line);
+  background: linear-gradient(180deg, rgba(4, 15, 27, 0.98), rgba(5, 12, 23, 0.96));
+}
+
+.topbar {
+  min-height: 82px;
+  position: sticky;
+  top: 0;
+  z-index: 35;
+  border-bottom: 1px solid var(--medical-line);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.topbarActions {
+  overflow: visible;
+}
+
+.primaryButton {
+  border: 1px solid rgba(87, 231, 200, 0.3);
+  background: linear-gradient(135deg, var(--medical-strong), var(--medical-cyan));
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(11, 150, 126, 0.22);
+}
+
+.primaryButton:hover {
+  box-shadow: 0 16px 34px rgba(11, 177, 145, 0.3);
+}
+
+.primaryButton.compact,
+.ghostButton.compact {
+  min-height: 42px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+.systemChip {
+  border-color: var(--medical-line);
+  background: var(--medical-soft);
+  color: #8cebd5;
+}
+
+.systemChip i {
+  background: var(--medical);
+  box-shadow: 0 0 0 5px rgba(24, 201, 163, 0.1), 0 0 14px rgba(24, 201, 163, 0.75);
+}
+
+.notificationButton {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: var(--panel-solid);
+  color: var(--muted-strong);
+  cursor: pointer;
+  transition: border-color .18s ease, color .18s ease, transform .18s ease;
+}
+
+.notificationButton:hover {
+  border-color: var(--medical-line);
+  color: var(--medical);
+  transform: translateY(-1px);
+}
+
+.notificationButton b {
+  min-width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  padding: 0 5px;
+  border: 2px solid var(--bg);
+  border-radius: 999px;
+  background: #f05b68;
+  color: #fff;
+  font-size: 9px;
+}
+
+.profileMenu {
+  position: relative;
+  z-index: 70;
+}
+
+.profileTrigger {
+  min-width: 220px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 9px 5px 6px;
+  border: 1px solid var(--line-soft);
+  border-radius: 15px;
+  background: var(--panel-solid);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.profileMenu:hover .profileTrigger,
+.profileMenu:focus-within .profileTrigger {
+  border-color: var(--medical-line);
+  box-shadow: 0 10px 28px rgba(3, 17, 29, .24);
+}
+
+.profileAvatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(100, 235, 205, .34);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(24, 201, 163, .23), rgba(53, 191, 226, .13));
+  color: #8ef1d9;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .05em;
+}
+
+.profileAvatar.large { width: 42px; height: 42px; }
+.profileAvatar.hero { width: 70px; height: 70px; border-radius: 21px; font-size: 20px; }
+
+.profileTriggerCopy {
+  min-width: 0;
+  display: grid;
+  flex: 1;
+  text-align: left;
+}
+
+.profileTriggerCopy strong,
+.profileTriggerCopy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileTriggerCopy strong { font-size: 12px; }
+.profileTriggerCopy small { margin-top: 2px; color: var(--muted); font-size: 10px; }
+
+.profileDropdown {
+  width: 280px;
+  display: grid;
+  gap: 4px;
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  padding: 10px;
+  border: 1px solid var(--medical-line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--panel-solid) 96%, transparent);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .38);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-7px) scale(.98);
+  transform-origin: top right;
+  transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+  backdrop-filter: blur(18px);
+}
+
+.profileMenu:hover .profileDropdown,
+.profileMenu:focus-within .profileDropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.profileDropdownIdentity {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 7px 12px;
+}
+
+.profileDropdownIdentity div { min-width: 0; display: grid; gap: 3px; }
+.profileDropdownIdentity strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.profileDropdownIdentity small { color: var(--muted); font-size: 10px; }
+
+.profileDropdown > button {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 11px;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--muted-strong);
+  cursor: pointer;
+  text-align: left;
+}
+
+.profileDropdown > button:hover { background: var(--medical-soft); color: var(--medical); }
+.profileDropdown > button.danger:hover { background: rgba(239, 75, 91, .1); color: #ff8791; }
+.profileDropdownDivider { height: 1px; margin: 5px 4px; background: var(--line-soft); }
+
+.profileOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(1, 7, 14, .66);
+  backdrop-filter: blur(12px);
+  animation: medaiFadeIn .18s ease both;
+}
+
+.profilePanel {
+  width: min(590px, 100%);
+  max-height: min(760px, calc(100vh - 48px));
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid var(--medical-line);
+  border-radius: 24px;
+  background: var(--panel-solid);
+  box-shadow: 0 36px 100px rgba(0, 0, 0, .48);
+  animation: medaiPanelIn .2s ease both;
+}
+
+.profilePanel > header,
+.profileIdentityCard,
+.profilePreferences label,
+.profileSecurityNote {
+  display: flex;
+  align-items: center;
+}
+
+.profilePanel > header { justify-content: space-between; gap: 20px; }
+.profilePanel > header small { color: var(--medical); font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.profilePanel > header h2 { margin-top: 4px; font-size: 22px; }
+
+.profileIdentityCard {
+  gap: 16px;
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid var(--medical-line);
+  border-radius: 19px;
+  background: linear-gradient(135deg, var(--medical-soft), rgba(53, 191, 226, .05));
+}
+
+.profileIdentityCard h3 { font-size: 19px; }
+.profileIdentityCard p { margin-top: 4px; font-size: 12px; }
+.profileIdentityCard div > span { display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; color: var(--medical); font-size: 10px; font-weight: 800; }
+.profileIdentityCard div > span i { width: 7px; height: 7px; border-radius: 50%; background: var(--medical); box-shadow: 0 0 12px var(--medical); }
+
+.profileFacts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.profileFacts div {
+  display: grid;
+  gap: 7px;
+  padding: 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.profileFacts span { color: var(--muted); font-size: 10px; }
+.profileFacts strong { color: var(--ink); font-size: 13px; }
+
+.profilePreferences { display: grid; gap: 10px; margin-top: 20px; }
+.profileSectionTitle { display: flex; align-items: center; gap: 9px; color: var(--muted-strong); font-size: 12px; font-weight: 850; }
+.profilePreferences label { justify-content: space-between; gap: 18px; padding: 12px 14px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); }
+.profilePreferences label > span { color: var(--muted-strong); }
+
+.profileSecurityNote {
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--medical-soft);
+  color: var(--medical);
+}
+
+.profileSecurityNote div { display: grid; gap: 4px; }
+.profileSecurityNote strong { font-size: 11px; }
+.profileSecurityNote span { color: var(--muted); font-size: 10px; line-height: 1.5; }
+
+.crmToolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border-color: var(--medical-line);
+  background: var(--panel-solid);
+}
+
+.crmSearchField {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.crmSearchField input { min-height: 42px; }
+
+.crmToolbarFilters {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.crmToolbarFilters select { width: auto; min-width: 150px; min-height: 42px; }
+
+.crmOperations.viewerOnly { grid-template-columns: minmax(0, 1fr); }
+.crmOperations.composerVisible { grid-template-columns: minmax(310px, 360px) minmax(0, 1fr); }
+.crmDepartmentBoard { min-width: 0; border-color: var(--medical-line); }
+.crmComposer { border-color: var(--medical-line); animation: medaiPanelIn .2s ease both; }
+
+.crmKanban { grid-template-columns: repeat(3, minmax(250px, 1fr)); gap: 12px; }
+.crmLane { border-color: var(--line-soft); background: color-mix(in srgb, var(--panel) 82%, transparent); }
+.crmLane.active > header { color: var(--medical); }
+.crmLane.follow_up > header { color: #5dcbe5; }
+.crmLane.closed > header { color: var(--muted); }
+
+.crmCard {
+  border-color: var(--line-soft);
+  border-radius: 16px;
+  background: var(--panel-solid);
+  box-shadow: 0 9px 26px rgba(0, 0, 0, .12);
+}
+
+.crmCard:hover,
+.crmCard.selected {
+  border-color: var(--medical-line);
+  box-shadow: 0 14px 34px rgba(4, 49, 48, .2);
+}
+
+.crmCardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 2px;
+}
+
+.crmCardTags span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 7px;
+  border-radius: 999px;
+  background: var(--medical-soft);
+  color: var(--medical);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.crmCardTags span.overdue { background: rgba(239, 75, 91, .12); color: #ff7b88; }
+.crmCardMeta > span:first-child { display: grid; gap: 3px; text-align: left; }
+.crmCardMeta > span:first-child b { color: var(--medical); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
+
+.crmDetail { border-color: var(--medical-line); background: linear-gradient(145deg, var(--panel-solid), color-mix(in srgb, var(--panel-solid) 88%, var(--medical-soft))); }
+
+.crmStatusRail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: var(--panel);
+}
+
+.crmStatusRail > span { color: var(--muted); font-size: 10px; font-weight: 800; }
+.crmStatusRail > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.crmStatusRail button { min-height: 31px; padding: 0 10px; border-radius: 9px; background: var(--panel-strong); color: var(--muted-strong); cursor: pointer; font-size: 9px; font-weight: 850; }
+.crmStatusRail button:hover { color: var(--medical); }
+.crmStatusRail button.active { background: var(--medical-soft); color: var(--medical); box-shadow: inset 0 0 0 1px var(--medical-line); }
+
+.modelSelector select {
+  border-color: var(--medical-line);
+  background: linear-gradient(135deg, rgba(24, 201, 163, .1), rgba(53, 191, 226, .06));
+  box-shadow: 0 0 0 3px rgba(24, 201, 163, .04);
+}
+
+.localizationBox {
+  border: 3px solid var(--medical);
+  border-radius: 12px;
+  background: rgba(24, 201, 163, .08);
+  box-shadow: 0 0 0 1px rgba(2, 16, 26, .9), 0 0 0 8px rgba(24, 201, 163, .07), 0 0 30px rgba(24, 201, 163, .46);
+  animation: localizationPulse 1.9s ease-in-out infinite;
+}
+
+.localizationBox span { background: var(--medical); color: #022a22; }
+
+:root[data-theme="light"] .topbar { background: rgba(247, 251, 252, .9); }
+:root[data-theme="light"] .sidebar { background: linear-gradient(180deg, #f6fbfc, #edf6f6); }
+:root[data-theme="light"] .profileAvatar { color: #08765e; }
+:root[data-theme="light"] .profileDropdown,
+:root[data-theme="light"] .profilePanel,
+:root[data-theme="light"] .notificationButton,
+:root[data-theme="light"] .profileTrigger,
+:root[data-theme="light"] .crmCard { background: #ffffff; }
+:root[data-theme="light"] .profileDropdown > button { color: #264456; }
+:root[data-theme="light"] .profileSecurityNote span { color: #315667; }
+:root[data-theme="light"] .crmCardTags span { color: #087a60; }
+
+@keyframes medaiFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes medaiPanelIn { from { opacity: 0; transform: translateY(10px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes localizationPulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.18); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .profileOverlay,
+  .profilePanel,
+  .crmComposer,
+  .localizationBox { animation: none; }
+}
+
+@media (max-width: 1180px) {
+  .profileTrigger { min-width: 48px; width: 48px; }
+  .profileTriggerCopy,
+  .profileTrigger > svg { display: none; }
+  .crmToolbar { grid-template-columns: 1fr; }
+  .crmToolbarFilters { justify-content: flex-start; flex-wrap: wrap; }
+}
+
+@media (max-width: 760px) {
+  .topbarActions .systemChip,
+  .topbarActions > .ghostButton { display: none; }
+  .profileFacts { grid-template-columns: 1fr; }
+  .profilePanel { padding: 18px; border-radius: 19px; }
+  .crmToolbarFilters { display: grid; grid-template-columns: 1fr 1fr; }
+  .crmToolbarFilters select { width: 100%; min-width: 0; }
+  .crmKanban { grid-template-columns: repeat(3, 82vw); }
+  .crmStatusRail { align-items: flex-start; flex-direction: column; }
+}

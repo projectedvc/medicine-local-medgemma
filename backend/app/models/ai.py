@@ -103,7 +103,7 @@ class AIAnalysis(Base):
     def model_quality_status(self) -> str:
         if self.model_version == "medai-pneumonia-v1":
             return "experimental"
-        if self.model_version == "medai-rsna-pneumonia-v2":
+        if self.model_version in {"medai-rsna-pneumonia-v2", "medai-1.0"}:
             try:
                 data = json.loads(self.raw_response_json or "{}")
             except Exception:

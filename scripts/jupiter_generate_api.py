@@ -26,8 +26,9 @@ RSNA_V2_ADAPTER_PATH = Path(
     "/home/jovyan/work/medgemma_rsna_v2/runs/"
     "rsna_quality_full_lr4e5_1epoch_20260714/final_adapter"
 )
-RSNA_V2_TEST_REPORT = RSNA_V2_ADAPTER_PATH.parent / "eval_full_test_128_loc32.json"
-RSNA_V2_VALIDATION_REPORT = RSNA_V2_ADAPTER_PATH.parent / "eval_full_validation_128_loc32.json"
+RSNA_V2_REPORT_DIR = RSNA_V2_ADAPTER_PATH.parent.parent
+RSNA_V2_TEST_REPORT = RSNA_V2_REPORT_DIR / "eval_full_test_128_loc32.json"
+RSNA_V2_VALIDATION_REPORT = RSNA_V2_REPORT_DIR / "eval_full_validation_128_loc32.json"
 DEFAULT_ADAPTER_PATH = LEGACY_ADAPTER_PATH
 ADAPTER_PATHS = {
     "pneumonia_v1": LEGACY_ADAPTER_PATH,
@@ -36,7 +37,7 @@ ADAPTER_PATHS = {
 MODEL_LABELS = {
     "base": "medai-base",
     "pneumonia_v1": "medai-pneumonia-v1",
-    "rsna_v2": "medai-rsna-pneumonia-v2",
+    "rsna_v2": "medai-1.0",
 }
 RSNA_LABELS = ("normal", "pneumonia", "other_abnormal")
 RSNA_CLASSIFICATION_PROMPT = (
@@ -112,7 +113,7 @@ def _load_quality_state() -> dict[str, Any]:
     balanced_accuracy = _find_numeric(report, "balanced_accuracy", "balanced_acc") or 0.0
     pneumonia_sensitivity = _find_numeric(report, "pneumonia_sensitivity", "pneumonia_recall") or 0.0
     normal_recall = _find_numeric(report, "normal_recall") or 0.0
-    mean_iou = _find_numeric(report, "mean_iou", "mean_IoU") or 0.0
+    mean_iou = _find_numeric(report, "mean_best_iou", "mean_iou", "mean_IoU") or 0.0
     hit_rate = _find_numeric(report, "hit_rate_iou_0_30", "hit_rate", "iou_0_30_hit_rate") or 0.0
     temperature = _find_numeric(report, "temperature") or 1.0
 
