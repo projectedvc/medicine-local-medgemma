@@ -2106,7 +2106,7 @@ export default function App() {
                           )}
                           {latestAI.warning && <p className="analysisWarningText">{latestAI.warning}</p>}
                           <span className="modelVersionLine">
-                            {ui.modelCurrent}: {latestAI.model_version === "medai-rsna-pneumonia-v2"
+                            {ui.modelCurrent}: {["medai-rsna-pneumonia-v2", "medai-1.0"].includes(latestAI.model_version)
                               ? ui.modelRsna
                               : latestAI.model_version === "medai-pneumonia-v1"
                                 ? ui.modelTuned
