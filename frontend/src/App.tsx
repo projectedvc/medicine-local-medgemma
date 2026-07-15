@@ -1112,7 +1112,7 @@ export default function App() {
   const [imageAspect, setImageAspect] = useState(4 / 3);
 
   const latestAI = aiResults[0] ?? null;
-  const latestAIWithheld = Boolean(latestAI?.hidden_due_low_confidence);
+  const latestAIWithheld = Boolean(latestAI && !latestAI.predicted_class);
   const selectedStudyAiBusy = Boolean(selectedStudy && aiRunningStudyId === selectedStudy.id);
   const reportSections = useMemo(() => parseClinicalReport(finalText || report?.ai_draft_text, lang), [finalText, lang, report?.ai_draft_text]);
   const selectedCrm = crmRecords.find((record) => record.id === crmSelectedId) ?? null;
@@ -1737,11 +1737,51 @@ export default function App() {
           <Search size={18} />
         </label>
         <div className="sidebarFooter">
-          <ThemeSwitch theme={theme} setTheme={setTheme} />
-          <LanguageSwitch lang={lang} setLang={setLang} />
-          <button className="ghostButton dark" onClick={logout}>
+          <span
+            className={`systemIndicator ${error ? "offline" : "online"}`}
+            role="status"
+            aria-label={error ? "API недоступен" : workspaceUi.medaiStatus}
+            title={error ? "API недоступен" : workspaceUi.medaiStatus}
+          >
+            <i />
+          </span>
+          <button className="iconButton navUtility" type="button" onClick={() => loadInitial()} disabled={busy} aria-label={ui.refresh} title={ui.refresh}>
+            <RefreshCw size={18} />
+          </button>
+          {canViewCrm(user) && (
+            <button
+              className="notificationButton"
+              type="button"
+              aria-label={experienceUi.notificationCenter}
+              onClick={async () => {
+                setView("crm");
+                await loadCrm();
+              }}
+            >
+              <Bell size={18} />
+              {urgentCrmCount > 0 && <b>{urgentCrmCount > 9 ? "9+" : urgentCrmCount}</b>}
+            </button>
+          )}
+          <div className="profileMenu">
+            <button className="profileTrigger" type="button" onClick={() => setShowProfilePanel(true)}>
+              <span className="profileAvatar">{profileInitials(user.full_name)}</span>
+              <span className="profileTriggerCopy"><strong>{user.full_name}</strong><small>{ui.roles[user.role]}</small></span>
+              <ChevronDown size={16} />
+            </button>
+            <div className="profileDropdown" role="menu">
+              <div className="profileDropdownIdentity">
+                <span className="profileAvatar large">{profileInitials(user.full_name)}</span>
+                <div><strong>{user.full_name}</strong><small>@{user.login}</small></div>
+              </div>
+              <button type="button" onClick={() => setShowProfilePanel(true)}><UserRound size={17} /><span>{experienceUi.profileTitle}</span></button>
+              <button type="button" onClick={() => setShowProfilePanel(true)}><Settings size={17} /><span>{experienceUi.profileSettings}</span></button>
+              {["admin", "analyst", "expert"].includes(user.role) && (
+                <button type="button" onClick={async () => { setView("audit"); await loadAudit(); }}><ShieldCheck size={17} /><span>{experienceUi.profileAudit}</span></button>
+              )}
+            </div>
+          </div>
+          <button className="iconButton navUtility logoutIcon" type="button" onClick={logout} aria-label={ui.logout} title={ui.logout}>
             <LogOut size={18} />
-            {ui.logout}
           </button>
         </div>
       </aside>
@@ -1751,50 +1791,6 @@ export default function App() {
           <div>
             <h1>{ui.titles[view]}</h1>
             <p>{user.full_name}</p>
-          </div>
-          <div className="topbarActions">
-            <span className="systemChip">
-              <i />
-              {workspaceUi.medaiStatus}
-            </span>
-            <button className="ghostButton" onClick={() => loadInitial()} disabled={busy}>
-              <RefreshCw size={18} />
-              {ui.refresh}
-            </button>
-            {canViewCrm(user) && (
-              <button
-                className="notificationButton"
-                type="button"
-                aria-label={experienceUi.notificationCenter}
-                onClick={async () => {
-                  setView("crm");
-                  await loadCrm();
-                }}
-              >
-                <Bell size={18} />
-                {urgentCrmCount > 0 && <b>{urgentCrmCount > 9 ? "9+" : urgentCrmCount}</b>}
-              </button>
-            )}
-            <div className="profileMenu">
-              <button className="profileTrigger" type="button" onClick={() => setShowProfilePanel(true)}>
-                <span className="profileAvatar">{profileInitials(user.full_name)}</span>
-                <span className="profileTriggerCopy"><strong>{user.full_name}</strong><small>{ui.roles[user.role]}</small></span>
-                <ChevronDown size={16} />
-              </button>
-              <div className="profileDropdown" role="menu">
-                <div className="profileDropdownIdentity">
-                  <span className="profileAvatar large">{profileInitials(user.full_name)}</span>
-                  <div><strong>{user.full_name}</strong><small>@{user.login}</small></div>
-                </div>
-                <button type="button" onClick={() => setShowProfilePanel(true)}><UserRound size={17} /><span>{experienceUi.profileTitle}</span></button>
-                <button type="button" onClick={() => setShowProfilePanel(true)}><Settings size={17} /><span>{experienceUi.profileSettings}</span></button>
-                {["admin", "analyst", "expert"].includes(user.role) && (
-                  <button type="button" onClick={async () => { setView("audit"); await loadAudit(); }}><ShieldCheck size={17} /><span>{experienceUi.profileAudit}</span></button>
-                )}
-                <div className="profileDropdownDivider" />
-                <button className="danger" type="button" onClick={logout}><LogOut size={17} /><span>{ui.logout}</span></button>
-              </div>
-            </div>
           </div>
         </header>
 
@@ -2098,12 +2094,6 @@ export default function App() {
                                 ? ui.findings[latestAI.predicted_class]
                                 : ui.classUnknown}
                           </strong>
-                          {(
-                            <>
-                              <div className="confidenceTrack"><i style={{ width: `${Math.max(3, (latestAI.confidence ?? 0) * 100)}%` }} /></div>
-                              <span>{ui.confidenceUncalibrated}: {formatPercent(latestAI.confidence)}</span>
-                            </>
-                          )}
                           {latestAI.warning && <p className="analysisWarningText">{latestAI.warning}</p>}
                           <span className="modelVersionLine">
                             {ui.modelCurrent}: {["medai-rsna-pneumonia-v2", "medai-1.0"].includes(latestAI.model_version)

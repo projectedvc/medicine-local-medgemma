@@ -55,19 +55,18 @@ async def process_analysis(
             model_variant=model_variant,
         )
         experimental = model_variant in EXPERIMENTAL_VARIANTS
-        hidden = (
-            result.predicted_class is None
-            or result.confidence < settings.ai_confidence_threshold
-        )
+        # Keep scores for evaluation, but do not suppress the class explicitly
+        # requested by a user. Only a missing/invalid class blocks a draft.
+        hidden = result.predicted_class is None
         analysis.status = AIJobStatus.completed
         analysis.raw_predicted_label = result.raw_predicted_label
-        analysis.predicted_class = None if hidden else result.predicted_class
+        analysis.predicted_class = result.predicted_class
         analysis.confidence = result.confidence
         analysis.hidden_due_low_confidence = hidden
         if hidden:
             analysis.warning = (
-                "Результат не достиг порога качества. Диагностический класс скрыт; "
-                "требуется ручная оценка врача."
+                "MedAI не вернула допустимый диагностический класс. "
+                "Требуется повторный анализ."
             )
         elif experimental:
             analysis.warning = (

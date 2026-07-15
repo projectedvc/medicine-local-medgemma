@@ -3725,10 +3725,10 @@ textarea:focus {
 
 .sidebar nav {
   gap: 5px;
-  padding: 5px;
-  border: 1px solid var(--line-soft);
-  border-radius: 15px;
-  background: rgba(3, 11, 24, 0.42);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .navButton {
@@ -3760,6 +3760,38 @@ textarea:focus {
 .sidebarFooter {
   gap: 8px;
 }
+
+.systemIndicator {
+  width: 24px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.systemIndicator i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--medical);
+  box-shadow: 0 0 0 5px rgba(24, 201, 163, .1), 0 0 14px rgba(24, 201, 163, .72);
+}
+
+.systemIndicator.offline i {
+  background: #ef4b5b;
+  box-shadow: 0 0 0 5px rgba(239, 75, 91, .1), 0 0 14px rgba(239, 75, 91, .68);
+}
+
+.navUtility {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-color: var(--line-soft);
+  background: transparent;
+}
+
+.logoutIcon { color: var(--muted-strong); }
+.logoutIcon:hover { color: #ff7b88; border-color: rgba(239, 75, 91, .28); }
 
 .languageSwitch,
 .themeSwitch,
@@ -5166,12 +5198,11 @@ textarea:focus {
 
 .topbar {
   min-height: 82px;
-  position: sticky;
-  top: 0;
-  z-index: 35;
+  position: static;
+  z-index: 1;
   border-bottom: 1px solid var(--medical-line);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(18px);
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .topbarActions {

@@ -50,7 +50,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (USES_NGROK) {
     headers.set("ngrok-skip-browser-warning", "true");
   }
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const method = (options.method ?? "GET").toUpperCase();
+  const maxAttempts = method === "GET" ? 3 : 1;
+  let response: Response | undefined;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    try {
+      response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    } catch (error) {
+      if (attempt + 1 >= maxAttempts) {
+        throw new Error(error instanceof Error ? error.message : "API недоступен");
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 450 * (attempt + 1)));
+      continue;
+    }
+    if (response.ok || ![502, 503, 504].includes(response.status) || attempt + 1 >= maxAttempts) break;
+    await new Promise((resolve) => window.setTimeout(resolve, 450 * (attempt + 1)));
+  }
+  if (!response) throw new Error("API недоступен");
   if (!response.ok) {
     const payload = await response.json().catch(() => ({ detail: response.statusText }));
     const detail = typeof payload.detail === "string" ? payload.detail : response.statusText;
