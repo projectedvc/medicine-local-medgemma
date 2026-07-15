@@ -42,6 +42,17 @@ Localization requires a separate dataset with expert boxes/masks and a separatel
 
 Coordinates are normalized to the source image. When the gate is unavailable or fails, return `localization.validated=false` and show an explicit “localization unavailable” message.
 
+The production localization candidate is the independent Faster R-CNN pipeline in `scripts/train_rsna_detector.py`. It reads the patient-separated `*_cases.jsonl` RSNA manifests, selects its score threshold on validation, and opens the untouched test split only for the final localization report. Run it on Jupyter with:
+
+```bash
+python scripts/train_rsna_detector.py \
+  --dataset-root /home/jovyan/work/datasets/rsna_pneumonia_2018 \
+  --output-dir /home/jovyan/work/medgemma_rsna_v2/detector/rsna_frcnn_v1 \
+  --epochs 4 --batch-size 4
+```
+
+`jupiter_generate_api.py` loads `detector.pt` only when `quality_report.json` is an untouched-test report with patient separation and both localization thresholds pass (`mean_best_iou >= 0.20`, `hit_rate_iou_0_30 >= 0.25`). Do not lower these thresholds to make a box appear in the UI.
+
 ## Corrected training and release gate
 
 Run training on the Jupyter GPU server, not on a workstation:

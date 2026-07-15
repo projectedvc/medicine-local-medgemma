@@ -29,6 +29,9 @@ RSNA_V2_ADAPTER_PATH = Path(
 RSNA_V2_REPORT_DIR = RSNA_V2_ADAPTER_PATH.parent.parent
 RSNA_V2_TEST_REPORT = RSNA_V2_REPORT_DIR / "eval_full_test_128_loc32.json"
 RSNA_V2_VALIDATION_REPORT = RSNA_V2_REPORT_DIR / "eval_full_validation_128_loc32.json"
+RSNA_DETECTOR_DIR = Path("/home/jovyan/work/medgemma_rsna_v2/detector/rsna_frcnn_v1")
+RSNA_DETECTOR_CHECKPOINT = RSNA_DETECTOR_DIR / "detector.pt"
+RSNA_DETECTOR_REPORT = RSNA_DETECTOR_DIR / "quality_report.json"
 DEFAULT_ADAPTER_PATH = LEGACY_ADAPTER_PATH
 ADAPTER_PATHS = {
     "pneumonia_v1": LEGACY_ADAPTER_PATH,
@@ -124,18 +127,38 @@ def _load_quality_state() -> dict[str, Any]:
         and pneumonia_sensitivity >= 0.80
         and normal_recall >= 0.80
     )
-    localization_passed = classification_passed and mean_iou >= 0.20 and hit_rate >= 0.25
+    detector_report: dict[str, Any] = {}
+    if RSNA_DETECTOR_REPORT.exists():
+        try:
+            detector_report = json.loads(RSNA_DETECTOR_REPORT.read_text(encoding="utf-8"))
+        except Exception:
+            detector_report = {}
+    detector_metrics = detector_report.get("test_metrics") if isinstance(detector_report.get("test_metrics"), dict) else {}
+    detector_mean_iou = float(detector_metrics.get("mean_best_iou") or 0.0)
+    detector_hit_rate = float(detector_metrics.get("hit_rate_iou_0_30") or 0.0)
+    localization_passed = (
+        detector_report.get("split") == "test"
+        and detector_report.get("patient_separated") is True
+        and detector_mean_iou >= 0.20
+        and detector_hit_rate >= 0.25
+        and RSNA_DETECTOR_CHECKPOINT.exists()
+    )
     state.update(
         classification_gate_passed=classification_passed,
         localization_gate_passed=localization_passed,
+        localization_report_path=str(RSNA_DETECTOR_REPORT) if RSNA_DETECTOR_REPORT.exists() else None,
+        localization_threshold=float(detector_report.get("validation_selected_threshold") or 0.35),
+        localization_source=str(detector_report.get("detector_version") or "medai-rsna-frcnn-v1"),
         temperature=max(0.2, min(5.0, temperature)),
         metrics={
             "macro_f1": macro_f1,
             "balanced_accuracy": balanced_accuracy,
             "pneumonia_sensitivity": pneumonia_sensitivity,
             "normal_recall": normal_recall,
-            "mean_iou": mean_iou,
-            "hit_rate": hit_rate,
+            "legacy_generative_mean_iou": mean_iou,
+            "legacy_generative_hit_rate": hit_rate,
+            "mean_iou": detector_mean_iou,
+            "hit_rate": detector_hit_rate,
         },
     )
     return state
@@ -153,6 +176,8 @@ _runtime: dict[str, Any] = {
     "adapter_available": {name: False for name in ADAPTER_PATHS},
     "device": None,
     "quality": {},
+    "detector": None,
+    "detector_device": None,
 }
 _generation_lock = threading.Lock()
 
@@ -379,13 +404,42 @@ def _generate_rsna_localization(model: Any, processor: Any, image: Image.Image) 
     return _parse_localization_boxes(text)
 
 
+def _detect_rsna_localization(image: Image.Image) -> list[list[float]]:
+    """Return normalized boxes from the independently test-gated detector."""
+    detector = _runtime.get("detector")
+    device = _runtime.get("detector_device")
+    quality = _runtime.get("quality", {})
+    if detector is None or device is None or not quality.get("localization_gate_passed"):
+        return []
+    from torchvision.transforms.functional import pil_to_tensor
+
+    width, height = image.size
+    tensor = pil_to_tensor(image.convert("RGB")).float().div_(255.0).to(device)
+    output = detector([tensor])[0]
+    threshold = float(quality.get("localization_threshold") or 0.35)
+    boxes: list[list[float]] = []
+    for box, score in zip(output["boxes"].detach().cpu(), output["scores"].detach().cpu()):
+        if float(score) < threshold:
+            continue
+        x1, y1, x2, y2 = (float(value) for value in box.tolist())
+        normalized = [
+            max(0.0, min(1.0, x1 / max(1, width))),
+            max(0.0, min(1.0, y1 / max(1, height))),
+            max(0.0, min(1.0, x2 / max(1, width))),
+            max(0.0, min(1.0, y2 / max(1, height))),
+        ]
+        if normalized[0] < normalized[2] and normalized[1] < normalized[3]:
+            boxes.append(normalized)
+    return boxes
+
+
 def _rsna_response(model: Any, processor: Any, image: Image.Image) -> dict[str, Any]:
     quality = _runtime.get("quality", {})
     with _generation_lock:
         adapter_context = _select_adapter(model, "rsna_v2")
         with adapter_context, torch.inference_mode():
             finding, probabilities = _score_rsna_classification(model, processor, image)
-            boxes = _generate_rsna_localization(model, processor, image) if finding == "pneumonia" else []
+            boxes = _detect_rsna_localization(image) if finding == "pneumonia" else []
 
     confidence = probabilities[finding]
     localization_validated = bool(quality.get("localization_gate_passed")) and bool(boxes)
@@ -413,7 +467,7 @@ def _rsna_response(model: Any, processor: Any, image: Image.Image) -> dict[str, 
         "bbox": boxes[0] if localization_validated else None,
         "localization": {
             "validated": localization_validated,
-            "source": "medai-rsna-pneumonia-v2:test-gated-boxes" if localization_validated else None,
+            "source": quality.get("localization_source") if localization_validated else None,
             "bbox": boxes[0] if localization_validated else None,
             "boxes": boxes if localization_validated else [],
             "reason": localization_reason,
@@ -545,6 +599,8 @@ def configure_runtime(
     processor: Any,
     adapter_available: bool | dict[str, bool],
     quality: dict[str, Any] | None = None,
+    detector: Any = None,
+    detector_device: torch.device | None = None,
 ) -> None:
     model.eval()
     if isinstance(adapter_available, bool):
@@ -557,6 +613,8 @@ def configure_runtime(
         adapter_available=availability,
         device=_model_device(model),
         quality=quality or _load_quality_state(),
+        detector=detector,
+        detector_device=detector_device,
     )
 
 
@@ -564,10 +622,12 @@ def start_api(
     model: Any,
     processor: Any,
     adapter_available: bool | dict[str, bool],
+    detector: Any = None,
+    detector_device: torch.device | None = None,
     host: str = "0.0.0.0",
     port: int = 8005,
 ):
-    configure_runtime(model, processor, adapter_available)
+    configure_runtime(model, processor, adapter_available, detector=detector, detector_device=detector_device)
     thread = threading.Thread(
         target=uvicorn.run,
         kwargs={"app": app, "host": host, "port": port, "log_level": "info"},
@@ -619,10 +679,33 @@ def load_and_start_api(
             )
         else:
             model.load_adapter(path, adapter_name=name, is_trainable=False)
+    detector = None
+    detector_device = None
+    quality = _load_quality_state()
+    if quality.get("localization_gate_passed") and RSNA_DETECTOR_CHECKPOINT.exists():
+        from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2
+        from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+
+        detector = fasterrcnn_resnet50_fpn_v2(
+            weights=None,
+            min_size=640,
+            max_size=1024,
+            box_score_thresh=0.05,
+            box_nms_thresh=0.35,
+            box_detections_per_img=10,
+        )
+        in_features = detector.roi_heads.box_predictor.cls_score.in_features
+        detector.roi_heads.box_predictor = FastRCNNPredictor(in_features, 2)
+        checkpoint = torch.load(RSNA_DETECTOR_CHECKPOINT, map_location="cpu", weights_only=False)
+        detector.load_state_dict(checkpoint["model"] if isinstance(checkpoint, dict) and "model" in checkpoint else checkpoint)
+        detector_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        detector.to(detector_device).eval()
     thread = start_api(
         model,
         processor,
         adapter_available={name: name in available_paths for name in ADAPTER_PATHS},
+        detector=detector,
+        detector_device=detector_device,
         host=host,
         port=port,
     )

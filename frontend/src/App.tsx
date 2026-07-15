@@ -26,13 +26,11 @@ import {
   Save,
   Search,
   Send,
-  Settings,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
   Sun,
   UploadCloud,
-  UserRound,
   Users,
   X,
   ZoomIn,
@@ -939,12 +937,33 @@ const HEALTH_NEWS = [
 ] as const;
 
 const REFERENCE_SOURCES: Record<string, string> = {
-  normal: "https://www.radiologyinfo.org/en/info/chestrad",
-  pneumonia: "https://www.radiologyinfo.org/en/info/pneumonia",
-  pneumothorax: "https://www.radiologyinfo.org/en/info/pneumothorax",
-  pleural_effusion: "https://www.radiologyinfo.org/en/info/pleuraleffusion",
+  normal: "https://www.us.elsevierhealth.com/felsons-principles-of-chest-roentgenology-a-programmed-text-9780323625678.html",
+  pneumonia: "https://www.us.elsevierhealth.com/learning-radiology-9780323878173.html",
+  pneumothorax: "https://www.us.elsevierhealth.com/felsons-principles-of-chest-roentgenology-a-programmed-text-9780323625678.html",
+  pleural_effusion: "https://www.us.elsevierhealth.com/felsons-principles-of-chest-roentgenology-a-programmed-text-9780323625678.html",
+  atelectasis: "https://www.us.elsevierhealth.com/felsons-principles-of-chest-roentgenology-a-programmed-text-9780323625678.html",
+  cardiomegaly: "https://www.us.elsevierhealth.com/learning-radiology-9780323878173.html",
+  pulmonary_edema: "https://www.us.elsevierhealth.com/grainger-allisons-diagnostic-radiology-9780702075247.html",
+  copd: "https://www.us.elsevierhealth.com/grainger-allisons-diagnostic-radiology-9780702075247.html",
+  fibrosis: "https://www.us.elsevierhealth.com/grainger-allisons-diagnostic-radiology-9780702075247.html",
+  mediastinal_widening: "https://www.us.elsevierhealth.com/felsons-principles-of-chest-roentgenology-a-programmed-text-9780323625678.html",
   tuberculosis: "https://www.who.int/news-room/fact-sheets/detail/tuberculosis",
   lung_nodule: "https://www.acr.org/clinical-resources/clinical-tools-and-reference/appropriateness-criteria"
+};
+
+const REFERENCE_BOOKS: Record<string, string> = {
+  normal: "Felson’s Principles of Chest Roentgenology · L. R. Goodman",
+  pneumonia: "Learning Radiology · William Herring",
+  pleural_effusion: "Felson’s Principles of Chest Roentgenology · L. R. Goodman",
+  pneumothorax: "Felson’s Principles of Chest Roentgenology · L. R. Goodman",
+  atelectasis: "Felson’s Principles of Chest Roentgenology · L. R. Goodman",
+  cardiomegaly: "Learning Radiology · William Herring",
+  pulmonary_edema: "Grainger & Allison’s Diagnostic Radiology",
+  lung_nodule: "ACR Appropriateness Criteria",
+  tuberculosis: "WHO · Tuberculosis fact sheet",
+  copd: "Grainger & Allison’s Diagnostic Radiology",
+  fibrosis: "Grainger & Allison’s Diagnostic Radiology",
+  mediastinal_widening: "Felson’s Principles of Chest Roentgenology · L. R. Goodman"
 };
 
 type LocalizedPathology = {
@@ -1180,6 +1199,7 @@ export default function App() {
   const [referenceSearch, setReferenceSearch] = useState("");
   const [dashboardRecommendation, setDashboardRecommendation] = useState("");
   const [dashboardRecommendationLoading, setDashboardRecommendationLoading] = useState(false);
+  const [dashboardClock, setDashboardClock] = useState(() => new Date());
   const [crmForm, setCrmForm] = useState({
     patient_code: "DEMO-001",
     contact_type: "consultation",
@@ -1253,6 +1273,11 @@ export default function App() {
     localStorage.setItem("medicine_theme", theme);
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setDashboardClock(new Date()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (!notice) return;
@@ -1887,8 +1912,8 @@ export default function App() {
               {urgentCrmCount > 0 && <b>{urgentCrmCount > 9 ? "9+" : urgentCrmCount}</b>}
             </button>
           )}
-          <div className="profileMenu">
-            <button className="profileTrigger" type="button" onClick={() => setShowProfilePanel(true)}>
+          <div className={`profileMenu ${showProfilePanel ? "open" : ""}`} onMouseLeave={() => setShowProfilePanel(false)}>
+            <button className="profileTrigger" type="button" aria-expanded={showProfilePanel} onClick={() => setShowProfilePanel((value) => !value)}>
               <span className="profileAvatar">{profileInitials(user.full_name)}</span>
               <span className="profileTriggerCopy"><strong>{user.full_name}</strong><small>{ui.roles[user.role]}</small></span>
               <ChevronDown size={16} />
@@ -1896,10 +1921,12 @@ export default function App() {
             <div className="profileDropdown" role="menu">
               <div className="profileDropdownIdentity">
                 <span className="profileAvatar large">{profileInitials(user.full_name)}</span>
-                <div><strong>{user.full_name}</strong><small>@{user.login}</small></div>
+                <div><strong>{user.full_name}</strong><small>@{user.login} · {ui.roles[user.role]}</small></div>
               </div>
-              <button type="button" onClick={() => setShowProfilePanel(true)}><UserRound size={17} /><span>{experienceUi.profileTitle}</span></button>
-              <button type="button" onClick={() => setShowProfilePanel(true)}><Settings size={17} /><span>{experienceUi.profileSettings}</span></button>
+              <div className="profileQuickFacts"><span><i />{experienceUi.activeSession}</span><strong>CRM {urgentCrmCount}</strong></div>
+              <div className="profileDropdownDivider" />
+              <div className="profilePreferenceRow"><span><Moon size={16} />{experienceUi.interfaceTheme}</span><ThemeSwitch theme={theme} setTheme={setTheme} /></div>
+              <div className="profilePreferenceRow"><span><Languages size={16} />{experienceUi.language}</span><LanguageSwitch lang={lang} setLang={setLang} /></div>
               {["admin", "analyst", "expert"].includes(user.role) && (
                 <button type="button" onClick={async () => { setView("audit"); await loadAudit(); }}><ShieldCheck size={17} /><span>{experienceUi.profileAudit}</span></button>
               )}
@@ -1919,32 +1946,6 @@ export default function App() {
           </div>
         </header>
 
-        {showProfilePanel && (
-          <div className="profileOverlay" role="presentation" onMouseDown={() => setShowProfilePanel(false)}>
-            <section className="profilePanel" role="dialog" aria-modal="true" aria-label={experienceUi.profileTitle} onMouseDown={(event) => event.stopPropagation()}>
-              <header>
-                <div><small>{experienceUi.account}</small><h2>{experienceUi.profileTitle}</h2></div>
-                <button className="iconButton" type="button" aria-label="Close" onClick={() => setShowProfilePanel(false)}><X size={18} /></button>
-              </header>
-              <div className="profileIdentityCard">
-                <span className="profileAvatar hero">{profileInitials(user.full_name)}</span>
-                <div><h3>{user.full_name}</h3><p>{ui.roles[user.role]} · @{user.login}</p><span><i />{experienceUi.activeSession}</span></div>
-              </div>
-              <div className="profileFacts">
-                <div><span>ID</span><strong>#{user.id}</strong></div>
-                <div><span>{experienceUi.security}</span><strong>{user.is_active ? "Active" : "Disabled"}</strong></div>
-                <div><span>{experienceUi.notificationCenter}</span><strong>{urgentCrmCount}</strong></div>
-              </div>
-              <div className="profilePreferences">
-                <div className="profileSectionTitle"><Settings size={17} /><span>{experienceUi.preferences}</span></div>
-                <label><span>{experienceUi.interfaceTheme}</span><ThemeSwitch theme={theme} setTheme={setTheme} /></label>
-                <label><span>{experienceUi.language}</span><LanguageSwitch lang={lang} setLang={setLang} /></label>
-              </div>
-              <div className="profileSecurityNote"><ShieldCheck size={18} /><div><strong>{experienceUi.security}</strong><span>{experienceUi.notificationNote}</span></div></div>
-            </section>
-          </div>
-        )}
-
         {notice && <div className="notice">{notice}</div>}
         {error && <div className="errorLine">{error}</div>}
 
@@ -1955,6 +1956,12 @@ export default function App() {
                 <small>MEDAI · CLINICAL WORKSPACE</small>
                 <h2>{dashboardUi.title}</h2>
                 <p>{dashboardUi.lead}</p>
+                <div className="dashboardLiveBar">
+                  <span><i />{dashboardClock.toLocaleTimeString(ui.locale, { hour: "2-digit", minute: "2-digit" })}</span>
+                  <span>{dashboardClock.toLocaleDateString(ui.locale, { weekday: "long", day: "numeric", month: "long" })}</span>
+                  <button type="button" onClick={() => setView("studies")}><Play size={14} />{dashboardUi.openStudies}</button>
+                  <button type="button" onClick={() => setView("crm")}><MessageCircle size={14} />{dashboardUi.openCrm}</button>
+                </div>
               </div>
               <LungMark className="dashboardLungMark" />
             </div>
@@ -2610,9 +2617,11 @@ export default function App() {
                     <div className="referenceVisual">
                       <ReferenceIllustration slug={item.slug} title={localized.title} />
                       <span>{localized.title.slice(0, 2).toUpperCase()}</span>
+                      <small>{lang === "ru" ? "Учебная иллюстрация" : lang === "kk" ? "Оқу иллюстрациясы" : "Educational illustration"}</small>
                     </div>
                     <div className="referenceCardCopy">
                       <small>{localized.label}</small><h2>{localized.title}</h2><p>{localized.signs}</p>
+                      <p className="referenceBook"><BookOpen size={14} />{REFERENCE_BOOKS[item.slug] ?? "ACR Appropriateness Criteria"}</p>
                       <details>
                         <summary>{workspaceUi.details}<ExternalLink size={14} /></summary>
                         <h3>{ui.report}</h3><p>{localized.report_template}</p>
@@ -2833,42 +2842,7 @@ function MedAILoader({ label, detail, compact = false }: { label: string; detail
 }
 
 function ReferenceIllustration({ slug, title }: { slug: string; title: string }) {
-  const variant = Array.from(slug).reduce((total, char) => total + char.charCodeAt(0), 0) % 6;
-  const gradientId = `reference-${slug.replace(/[^a-z0-9_-]/gi, "")}`;
-  return (
-    <svg className={`referenceIllustration variant-${variant}`} viewBox="0 0 560 280" role="img" aria-label={title}>
-      <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#0a2740" />
-          <stop offset="1" stopColor="#031019" />
-        </linearGradient>
-        <radialGradient id={`${gradientId}-glow`} cx="50%" cy="48%" r="60%">
-          <stop offset="0" stopColor="#54e2c5" stopOpacity=".36" />
-          <stop offset="1" stopColor="#1a91b2" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="560" height="280" rx="24" fill={`url(#${gradientId})`} />
-      <circle cx={90 + variant * 66} cy={54 + variant * 13} r="150" fill={`url(#${gradientId}-glow)`} />
-      <g className="referenceRibs" opacity=".24">
-        {[0, 1, 2, 3, 4].map((line) => <path key={line} d={`M95 ${60 + line * 32} Q280 ${5 + line * 42} 465 ${60 + line * 32}`} />)}
-      </g>
-      <g className="referenceLungs" transform={`translate(${variant % 2 ? 7 : -7} 2)`}>
-        <path d="M272 42v66m16-66v66m-8-17v39" />
-        <path d="M280 122c-28 12-55 43-69 78m69-78c28 12 55 43 69 78" />
-        <path d="M263 104c-55 9-96 62-103 112-5 37 20 47 54 33 38-16 53-50 53-91v-45c0-5-2-9-4-9Z" />
-        <path d="M297 104c55 9 96 62 103 112 5 37-20 47-54 33-38-16-53-50-53-91v-45c0-5 2-9 4-9Z" />
-      </g>
-      <g className={`referenceFinding finding-${variant}`}>
-        {variant === 0 && <circle cx="220" cy="188" r="28" />}
-        {variant === 1 && <path d="M335 126c28 7 43 25 48 50-22 11-45 9-65-3 0-18 6-34 17-47Z" />}
-        {variant === 2 && <path d="M163 215h100v35H151c1-13 5-25 12-35Z" />}
-        {variant === 3 && <path d="M390 105c-26 20-36 50-31 91" />}
-        {variant === 4 && <circle cx="352" cy="198" r="20" />}
-        {variant === 5 && <path d="M208 119c24 17 42 37 54 61-25 7-48 3-68-13 1-19 6-35 14-48Z" />}
-      </g>
-      <text x="26" y="254">MEDAI · VERIFIED CLINICAL REFERENCE</text>
-    </svg>
-  );
+  return <img className="referenceIllustration" src={`/reference/${slug}.webp`} alt={`${title}. Educational chest X-ray illustration`} loading="lazy" />;
 }
 
 function LanguageSwitch({ lang, setLang }: { lang: Lang; setLang: (lang: Lang) => void }) {
