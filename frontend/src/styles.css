@@ -5629,3 +5629,324 @@ textarea:focus {
   .crmKanban { grid-template-columns: repeat(3, 82vw); }
   .crmStatusRail { align-items: flex-start; flex-direction: column; }
 }
+
+/* Dashboard, lung identity and unified loading language */
+.lungMark {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.lungMark path {
+  vector-effect: non-scaling-stroke;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lungMark .lungLeft,
+.lungMark .lungRight {
+  fill: currentColor;
+  fill-opacity: .09;
+}
+
+.brandSymbol .lungMark,
+.brandSignal .lungMark { width: 25px; height: 25px; color: var(--medical); }
+
+.workspace > section {
+  animation: medaiPageReveal .34s cubic-bezier(.2, .75, .25, 1) both;
+}
+
+.medaiLungLoader {
+  min-width: 230px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 18px 20px;
+  color: var(--medical);
+}
+
+.loaderLungWrap {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  flex: 0 0 auto;
+  padding: 8px;
+  border: 1px solid var(--medical-line);
+  border-radius: 22px;
+  background: radial-gradient(circle, var(--medical-soft), transparent 72%);
+  box-shadow: 0 0 36px rgba(24, 201, 163, .12);
+  animation: lungLoaderBreath 2.15s ease-in-out infinite;
+}
+
+.loaderLungWrap::before,
+.loaderLungWrap::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 1px solid var(--medical-line);
+  border-radius: 28px;
+  opacity: 0;
+  animation: lungLoaderRing 2.15s ease-out infinite;
+}
+
+.loaderLungWrap::after { animation-delay: 1.05s; }
+.loaderLungWrap .lungMark { color: var(--medical); }
+.loaderLungWrap > i {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #8ff1dc, transparent);
+  box-shadow: 0 0 12px #52d7ba;
+  animation: lungScan 1.75s ease-in-out infinite;
+}
+
+.loaderCopy { display: grid; gap: 4px; }
+.loaderCopy strong { color: var(--ink); font-size: 13px; }
+.loaderCopy small { color: var(--muted); font-size: 10px; }
+.medaiLungLoader.compact { min-width: 0; padding: 8px; gap: 10px; }
+.medaiLungLoader.compact .loaderLungWrap { width: 42px; height: 42px; border-radius: 15px; padding: 6px; }
+.medaiLungLoader.compact .loaderLungWrap::before,
+.medaiLungLoader.compact .loaderLungWrap::after { display: none; }
+
+.imageStageLoader {
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.imageStageLoader > .medaiLungLoader {
+  border: 1px solid var(--medical-line);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--panel-solid) 92%, transparent);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .34);
+}
+
+.previewLungState {
+  width: min(560px, 78%);
+  min-height: 330px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  overflow: hidden;
+  border-style: dashed;
+  background: radial-gradient(circle at 50% 55%, rgba(24, 201, 163, .11), transparent 54%);
+}
+
+.previewLungState img {
+  width: min(430px, 92%);
+  height: 250px;
+  object-fit: contain;
+  opacity: .82;
+  filter: drop-shadow(0 0 28px rgba(24, 201, 163, .18));
+  animation: previewLungBreath 5.8s ease-in-out infinite;
+}
+
+.previewLungState span { color: var(--muted-strong); font-size: 12px; font-weight: 800; }
+
+.homeDashboard { display: grid; gap: 16px; }
+.dashboardWelcome {
+  min-height: 178px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  overflow: hidden;
+  position: relative;
+  padding: 30px 34px;
+  border: 1px solid var(--medical-line);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 86% 40%, rgba(24, 201, 163, .16), transparent 28%),
+    linear-gradient(125deg, var(--panel-solid), color-mix(in srgb, var(--panel-solid) 88%, var(--medical-soft)));
+  box-shadow: var(--shadow);
+}
+
+.dashboardWelcome small { color: var(--medical); font-size: 10px; font-weight: 900; letter-spacing: .12em; }
+.dashboardWelcome h2 { margin-top: 9px; font-size: clamp(28px, 4vw, 48px); letter-spacing: -.05em; }
+.dashboardWelcome p { max-width: 660px; margin-top: 10px; font-size: 14px; }
+.dashboardLungMark { width: 150px; height: 150px; flex: 0 0 auto; color: var(--medical); opacity: .62; filter: drop-shadow(0 0 30px rgba(24, 201, 163, .22)); }
+
+.dashboardMetrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.dashboardMetrics button {
+  min-height: 108px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  background: var(--panel-solid);
+  color: var(--medical);
+  cursor: pointer;
+  text-align: left;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.dashboardMetrics button:hover { transform: translateY(-3px); border-color: var(--medical-line); box-shadow: 0 16px 40px rgba(0, 0, 0, .16); }
+.dashboardMetrics button span { color: var(--muted-strong); font-size: 12px; font-weight: 800; }
+.dashboardMetrics button strong { color: var(--ink); font-size: 31px; }
+
+.dashboardContentGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.dashboardPanel {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--line-soft);
+  border-radius: 21px;
+  background: var(--panel-solid);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, .12);
+}
+.dashboardPanel > header { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-bottom: 13px; border-bottom: 1px solid var(--line-soft); }
+.dashboardPanel > header small { color: var(--medical); font-size: 9px; font-weight: 900; letter-spacing: .08em; }
+.dashboardPanel > header h3 { margin-top: 3px; font-size: 17px; }
+.dashboardPanel > header > svg { color: var(--medical); }
+.recommendationPanel { grid-column: 1 / -1; }
+
+.healthNewsList,
+.dashboardStudyList,
+.doctorMessageList { display: grid; gap: 8px; }
+.healthNewsList a,
+.dashboardStudyList > button,
+.doctorMessageList > button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color .18s ease, transform .18s ease, background .18s ease;
+}
+.healthNewsList a:hover,
+.dashboardStudyList > button:hover,
+.doctorMessageList > button:hover { transform: translateX(3px); border-color: var(--medical-line); background: var(--medical-soft); }
+.healthNewsList a { display: grid; grid-template-columns: 74px 1fr auto; }
+.healthNewsList a > span { color: var(--muted); font-size: 10px; }
+.healthNewsList a > strong { font-size: 12px; line-height: 1.45; }
+.healthNewsList a > small { display: inline-flex; align-items: center; gap: 5px; color: var(--medical); font-size: 9px; white-space: nowrap; }
+
+.managementPanel { align-content: start; }
+.managementMessage { display: flex; align-items: flex-start; gap: 12px; padding: 13px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); }
+.managementMessage > span { width: 34px; height: 34px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 11px; background: var(--medical-soft); color: var(--medical); }
+.managementMessage > div { display: grid; gap: 4px; }
+.managementMessage strong { font-size: 12px; }
+.managementMessage p { font-size: 11px; line-height: 1.5; }
+.managementMessage.important { border-color: var(--medical-line); }
+
+.dashboardStudyList > button { justify-content: space-between; text-align: left; }
+.dashboardStudyList > button > span:first-child { min-width: 0; display: grid; gap: 3px; }
+.dashboardStudyList strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.dashboardStudyList small { color: var(--muted); font-size: 10px; }
+.doctorMessageList > button { align-items: flex-start; cursor: pointer; text-align: left; }
+.doctorMessageList > button > span:last-child { min-width: 0; display: grid; gap: 3px; }
+.doctorMessageList strong { font-size: 11px; }
+.doctorMessageList p { overflow: hidden; color: var(--muted-strong); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.doctorMessageList small { color: var(--muted); font-size: 9px; }
+.dashboardEmpty { min-height: 104px; display: grid; place-items: center; align-content: center; gap: 8px; padding: 16px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); font-size: 11px; text-align: center; }
+.dashboardEmpty > svg { width: 32px; height: 32px; color: var(--medical); }
+
+.recommendationPrivacy { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; }
+.recommendationPrivacy svg { color: var(--medical); }
+.recommendationBody { min-height: 128px; display: grid; place-items: center; padding: 16px; border: 1px solid var(--line-soft); border-radius: 15px; background: var(--panel); }
+.recommendationBody > p { width: 100%; color: var(--muted-strong); font-size: 13px; line-height: 1.7; white-space: pre-line; }
+.recommendationPanel > .primaryButton { justify-self: start; }
+
+.referenceIllustration { width: 100%; height: 100%; display: block; }
+.referenceIllustration path,
+.referenceIllustration circle { vector-effect: non-scaling-stroke; }
+.referenceRibs path { fill: none; stroke: #83bdd0; stroke-width: 1; }
+.referenceLungs path { fill: rgba(41, 152, 174, .12); stroke: #63d7d1; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.referenceFinding { color: #61efd1; }
+.referenceFinding circle,
+.referenceFinding path { fill: rgba(97, 239, 209, .24); stroke: currentColor; stroke-width: 2; }
+.referenceFinding.finding-3 path { fill: none; stroke-width: 4; }
+.referenceIllustration text { fill: rgba(194, 235, 239, .55); font-size: 9px; font-weight: 800; letter-spacing: 1.1px; }
+.referenceSourceLink { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--medical); font-size: 10px; font-weight: 850; text-decoration: none; }
+.referenceSourceLink:hover { text-decoration: underline; }
+
+.crmConversationPicker { padding: 12px 14px 0; }
+.crmConversationPicker > span { color: var(--medical); font-size: 9px; font-weight: 900; }
+.crmCommunication .assistantPanel { grid-template-rows: auto auto 1fr auto; }
+.crmCommunication .assistantMessage p { display: grid; gap: 4px; }
+.crmCommunication .assistantMessage p > strong { color: var(--ink); font-size: 10px; }
+.crmCommunication .assistantMessage p > small { color: var(--muted); font-size: 8px; }
+.crmCommunication .assistantMessage > span { color: var(--medical); font-size: 8px; font-weight: 900; }
+
+:root[data-theme="light"] {
+  --line: rgba(19, 71, 91, .28);
+  --line-soft: rgba(19, 71, 91, .19);
+}
+:root[data-theme="light"] .dashboardWelcome,
+:root[data-theme="light"] .dashboardMetrics button,
+:root[data-theme="light"] .dashboardPanel,
+:root[data-theme="light"] .toolPanel,
+:root[data-theme="light"] .viewerPanel,
+:root[data-theme="light"] .crmDepartmentBoard,
+:root[data-theme="light"] .crmCard,
+:root[data-theme="light"] .referenceItem,
+:root[data-theme="light"] .referenceHero,
+:root[data-theme="light"] .profilePanel {
+  border-color: #bed3dc;
+  background-color: #ffffff;
+  box-shadow: 0 16px 42px rgba(29, 72, 88, .12);
+}
+:root[data-theme="light"] .crmLane,
+:root[data-theme="light"] .crmDetail,
+:root[data-theme="light"] .managementMessage,
+:root[data-theme="light"] .healthNewsList a,
+:root[data-theme="light"] .dashboardStudyList > button,
+:root[data-theme="light"] .doctorMessageList > button,
+:root[data-theme="light"] .recommendationBody,
+:root[data-theme="light"] .advancedFilters,
+:root[data-theme="light"] .clinicalReportPreview > section {
+  border-color: #c7d9e1;
+  background: #f3f8fa;
+}
+:root[data-theme="light"] .previewLungState {
+  border-color: #b7d1dc;
+  background: radial-gradient(circle at 50% 55%, rgba(12, 153, 126, .12), transparent 54%), #f7fbfc;
+}
+:root[data-theme="light"] .previewLungState img { opacity: .92; filter: saturate(1.15) drop-shadow(0 0 22px rgba(13, 125, 128, .2)); }
+:root[data-theme="light"] .imageStageLoader { background: rgba(238, 247, 249, .82); }
+:root[data-theme="light"] .referenceVisual { border-color: #bdd3dc; background: #e8f2f5; }
+:root[data-theme="light"] .assistantPanel { border-color: #b9d2dc; background: rgba(255, 255, 255, .98); }
+
+@keyframes medaiPageReveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes lungLoaderBreath { 0%, 100% { transform: scale(.96); filter: brightness(.92); } 50% { transform: scale(1.04); filter: brightness(1.15); } }
+@keyframes lungLoaderRing { 0% { opacity: .42; transform: scale(.82); } 75%, 100% { opacity: 0; transform: scale(1.25); } }
+@keyframes lungScan { 0%, 100% { transform: translateY(-15px); opacity: .18; } 50% { transform: translateY(15px); opacity: 1; } }
+@keyframes previewLungBreath { 0%, 100% { transform: scale(.985); } 50% { transform: scale(1.025); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace > section,
+  .loaderLungWrap,
+  .loaderLungWrap::before,
+  .loaderLungWrap::after,
+  .loaderLungWrap > i,
+  .previewLungState img { animation: none; }
+}
+
+@media (max-width: 980px) {
+  .dashboardMetrics { grid-template-columns: 1fr; }
+  .dashboardContentGrid { grid-template-columns: 1fr; }
+  .recommendationPanel { grid-column: auto; }
+}
+
+@media (max-width: 620px) {
+  .dashboardWelcome { padding: 22px; }
+  .dashboardLungMark { width: 86px; height: 86px; }
+  .healthNewsList a { grid-template-columns: 1fr; }
+  .previewLungState { width: 92%; min-height: 250px; }
+  .previewLungState img { height: 170px; }
+}

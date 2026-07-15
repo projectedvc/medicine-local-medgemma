@@ -11,7 +11,7 @@ import {
   ExternalLink,
   Download,
   FileText,
-  ImagePlus,
+  Home,
   Languages,
   Loader2,
   LogIn,
@@ -30,7 +30,6 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
-  Stethoscope,
   Sun,
   UploadCloud,
   UserRound,
@@ -45,7 +44,6 @@ import { api, currentToken, setAuthToken } from "./api";
 import type {
   AIAnalysis,
   AnalyticsOverview,
-  AssistantMessage,
   AuditLog,
   CRMRecord,
   FeedbackType,
@@ -57,7 +55,7 @@ import type {
   User
 } from "./types";
 
-type View = "studies" | "crm" | "reference" | "analytics" | "audit" | "users";
+type View = "dashboard" | "studies" | "crm" | "reference" | "analytics" | "audit" | "users";
 type Lang = "kk" | "ru" | "en";
 type Theme = "light" | "dark";
 
@@ -853,6 +851,102 @@ const EXPERIENCE_UI = {
   }
 } as const;
 
+const DASHBOARD_UI = {
+  kk: {
+    nav: "Басты",
+    title: "Жұмыс дэшборды",
+    lead: "Зерттеулер, бөлім байланысы және маңызды денсаулық жаңалықтары бір жерде.",
+    pending: "Аяқталмаған қорытындылар",
+    urgent: "Шұғыл CRM",
+    completed: "AI талдауы дайын",
+    news: "Денсаулық сақтау жаңалықтары",
+    management: "Басшылық хабарламалары",
+    colleagues: "Дәрігерлер хабарламалары",
+    recommendations: "MedAI ұсыныстары",
+    recommendationsHint: "Ұсыныстар пациент деректерін жібермей, тек жұмыс көрсеткіштері бойынша жасалады.",
+    generate: "Ұсыныстарды жаңарту",
+    noMessages: "Жаңа хабарламалар жоқ",
+    openStudies: "Зерттеулерге өту",
+    openCrm: "CRM ашу",
+    verified: "Ресми дереккөз"
+  },
+  ru: {
+    nav: "Главная",
+    title: "Рабочий дэшборд",
+    lead: "Исследования, связь отдела и важные новости здравоохранения в одном месте.",
+    pending: "Незавершённые заключения",
+    urgent: "Срочные задачи CRM",
+    completed: "AI-анализов готово",
+    news: "Новости здравоохранения",
+    management: "Сообщения руководства",
+    colleagues: "Сообщения врачей",
+    recommendations: "Рекомендации MedAI",
+    recommendationsHint: "Рекомендации строятся только по рабочим показателям, без передачи данных пациентов.",
+    generate: "Обновить рекомендации",
+    noMessages: "Новых сообщений нет",
+    openStudies: "Перейти к исследованиям",
+    openCrm: "Открыть CRM",
+    verified: "Официальный источник"
+  },
+  en: {
+    nav: "Home",
+    title: "Clinical dashboard",
+    lead: "Studies, department communication, and important health updates in one workspace.",
+    pending: "Unfinished reports",
+    urgent: "Urgent CRM tasks",
+    completed: "AI analyses ready",
+    news: "Health news",
+    management: "Management messages",
+    colleagues: "Doctor messages",
+    recommendations: "MedAI recommendations",
+    recommendationsHint: "Recommendations use aggregate workflow metrics only and never send patient data.",
+    generate: "Refresh recommendations",
+    noMessages: "No new messages",
+    openStudies: "Open studies",
+    openCrm: "Open CRM",
+    verified: "Official source"
+  }
+} as const;
+
+const HEALTH_NEWS = [
+  {
+    date: "07.07.2026",
+    title: {
+      kk: "Еуропада аптап ыстыққа байланысты денсаулық қаупі сақталуда",
+      ru: "ВОЗ предупреждает о продолжающихся рисках экстремальной жары в Европе",
+      en: "WHO warns that extreme heat risks continue across Europe"
+    },
+    url: "https://www.who.int/europe/news/item/07-07-2026-statement---extreme-heat--more-deadly-weeks-may-still-lie-ahead-for-the-european-region"
+  },
+  {
+    date: "07.07.2026",
+    title: {
+      kk: "Батыс Балқан елдері темекісіз орта саясатын күшейтеді",
+      ru: "Страны Западных Балкан усиливают политику по защите от табачного дыма",
+      en: "Western Balkans strengthen smoke-free health policies"
+    },
+    url: "https://www.who.int/europe/news/item/07-07-2026-western-balkans-commit-to-stronger-tobacco-policies-and-a-smoke-free-future"
+  },
+  {
+    date: "02.07.2026",
+    title: {
+      kk: "ДДҰ көмекші технологияларды жөндеу және қайта пайдалану жөнінде нұсқаулық шығарды",
+      ru: "ВОЗ выпустила руководство по ремонту и повторному использованию вспомогательных технологий",
+      en: "WHO publishes guidance on repair and reuse of assistive technology"
+    },
+    url: "https://www.who.int/europe/news/item/02-07-2026-who-releases-new-guidance-on-the-repair--refurbishment-and-recycling-of-assistive-technology"
+  }
+] as const;
+
+const REFERENCE_SOURCES: Record<string, string> = {
+  normal: "https://www.radiologyinfo.org/en/info/chestrad",
+  pneumonia: "https://www.radiologyinfo.org/en/info/pneumonia",
+  pneumothorax: "https://www.radiologyinfo.org/en/info/pneumothorax",
+  pleural_effusion: "https://www.radiologyinfo.org/en/info/pleuraleffusion",
+  tuberculosis: "https://www.who.int/news-room/fact-sheets/detail/tuberculosis",
+  lung_nodule: "https://www.acr.org/clinical-resources/clinical-tools-and-reference/appropriateness-criteria"
+};
+
 type LocalizedPathology = {
   title: string;
   label: string;
@@ -1050,12 +1144,13 @@ export default function App() {
   const ui = UI[lang];
   const workspaceUi = WORKSPACE_UI[lang];
   const experienceUi = EXPERIENCE_UI[lang];
+  const dashboardUi = DASHBOARD_UI[lang];
 
   const [user, setUser] = useState<User | null>(null);
   const [booting, setBooting] = useState(true);
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
-  const [view, setView] = useState<View>("studies");
+  const [view, setView] = useState<View>("dashboard");
   const [showLoginPanel, setShowLoginPanel] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -1083,6 +1178,8 @@ export default function App() {
   const [crmSelectedId, setCrmSelectedId] = useState<number | null>(null);
   const [crmActivity, setCrmActivity] = useState("");
   const [referenceSearch, setReferenceSearch] = useState("");
+  const [dashboardRecommendation, setDashboardRecommendation] = useState("");
+  const [dashboardRecommendationLoading, setDashboardRecommendationLoading] = useState(false);
   const [crmForm, setCrmForm] = useState({
     patient_code: "DEMO-001",
     contact_type: "consultation",
@@ -1127,6 +1224,18 @@ export default function App() {
     () => crmRecords.filter((record) => record.status !== "closed" && (record.priority === "urgent" || isCrmOverdue(record))).length,
     [crmRecords]
   );
+  const unfinishedStudies = useMemo(
+    () => studies.filter((study) => !["confirmed", "exported"].includes(study.status)),
+    [studies]
+  );
+  const recentDoctorMessages = useMemo(
+    () => crmRecords
+      .flatMap((record) => (record.activities ?? []).map((activity) => ({ ...activity, patientCode: record.patient_code, recordId: record.id })))
+      .filter((activity) => ["message", "note"].includes(activity.activity_type))
+      .sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime())
+      .slice(0, 4),
+    [crmRecords]
+  );
   const filteredPathologies = useMemo(() => {
     const query = referenceSearch.trim().toLocaleLowerCase();
     if (!query) return pathologies;
@@ -1160,7 +1269,7 @@ export default function App() {
       try {
         const me = await api.me();
         setUser(me);
-        setView("studies");
+        setView("dashboard");
         await loadInitial(me);
       } catch {
         setAuthToken("");
@@ -1197,7 +1306,7 @@ export default function App() {
       const response = await api.login(login, password);
       setAuthToken(response.access_token);
       setUser(response.user);
-      setView("studies");
+      setView("dashboard");
       setShowLoginPanel(false);
       await loadInitial(response.user);
       flash(ui.signedIn);
@@ -1218,7 +1327,7 @@ export default function App() {
     setPreviewUrl(null);
     setShowLoginPanel(false);
     setShowProfilePanel(false);
-    setView("studies");
+    setView("dashboard");
   }
 
   async function loadStudies(nextFilters = filters) {
@@ -1316,6 +1425,24 @@ export default function App() {
       fail(err);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function generateDashboardRecommendations() {
+    setDashboardRecommendationLoading(true);
+    setError("");
+    try {
+      const prompt = lang === "ru"
+        ? `Дай врачу 3 короткие практические рекомендации по организации работы. Данные только агрегированные: незавершённых заключений ${unfinishedStudies.length}, срочных CRM-задач ${urgentCrmCount}, всего исследований ${studies.length}. Не ставь диагнозы, не выдумывай пациентов, ответ не длиннее 80 слов.`
+        : lang === "kk"
+          ? `Дәрігерге жұмысты ұйымдастыру бойынша 3 қысқа ұсыныс бер. Тек жиынтық дерек: аяқталмаған қорытынды ${unfinishedStudies.length}, шұғыл CRM тапсырмасы ${urgentCrmCount}, зерттеу саны ${studies.length}. Диагноз қойма, пациенттерді ойдан шығарма, 80 сөзден аспасын.`
+          : `Give the clinician 3 short workflow recommendations. Aggregate data only: ${unfinishedStudies.length} unfinished reports, ${urgentCrmCount} urgent CRM tasks, ${studies.length} total studies. Do not diagnose or invent patients. Stay under 80 words.`;
+      const response = await api.chatAssistant([{ role: "user", content: prompt }], lang);
+      setDashboardRecommendation(response.message);
+    } catch (err) {
+      fail(err);
+    } finally {
+      setDashboardRecommendationLoading(false);
     }
   }
 
@@ -1522,10 +1649,7 @@ export default function App() {
   if (booting) {
     return (
       <div className="boot">
-        <div className="pulseLoader">
-          <Stethoscope size={30} />
-        </div>
-        <strong>{ui.appName}</strong>
+        <MedAILoader label={ui.appName} />
       </div>
     );
   }
@@ -1536,7 +1660,7 @@ export default function App() {
         <header className="publicHeader">
           <div className="photonBrand">
             <span className="brandSignal" aria-hidden="true">
-              <Activity size={18} />
+              <LungMark />
             </span>
             <span className="photonBrandCopy">
               <strong>MedAI</strong>
@@ -1677,7 +1801,7 @@ export default function App() {
       <aside className="sidebar">
         <div className="brand">
           <span className="brandSymbol" aria-hidden="true">
-            <Activity size={21} />
+            <LungMark />
           </span>
           <span className="brandCopy">
             <strong>MedAI</strong>
@@ -1685,6 +1809,7 @@ export default function App() {
           </span>
         </div>
         <nav>
+          <NavButton active={view === "dashboard"} icon={<Home size={18} />} label={DASHBOARD_UI[lang].nav} onClick={() => setView("dashboard")} />
           <NavButton active={view === "studies"} icon={<Activity size={18} />} label={ui.nav.studies} onClick={() => setView("studies")} />
           {canViewCrm(user) && (
             <NavButton
@@ -1789,7 +1914,7 @@ export default function App() {
       <main className="workspace">
         <header className="topbar">
           <div>
-            <h1>{ui.titles[view]}</h1>
+            <h1>{view === "dashboard" ? DASHBOARD_UI[lang].title : ui.titles[view]}</h1>
             <p>{user.full_name}</p>
           </div>
         </header>
@@ -1822,6 +1947,82 @@ export default function App() {
 
         {notice && <div className="notice">{notice}</div>}
         {error && <div className="errorLine">{error}</div>}
+
+        {view === "dashboard" && (
+          <section className="homeDashboard medaiPageEnter">
+            <div className="dashboardWelcome">
+              <div>
+                <small>MEDAI · CLINICAL WORKSPACE</small>
+                <h2>{dashboardUi.title}</h2>
+                <p>{dashboardUi.lead}</p>
+              </div>
+              <LungMark className="dashboardLungMark" />
+            </div>
+
+            <div className="dashboardMetrics">
+              <button type="button" onClick={() => setView("studies")}><FileText size={19} /><span>{dashboardUi.pending}</span><strong>{unfinishedStudies.length}</strong></button>
+              <button type="button" onClick={() => setView("crm")}><Bell size={19} /><span>{dashboardUi.urgent}</span><strong>{urgentCrmCount}</strong></button>
+              <button type="button" onClick={() => setView("studies")}><CheckCircle size={19} /><span>{dashboardUi.completed}</span><strong>{studies.filter((study) => ["ai_completed", "draft_ready", "confirmed", "exported"].includes(study.status)).length}</strong></button>
+            </div>
+
+            <div className="dashboardContentGrid">
+              <section className="dashboardPanel newsPanel">
+                <header><div><small>WHO / EUROPE</small><h3>{dashboardUi.news}</h3></div><ExternalLink size={18} /></header>
+                <div className="healthNewsList">
+                  {HEALTH_NEWS.map((item) => (
+                    <a href={item.url} target="_blank" rel="noreferrer" key={item.url}>
+                      <span>{item.date}</span><strong>{item.title[lang]}</strong><small>{dashboardUi.verified}<ExternalLink size={12} /></small>
+                    </a>
+                  ))}
+                </div>
+              </section>
+
+              <section className="dashboardPanel managementPanel">
+                <header><div><small>MEDAI DEPARTMENT</small><h3>{dashboardUi.management}</h3></div><Bell size={18} /></header>
+                <div className="managementMessage important">
+                  <span><ShieldCheck size={17} /></span>
+                  <div><strong>{lang === "ru" ? "Контроль качества заключений" : lang === "kk" ? "Қорытынды сапасын бақылау" : "Report quality review"}</strong><p>{lang === "ru" ? "Перед подтверждением проверяйте локализацию и клинический текст MedAI." : lang === "kk" ? "Растау алдында MedAI локализациясы мен клиникалық мәтінін тексеріңіз." : "Review MedAI localization and clinical text before confirmation."}</p></div>
+                </div>
+                <div className="managementMessage">
+                  <span><Clock3 size={17} /></span>
+                  <div><strong>{lang === "ru" ? "Ежедневная передача смены" : lang === "kk" ? "Күнделікті ауысым тапсыру" : "Daily shift handoff"}</strong><p>{lang === "ru" ? "Срочные и просроченные карточки передаются через CRM." : lang === "kk" ? "Шұғыл және мерзімі өткен карточкалар CRM арқылы беріледі." : "Urgent and overdue cards are handed off through CRM."}</p></div>
+                </div>
+              </section>
+
+              <section className="dashboardPanel unfinishedPanel">
+                <header><div><small>{unfinishedStudies.length}</small><h3>{dashboardUi.pending}</h3></div><FileText size={18} /></header>
+                <div className="dashboardStudyList">
+                  {unfinishedStudies.slice(0, 5).map((study) => (
+                    <button type="button" key={study.id} onClick={() => openStudy(study.id)}><span><strong>{study.accession_number}</strong><small>{study.patient_code} · {study.study_type}</small></span><StatusBadge status={study.status} labels={ui.statuses} /></button>
+                  ))}
+                  {!unfinishedStudies.length && <div className="dashboardEmpty"><CheckCircle size={20} />{lang === "ru" ? "Все заключения завершены" : lang === "kk" ? "Барлық қорытынды аяқталды" : "All reports are complete"}</div>}
+                </div>
+              </section>
+
+              <section className="dashboardPanel colleaguePanel">
+                <header><div><small>CRM</small><h3>{dashboardUi.colleagues}</h3></div><MessageCircle size={18} /></header>
+                <div className="doctorMessageList">
+                  {recentDoctorMessages.map((message) => (
+                    <button type="button" key={message.id} onClick={() => { setCrmSelectedId(message.recordId); setView("crm"); }}>
+                      <span className="profileAvatar">{profileInitials(message.author.full_name)}</span>
+                      <span><strong>{message.author.full_name}</strong><p>{message.content}</p><small>{message.patientCode} · {formatDate(message.created_at, lang)}</small></span>
+                    </button>
+                  ))}
+                  {!recentDoctorMessages.length && <div className="dashboardEmpty"><MessageCircle size={20} />{dashboardUi.noMessages}</div>}
+                </div>
+              </section>
+
+              <section className="dashboardPanel recommendationPanel">
+                <header><div><small>GROQ · AGGREGATE DATA</small><h3>{dashboardUi.recommendations}</h3></div><Sparkles size={18} /></header>
+                <p className="recommendationPrivacy"><ShieldCheck size={15} />{dashboardUi.recommendationsHint}</p>
+                <div className="recommendationBody">
+                  {dashboardRecommendationLoading ? <MedAILoader label={dashboardUi.recommendations} compact /> : dashboardRecommendation ? <p>{dashboardRecommendation}</p> : <div className="dashboardEmpty"><LungMark />{dashboardUi.recommendationsHint}</div>}
+                </div>
+                <button className="primaryButton" type="button" onClick={generateDashboardRecommendations} disabled={dashboardRecommendationLoading}><Sparkles size={17} />{dashboardUi.generate}</button>
+              </section>
+            </div>
+          </section>
+        )}
 
         {view === "studies" && (
           <section className="dashboardGrid">
@@ -1926,7 +2127,7 @@ export default function App() {
                     </span>
                     {aiRunningStudyId === study.id ? (
                       <span className="studyProcessing">
-                        <Loader2 size={14} />
+                        <i className="liveDot" />
                         AI
                       </span>
                     ) : (
@@ -2014,13 +2215,14 @@ export default function App() {
                           )}
                         </div>
                       ) : (
-                        <div className="emptyState">{ui.previewMissing}</div>
+                        <div className="emptyState previewLungState">
+                          <img src="/neon_lungs_hero_transparent.png" alt="" />
+                          <span>{ui.previewMissing}</span>
+                        </div>
                       )}
                       {selectedStudyAiBusy && (
                         <div className="imageStageLoader">
-                          <Loader2 size={24} />
-                          <strong>{ui.aiWaiting}</strong>
-                          <span>{selectedStudy.accession_number}</span>
+                          <MedAILoader label={ui.aiWaiting} detail={selectedStudy.accession_number} />
                         </div>
                       )}
                     </div>
@@ -2066,14 +2268,8 @@ export default function App() {
                           <div><strong>{ui.qualityGateCandidate}</strong><span>{ui.modelRsnaWarning}</span></div>
                         </div>
                       )}
-                      {selectedStudyAiBusy && (
-                        <div className="inlineAiStatus">
-                          <Loader2 size={18} />
-                          <span>{ui.aiWaiting}</span>
-                        </div>
-                      )}
                       <button className="primaryButton" onClick={() => runAI(false)} disabled={busy || selectedStudyAiBusy}>
-                        {selectedStudyAiBusy ? <Loader2 size={18} className="spinIcon" /> : <Play size={18} />}
+                        <Play size={18} />
                         {selectedStudyAiBusy ? ui.aiWaiting : ui.runAI}
                       </button>
                       {latestAI && (
@@ -2412,7 +2608,7 @@ export default function App() {
                 return (
                   <article className="referenceItem" key={item.id}>
                     <div className="referenceVisual">
-                      <img src="/medical_lungs_xray.png" alt="" />
+                      <ReferenceIllustration slug={item.slug} title={localized.title} />
                       <span>{localized.title.slice(0, 2).toUpperCase()}</span>
                     </div>
                     <div className="referenceCardCopy">
@@ -2422,6 +2618,9 @@ export default function App() {
                         <h3>{ui.report}</h3><p>{localized.report_template}</p>
                         {(localized.examples || item.examples) && <><h3>{workspaceUi.examples}</h3><p>{localized.examples || item.examples}</p></>}
                         {localized.references && <small className="referenceSource">{localized.references}</small>}
+                        <a className="referenceSourceLink" href={REFERENCE_SOURCES[item.slug] ?? "https://www.acr.org/clinical-resources/clinical-tools-and-reference/appropriateness-criteria"} target="_blank" rel="noreferrer">
+                          <ShieldCheck size={14} />{dashboardUi.verified}<ExternalLink size={13} />
+                        </a>
                       </details>
                     </div>
                   </article>
@@ -2510,75 +2709,165 @@ export default function App() {
           </section>
         )}
       </main>
-      <MedAIAssistant lang={lang} studyId={selectedStudy?.id} />
+      {canViewCrm(user) && (
+        <CRMCommunication
+          lang={lang}
+          records={crmRecords}
+          selectedId={crmSelectedId}
+          canSend={canManageCrm(user)}
+          onSelect={setCrmSelectedId}
+          onRefresh={() => loadCrm()}
+        />
+      )}
     </div>
   );
 }
 
-function MedAIAssistant({ lang, studyId }: { lang: Lang; studyId?: number }) {
-  const labels = WORKSPACE_UI[lang];
+function CRMCommunication({
+  lang,
+  records,
+  selectedId,
+  canSend,
+  onSelect,
+  onRefresh
+}: {
+  lang: Lang;
+  records: CRMRecord[];
+  selectedId: number | null;
+  canSend: boolean;
+  onSelect: (id: number | null) => void;
+  onRefresh: () => Promise<void>;
+}) {
+  const labels = {
+    kk: { title: "CRM байланысы", subtitle: "Дәрігерлер мен бөлім арасындағы байланыс", empty: "Алдымен CRM карточкасын таңдаңыз", placeholder: "Бөлімге хабарлама...", send: "Жіберу" },
+    ru: { title: "Связь через CRM", subtitle: "Сообщения врачей и сотрудников отдела", empty: "Сначала выберите карточку CRM", placeholder: "Сообщение отделу...", send: "Отправить" },
+    en: { title: "CRM communication", subtitle: "Messages between clinicians and the department", empty: "Select a CRM card first", placeholder: "Message the department...", send: "Send" }
+  }[lang];
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [assistantError, setAssistantError] = useState("");
+  const [communicationError, setCommunicationError] = useState("");
+  const activeRecord = records.find((record) => record.id === selectedId) ?? records[0] ?? null;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     const content = input.trim();
-    if (!content || loading) return;
-    const nextMessages: AssistantMessage[] = [...messages, { role: "user", content }];
-    setMessages(nextMessages);
-    setInput("");
+    if (!content || loading || !activeRecord || !canSend) return;
     setLoading(true);
-    setAssistantError("");
+    setCommunicationError("");
     try {
-      const response = await api.chatAssistant(nextMessages, lang, studyId);
-      setMessages([...nextMessages, { role: "assistant", content: response.message }]);
+      await api.addCrmActivity(activeRecord.id, content, "message");
+      setInput("");
+      await onRefresh();
     } catch (err) {
-      setAssistantError(err instanceof Error ? err.message : "MedAI unavailable");
+      setCommunicationError(err instanceof Error ? err.message : "CRM unavailable");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className={`medaiAssistant ${open ? "open" : ""}`}>
+    <div className={`medaiAssistant crmCommunication ${open ? "open" : ""}`}>
       {open && (
-        <section className="assistantPanel" aria-label={labels.assistantTitle}>
+        <section className="assistantPanel" aria-label={labels.title}>
           <header>
-            <span className="assistantMark"><Sparkles size={18} /></span>
-            <div><strong>{labels.assistantTitle}</strong><small><i />{labels.assistantSubtitle}</small></div>
+            <span className="assistantMark"><MessageCircle size={18} /></span>
+            <div><strong>{labels.title}</strong><small><i />{labels.subtitle}</small></div>
             <button onClick={() => setOpen(false)} aria-label="Close"><X size={18} /></button>
           </header>
+          <label className="crmConversationPicker">
+            <span>CRM</span>
+            <select value={activeRecord?.id ?? ""} onChange={(event) => onSelect(event.target.value ? Number(event.target.value) : null)}>
+              <option value="">{labels.empty}</option>
+              {records.map((record) => <option value={record.id} key={record.id}>{record.patient_code} · {record.summary}</option>)}
+            </select>
+          </label>
           <div className="assistantMessages">
-            {!messages.length && <div className="assistantWelcome"><Sparkles size={20} /><p>{labels.assistantHello}</p><div>{labels.assistantSuggestions.map((suggestion) => <button key={suggestion} onClick={() => setInput(suggestion)}>{suggestion}</button>)}</div></div>}
-            {messages.map((message, index) => (
-              <div className={`assistantMessage ${message.role}`} key={`${message.role}-${index}`}>
-                <span>{message.role === "assistant" ? <Sparkles size={14} /> : <UserRound size={14} />}</span>
-                <p>{message.content}</p>
+            {!activeRecord && <div className="assistantWelcome"><MessageCircle size={20} /><p>{labels.empty}</p></div>}
+            {(activeRecord?.activities ?? []).slice().reverse().slice(-20).map((message) => (
+              <div className="assistantMessage" key={message.id}>
+                <span>{profileInitials(message.author.full_name)}</span>
+                <p><strong>{message.author.full_name}</strong>{message.content}<small>{formatDate(message.created_at, lang)}</small></p>
               </div>
             ))}
-            {loading && <div className="assistantTyping"><i /><i /><i /></div>}
-            {assistantError && <div className="assistantError">{assistantError}</div>}
+            {loading && <MedAILoader label={labels.send} compact />}
+            {communicationError && <div className="assistantError">{communicationError}</div>}
           </div>
-          {studyId && <div className="assistantContext"><Activity size={14} />{labels.assistantContext}</div>}
           <form onSubmit={submit}>
-            <textarea rows={2} value={input} onChange={(event) => setInput(event.target.value)} placeholder={labels.assistantPlaceholder} onKeyDown={(event) => {
+            <textarea rows={2} value={input} onChange={(event) => setInput(event.target.value)} placeholder={labels.placeholder} disabled={!activeRecord || !canSend} onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
                 event.currentTarget.form?.requestSubmit();
               }
             }} />
-            <button disabled={loading || !input.trim()} aria-label={labels.assistantAsk}>{loading ? <Loader2 size={18} className="spinIcon" /> : <Send size={18} />}</button>
+            <button disabled={loading || !input.trim() || !activeRecord || !canSend} aria-label={labels.send}><Send size={18} /></button>
           </form>
         </section>
       )}
-      <button className="assistantTrigger" onClick={() => setOpen((value) => !value)} aria-label={labels.assistantTitle}>
+      <button className="assistantTrigger" onClick={() => setOpen((value) => !value)} aria-label={labels.title}>
         {open ? <X size={22} /> : <MessageCircle size={22} />}
-        {!open && <span>MedAI</span>}
+        {!open && <span>CRM</span>}
       </button>
     </div>
+  );
+}
+
+function LungMark({ className = "" }: { className?: string }) {
+  return (
+    <svg className={`lungMark ${className}`} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path className="lungTrachea" d="M30 7v18m4-18v18M32 18v13" />
+      <path className="lungBronchi" d="M32 29 23 38m9-9 9 9M23 38l-5 8m23-8 5 8" />
+      <path className="lungLeft" d="M27 27c-7 1-13 7-16 15-4 11 1 16 9 13 6-2 9-8 9-16V29c0-1-1-2-2-2Z" />
+      <path className="lungRight" d="M37 27c7 1 13 7 16 15 4 11-1 16-9 13-6-2-9-8-9-16V29c0-1 1-2 2-2Z" />
+    </svg>
+  );
+}
+
+function MedAILoader({ label, detail, compact = false }: { label: string; detail?: string; compact?: boolean }) {
+  return (
+    <div className={`medaiLungLoader ${compact ? "compact" : ""}`} role="status" aria-live="polite">
+      <span className="loaderLungWrap"><LungMark /><i /></span>
+      <span className="loaderCopy"><strong>{label}</strong>{detail && <small>{detail}</small>}</span>
+    </div>
+  );
+}
+
+function ReferenceIllustration({ slug, title }: { slug: string; title: string }) {
+  const variant = Array.from(slug).reduce((total, char) => total + char.charCodeAt(0), 0) % 6;
+  const gradientId = `reference-${slug.replace(/[^a-z0-9_-]/gi, "")}`;
+  return (
+    <svg className={`referenceIllustration variant-${variant}`} viewBox="0 0 560 280" role="img" aria-label={title}>
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#0a2740" />
+          <stop offset="1" stopColor="#031019" />
+        </linearGradient>
+        <radialGradient id={`${gradientId}-glow`} cx="50%" cy="48%" r="60%">
+          <stop offset="0" stopColor="#54e2c5" stopOpacity=".36" />
+          <stop offset="1" stopColor="#1a91b2" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="560" height="280" rx="24" fill={`url(#${gradientId})`} />
+      <circle cx={90 + variant * 66} cy={54 + variant * 13} r="150" fill={`url(#${gradientId}-glow)`} />
+      <g className="referenceRibs" opacity=".24">
+        {[0, 1, 2, 3, 4].map((line) => <path key={line} d={`M95 ${60 + line * 32} Q280 ${5 + line * 42} 465 ${60 + line * 32}`} />)}
+      </g>
+      <g className="referenceLungs" transform={`translate(${variant % 2 ? 7 : -7} 2)`}>
+        <path d="M272 42v66m16-66v66m-8-17v39" />
+        <path d="M280 122c-28 12-55 43-69 78m69-78c28 12 55 43 69 78" />
+        <path d="M263 104c-55 9-96 62-103 112-5 37 20 47 54 33 38-16 53-50 53-91v-45c0-5-2-9-4-9Z" />
+        <path d="M297 104c55 9 96 62 103 112 5 37-20 47-54 33-38-16-53-50-53-91v-45c0-5 2-9 4-9Z" />
+      </g>
+      <g className={`referenceFinding finding-${variant}`}>
+        {variant === 0 && <circle cx="220" cy="188" r="28" />}
+        {variant === 1 && <path d="M335 126c28 7 43 25 48 50-22 11-45 9-65-3 0-18 6-34 17-47Z" />}
+        {variant === 2 && <path d="M163 215h100v35H151c1-13 5-25 12-35Z" />}
+        {variant === 3 && <path d="M390 105c-26 20-36 50-31 91" />}
+        {variant === 4 && <circle cx="352" cy="198" r="20" />}
+        {variant === 5 && <path d="M208 119c24 17 42 37 54 61-25 7-48 3-68-13 1-19 6-35 14-48Z" />}
+      </g>
+      <text x="26" y="254">MEDAI · VERIFIED CLINICAL REFERENCE</text>
+    </svg>
   );
 }
 
