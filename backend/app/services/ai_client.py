@@ -54,18 +54,6 @@ LABEL_MAP: dict[str, FindingClass] = {
     "норма": FindingClass.normal,
 }
 
-GENERATE_PROMPT = (
-    "Inspect the chest radiograph itself. Choose exactly one finding: normal, pneumonia, "
-    "other_abnormal, pneumothorax, pleural_effusion, atelectasis, or not_diagnostic. Return only a JSON object "
-    "with the keys finding, confidence, bbox, impression, and evidence. confidence must be a "
-    "number from 0.01 to 0.99 based on this image; use 0 only when the image is unreadable. "
-    "bbox must be null unless a reliable normalized [x1,y1,x2,y2] region in the 0..1 range is "
-    "available. impression must be an actual concise Russian radiology conclusion for this "
-    "patient. evidence must contain only actual visible radiographic signs. Do not copy these "
-    "instructions and never return field descriptions, placeholders, example values, model names, "
-    "methodology, disclaimers, markdown, or text outside JSON."
-)
-
 _PLACEHOLDER_TEXTS = {
     "one short clinical conclusion",
     "up to three visible radiographic signs",
@@ -336,7 +324,6 @@ async def _post_generate(
         url,
         json={
             "image_base64": image_base64,
-            "prompt": GENERATE_PROMPT,
             "model_variant": model_variant,
         },
         headers={"ngrok-skip-browser-warning": "true"},
